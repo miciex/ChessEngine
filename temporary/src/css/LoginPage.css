@@ -1,0 +1,40 @@
+.login-wrapper{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login{
+    width: 40%;
+    min-width: 250px;
+    height:50%;
+    display: flex;
+    justify-content: center;
+}
+
+
+.login form{
+    text-align: center;
+    display: flex;
+    align-items: center;
+    height: fit-content;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%
+}
+
+.login form label{
+    width: 60%;
+}
+
+.login form input{
+    padding: 5px 10px;
+    width: 100%;
+}
+
+.login form button{
+    width: 25%;
+    min-width: 50px;
+}

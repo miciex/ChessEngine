@@ -1,0 +1,19 @@
+.board {
+  width: 600px;
+  height: 600px;
+  display: flex;
+  flex-wrap: wrap;
+  position: absolute;
+}
+
+.imgplace {
+  width: 600px;
+  height: 600px;
+  position: absolute;
+}
+
+.placement img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
