@@ -81,7 +81,11 @@ public class Game implements Runnable{
     }
 
     public void render(Graphics g) {
-        //if(playing!=null)
         playing.draw(g);
     }
+
+    public Playing getPlaying() {
+        return playing;
+    }
+
 }
