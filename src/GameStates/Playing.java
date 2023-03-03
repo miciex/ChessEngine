@@ -1,6 +1,7 @@
 package GameStates;
 
 import main.Game;
+import ui.BoardOverlay;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -20,9 +21,16 @@ public class Playing extends State implements StateMethods{
     private final int START_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
     private final int START_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
 
+    BoardOverlay overlay;
+
     public Playing(Game game){
         super(game);
         board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        initClasses();
+    }
+
+    private void initClasses(){
+        overlay = new BoardOverlay(this);
     }
 
     @Override
@@ -37,41 +45,34 @@ public class Playing extends State implements StateMethods{
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        overlay.mouseClicked(e);
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        overlay.mousePressed(e);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        overlay.mouseReleased(e);
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        overlay.mouseMoved(e);
+    }
 
+    public void mouseDragged(MouseEvent e){
+        overlay.mouseDragged(e);
     }
 
     private void drawBoard(Graphics g){
-        for(int i = 0; i<BOARD_HEIGHT; i++){
-            for(int j = 0; j<BOARD_WIDTH; j++){
-                int currX = START_X + FIELD_SIZE * j;
-                int currY = START_Y + FIELD_SIZE * i;
-                if(i%2!=j%2){
-                    g.setColor(Color.BLACK);
-                }else
-                g.setColor(Color.white);
-                g.fillRect(currX - FIELD_SIZE/2,  currY -FIELD_SIZE/2, FIELD_SIZE, FIELD_SIZE);
-                g.setColor(Color.pink);
-                g.drawString(String.valueOf(intToCharPiece(board[i*BOARD_WIDTH + j])),currX,currY);
-            }
-        }
+        overlay.draw(g);
     }
 
-    public int[] getBoard() {
+    public int[] getBoard(){
         return board;
     }
+
 }

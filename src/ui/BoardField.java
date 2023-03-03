@@ -10,26 +10,27 @@ import static utils.Constants.Field.FIELD_SIZE;
 
 public class BoardField {
 
-    private int xPos, yPos, Fieldindex, index;
+    private int xPos, yPos, fieldIndex, index;
     private int xOffsetCenter = FIELD_SIZE/2;
-    private GameState state;
     private boolean mouseOver, mousePressed;
     private Rectangle bounds;
     private Character piece;
-    private int mouseX;
-    private int mouseY;
-    private boolean active;
+    public Color fieldColor;
 
-    public BoardField(int xPos, int yPos, int index, Character piece){
+    private boolean active;
+    BoardOverlay overlay;
+
+    public BoardField(int xPos, int yPos, int index, Character piece, BoardOverlay overlay){
         this.xPos = xPos;
         this.yPos = yPos;
-        this.Fieldindex = index;
+        this.fieldIndex = index;
         this.piece = piece;
+        this.overlay = overlay;
         initBounds();
     }
 
     private void initBounds() {
-        bounds = new Rectangle(xPos-xOffsetCenter, yPos, FIELD_SIZE, FIELD_SIZE);
+        bounds = new Rectangle(xPos, yPos, FIELD_SIZE, FIELD_SIZE);
     }
 
     public void draw(Graphics g){
@@ -37,20 +38,22 @@ public class BoardField {
         int pieceX;
         int pieceY;
 
-        if (Fieldindex % 2 == 0) {
+        if(fieldColor!=null){
+            g.setColor(fieldColor);
+        }else if (fieldIndex%2!=(fieldIndex/8)%2) {
             g.setColor(Color.BLACK);
         } else {
             g.setColor(Color.white);
         }
-        g.drawRect(xPos, yPos, FIELD_SIZE, FIELD_SIZE);
+        g.fillRect(xPos, yPos, FIELD_SIZE, FIELD_SIZE);
         if(Character.isUpperCase(piece)){
             g.setColor(Color.LIGHT_GRAY);
         }else{
             g.setColor(Color.DARK_GRAY);
         }
         if(mousePressed){
-            pieceX = mouseX;
-            pieceY = mouseY;
+            pieceX = overlay.getMouseX();
+            pieceY = overlay.getMouseY();
         }else{
             pieceX = xPos+xOffsetCenter;
             pieceY = yPos+xOffsetCenter;
@@ -59,8 +62,12 @@ public class BoardField {
         g.drawString(String.valueOf(piece), pieceX, pieceY);
     }
 
-    public void mouesMoved(MouseEvent e){
+    public void mouseMoved(MouseEvent e){
 
+    }
+
+    public boolean isIn(MouseEvent e){
+        return bounds.contains(e.getX(), e.getY());
     }
 
     public void update(){
@@ -98,7 +105,11 @@ public class BoardField {
         mousePressed = false;
     }
 
-    public GameState getState() {
-        return state;
+    public Character getPiece() {
+        return piece;
+    }
+
+    public void setPiece(Character piece) {
+        this.piece = piece;
     }
 }
