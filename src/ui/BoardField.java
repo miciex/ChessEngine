@@ -37,14 +37,7 @@ public class BoardField {
 
         int pieceX;
         int pieceY;
-
-        if(fieldColor!=null){
-            g.setColor(fieldColor);
-        }else if (fieldIndex%2!=(fieldIndex/8)%2) {
-            g.setColor(Color.BLACK);
-        } else {
-            g.setColor(Color.white);
-        }
+        g.setColor(fieldColor);
         g.fillRect(xPos, yPos, FIELD_SIZE, FIELD_SIZE);
         if(Character.isUpperCase(piece)){
             g.setColor(Color.LIGHT_GRAY);

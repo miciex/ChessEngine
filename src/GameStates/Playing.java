@@ -18,8 +18,6 @@ public class Playing extends State implements StateMethods{
     private final int BOARD_HEIGHT = 8;
     private final int BOARD_WIDTH = 8;
     private final int FIELD_SIZE = 32;
-    private final int START_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
-    private final int START_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
 
     BoardOverlay overlay;
 

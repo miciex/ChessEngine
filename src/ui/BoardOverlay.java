@@ -20,7 +20,8 @@ public class BoardOverlay {
     private Playing playing;
     private final int START_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
     private final int START_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
-    int activeField;
+    int activeField = -1;
+    int newField = -1;
     private int mouseX;
     private int mouseY;
     private ArrayList<Integer> moves= new ArrayList<>();
@@ -41,8 +42,13 @@ public class BoardOverlay {
             int currX = FIELD_SIZE * (i%8);
             int currY =  FIELD_SIZE * (int)(i/BOARD_WIDTH);
             fields[i] = new BoardField(START_X + currX, START_Y +currY, i, intToCharPiece(board[i]), this);
+                if (i%2!=(i/8)%2) {
+                    fields[i].fieldColor = Color.BLACK;
+                } else {
+                    fields[i].fieldColor = Color.white;
+                }
+            }
         }
-    }
 
     public void mouseDragged(MouseEvent e){
         mouseX = e.getX();
@@ -50,16 +56,21 @@ public class BoardOverlay {
     }
 
     public void mousePressed(MouseEvent e) {
-        activeField = -1;
-        for(int i = 0; i<fields.length; i++){
-            fields[i].fieldColor = null;
-            fields[i].setMousePressed(false);
-            if(fields[i].isIn(e)){
-                activeField = i;
-            }
-        }
-        if(activeField>=0 && fields[activeField].getPiece()!= ' ') {
+        System.out.println("Mouse Pressed");
+        int col = (e.getX() - START_X)/FIELD_SIZE;
+        int row = (e.getY() - START_Y)/FIELD_SIZE;
+        newField = -1;
+        resetColors();
+        if(row < 0 && col < 0) return;
+        if(activeField >= 0 ) newField = col + row * BOARD_WIDTH;
+
+        if(activeField==col + row * BOARD_WIDTH){
             fields[activeField].setMousePressed(true);
+        }else if(fields[col + row * BOARD_WIDTH].getPiece()!= ' '){
+            activeField = col + row * BOARD_WIDTH;
+            fields[activeField].setMousePressed(true);
+        }
+        if(activeField>=0){
             for (int move : moves) {
                 fields[move].fieldColor = Color.red;
             }
@@ -67,23 +78,55 @@ public class BoardOverlay {
     }
 
     public void mouseReleased(MouseEvent e) {
-        for(int i = 0; i<fields.length; i++){
-            fields[i].fieldColor = null;
-            if(i==activeField) {
-                fields[i].resetBools();
-                continue;
-            }
-            if(fields[i].isIn(e) && activeField>=0 &&fields[activeField].getPiece()!=' ' ){
-                fields[i].setPiece(fields[activeField].getPiece());
-                fields[activeField].setPiece(' ');
-            }
-            fields[i].resetBools();
+        //if(!mousePressed) return;
+        System.out.println("Mouse released");
+        int col = (e.getX() - START_X)/FIELD_SIZE;
+        int row = (e.getY() - START_Y)/FIELD_SIZE;
+        if(activeField<0){
+            return;
         }
-        activeField = -1;
+
+        boolean canMove = false;
+        for(int move: moves){
+            canMove = move == col + row * BOARD_WIDTH;
+            if(canMove) break;
+        }
+        if(canMove) {
+            movePiece(col, row);
+            activeField = -1;
+            return;
+        }
+        if(newField>=0){
+            fields[activeField].setMousePressed(false);
+            activeField = -1;
+            resetColors();
+            return;
+        }
+            fields[activeField].setMousePressed(false);
+
     }
 
     public void mouseClicked(MouseEvent e){
 
+    }
+
+    private void resetColors(){
+        for(int i = 0; i<fields.length; i++){
+            if (i%2!=(i/8)%2) {
+                fields[i].fieldColor = Color.BLACK;
+            } else {
+                fields[i].fieldColor = Color.white;
+            }
+        }
+    }
+
+    private void movePiece(int col, int row){
+        if(activeField == col + row * BOARD_WIDTH)
+            fields[activeField].resetBools();
+        else{
+            fields[col + row * BOARD_WIDTH].setPiece(fields[activeField].getPiece());
+            fields[activeField].setPiece(' ');
+        }
     }
 
     public void mouseMoved(MouseEvent e) {
