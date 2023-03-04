@@ -33,26 +33,23 @@ public class BoardField {
         bounds = new Rectangle(xPos, yPos, FIELD_SIZE, FIELD_SIZE);
     }
 
-    public void draw(Graphics g){
+    public void drawSquare(Graphics g){
 
-        int pieceX;
-        int pieceY;
+
         g.setColor(fieldColor);
         g.fillRect(xPos, yPos, FIELD_SIZE, FIELD_SIZE);
-        if(Character.isUpperCase(piece)){
-            g.setColor(Color.LIGHT_GRAY);
-        }else{
-            g.setColor(Color.DARK_GRAY);
-        }
-        if(mousePressed){
-            pieceX = overlay.getMouseX();
-            pieceY = overlay.getMouseY();
-        }else{
-            pieceX = xPos+xOffsetCenter;
-            pieceY = yPos+xOffsetCenter;
-        }
 
-        g.drawString(String.valueOf(piece), pieceX, pieceY);
+
+    }
+
+    public void drawPiece(Graphics g){
+        int pieceX;
+        int pieceY;
+
+        pieceX = mousePressed?overlay.getMouseX()-FIELD_SIZE/2:xPos;
+        pieceY = mousePressed?overlay.getMouseY()-FIELD_SIZE/2:yPos;
+        if(overlay.getChessPiecesImgs().containsKey(piece))
+            g.drawImage(overlay.getChessPiecesImgs().get(piece), pieceX, pieceY, FIELD_SIZE, FIELD_SIZE, null);
     }
 
     public void mouseMoved(MouseEvent e){

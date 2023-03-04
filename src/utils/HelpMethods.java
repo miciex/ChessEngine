@@ -2,13 +2,11 @@ package utils;
 
 import utils.Constants.Pieces;
 
+import java.util.HashMap;
+
 import static java.lang.Character.*;
 
 public class HelpMethods {
-
-    public static int isIn(int startX, int startY, int width, int height){
-        return 0;
-    }
 
     public static int[] FenToIntArray(String fen, int arrayLength){
         int num = 0;
@@ -59,7 +57,7 @@ public class HelpMethods {
             case 2:
                 return p<16?'P':'p';
             case 3:
-                return p<16?'R':'k';
+                return p<16?'R':'r';
             case 4:
                 return p<16?'N':'n';
             case 5:

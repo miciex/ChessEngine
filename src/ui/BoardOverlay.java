@@ -2,10 +2,14 @@ package ui;
 
 import GameStates.Playing;
 import utils.Constants;
+import utils.LoadSave;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static main.Game.GAME_HEIGHT;
 import static main.Game.GAME_WIDTH;
@@ -25,10 +29,13 @@ public class BoardOverlay {
     private int mouseX;
     private int mouseY;
     private ArrayList<Integer> moves= new ArrayList<>();
+    private HashMap<Character, BufferedImage> chessPiecesImgs;
 
     public BoardOverlay(Playing playing){
         this.playing = playing;
+        loadPiecesImgs();
         createFields();
+        System.out.println("h");
     }
 
     private void createFields() {
@@ -43,7 +50,7 @@ public class BoardOverlay {
             int currY =  FIELD_SIZE * (int)(i/BOARD_WIDTH);
             fields[i] = new BoardField(START_X + currX, START_Y +currY, i, intToCharPiece(board[i]), this);
                 if (i%2!=(i/8)%2) {
-                    fields[i].fieldColor = Color.BLACK;
+                    fields[i].fieldColor = Color.darkGray;
                 } else {
                     fields[i].fieldColor = Color.white;
                 }
@@ -113,7 +120,7 @@ public class BoardOverlay {
     private void resetColors(){
         for(int i = 0; i<fields.length; i++){
             if (i%2!=(i/8)%2) {
-                fields[i].fieldColor = Color.BLACK;
+                fields[i].fieldColor = Color.darkGray;
             } else {
                 fields[i].fieldColor = Color.white;
             }
@@ -136,7 +143,23 @@ public class BoardOverlay {
 
     public void draw(Graphics g){
         for(BoardField f : fields){
-            f.draw(g);
+            f.drawSquare(g);
+        }
+        for(BoardField f : fields){
+            f.drawPiece(g);
+        }
+        if(activeField>=0)
+        fields[activeField].drawPiece(g);
+    }
+
+    private void loadPiecesImgs(){
+        BufferedImage img = LoadSave.GetSpriteAtlas(LoadSave.PIECES_ATLAS);
+        chessPiecesImgs = new HashMap<>();
+        for(int i = 0; i<12; i++){
+            if(i<6)
+                chessPiecesImgs.put(Character.toUpperCase(Constants.Pieces.CHAR_PIECES[i%6]), img.getSubimage((img.getWidth()/6)*(i%6), 0,img.getWidth()/6, img.getHeight()/2 ));
+            else
+                chessPiecesImgs.put(Character.toLowerCase(Constants.Pieces.CHAR_PIECES[i%6]), img.getSubimage((img.getWidth()/6)*(i%6), (img.getHeight()/2),img.getWidth()/6, img.getHeight()/2 ));
         }
     }
 
@@ -146,5 +169,9 @@ public class BoardOverlay {
 
     public int getMouseY() {
         return mouseY;
+    }
+
+    public HashMap<Character, BufferedImage> getChessPiecesImgs() {
+        return chessPiecesImgs;
     }
 }

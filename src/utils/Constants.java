@@ -3,7 +3,7 @@ package utils;
 public class Constants {
 
     public static class Field{
-        public static int FIELD_SIZE = 32;
+        public static int FIELD_SIZE = 64;
     }
 
     public static class Pieces{
@@ -17,6 +17,8 @@ public class Constants {
 
         public static int White = 8;
         public static int Black = 16;
+
+        public static char[] CHAR_PIECES= new char[]{'K', 'Q', 'B', 'N', 'R','P'};
     }
 
     public static class Boards{
