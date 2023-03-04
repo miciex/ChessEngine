@@ -35,7 +35,6 @@ public class BoardOverlay {
         this.playing = playing;
         loadPiecesImgs();
         createFields();
-        System.out.println("h");
     }
 
     private void createFields() {
@@ -63,51 +62,66 @@ public class BoardOverlay {
     }
 
     public void mousePressed(MouseEvent e) {
-        System.out.println("Mouse Pressed");
         int col = (e.getX() - START_X)/FIELD_SIZE;
         int row = (e.getY() - START_Y)/FIELD_SIZE;
-        newField = -1;
-        resetColors();
-        if(row < 0 && col < 0) return;
-        if(activeField >= 0 ) newField = col + row * BOARD_WIDTH;
 
-        if(activeField==col + row * BOARD_WIDTH){
-            fields[activeField].setMousePressed(true);
-        }else if(fields[col + row * BOARD_WIDTH].getPiece()!= ' '){
+
+
+        if(row < 0 && col < 0) return;
+
+        if(fields[col + row * BOARD_WIDTH].getPiece()!= ' ' && activeField<0){
             activeField = col + row * BOARD_WIDTH;
             fields[activeField].setMousePressed(true);
+            showPossibleMoves();
+            return;
         }
-        if(activeField>=0){
-            for (int move : moves) {
-                fields[move].fieldColor = Color.red;
+        if(activeField >= 0 )
+            newField = col + row * BOARD_WIDTH;
+
+        if(activeField != newField && newField>=0 && canMoveHere(newField)){
+            movePiece(col, row);
+            fields[activeField].setMousePressed(false);
+            activeField = -1;
+            newField = -1;
+            resetColors();
+            return;
+        }else if(newField>=0){
+            fields[activeField].setMousePressed(false);
+            resetColors();
+            if(fields[newField].getPiece() != ' ' && activeField != newField){
+                activeField = newField;
+                fields[activeField].setMousePressed(true);
+                showPossibleMoves();
+            }else{
+                activeField = -1;
             }
+            newField = -1;
+
+            return;
+        }
+
+        if(newField<0&&activeField>=0){
+            showPossibleMoves();
         }
     }
 
     public void mouseReleased(MouseEvent e) {
-        //if(!mousePressed) return;
-        System.out.println("Mouse released");
         int col = (e.getX() - START_X)/FIELD_SIZE;
         int row = (e.getY() - START_Y)/FIELD_SIZE;
         if(activeField<0){
             return;
         }
 
-        boolean canMove = false;
-        for(int move: moves){
-            canMove = move == col + row * BOARD_WIDTH;
-            if(canMove) break;
-        }
-        if(canMove) {
+        if(col + row * BOARD_WIDTH != activeField &&canMoveHere(col + row * BOARD_WIDTH) && newField<0) {
             movePiece(col, row);
             activeField = -1;
-            return;
-        }
-        if(newField>=0){
-            fields[activeField].setMousePressed(false);
-            activeField = -1;
+            newField = -1;
             resetColors();
             return;
+        }
+
+        if(newField>=0){
+            showPossibleMoves();
         }
             fields[activeField].setMousePressed(false);
 
@@ -115,6 +129,12 @@ public class BoardOverlay {
 
     public void mouseClicked(MouseEvent e){
 
+    }
+
+    private void showPossibleMoves(){
+        for (int move : moves) {
+            fields[move].fieldColor = Color.red;
+        }
     }
 
     private void resetColors(){
@@ -161,6 +181,13 @@ public class BoardOverlay {
             else
                 chessPiecesImgs.put(Character.toLowerCase(Constants.Pieces.CHAR_PIECES[i%6]), img.getSubimage((img.getWidth()/6)*(i%6), (img.getHeight()/2),img.getWidth()/6, img.getHeight()/2 ));
         }
+    }
+
+    private boolean canMoveHere(int fieldNumber){
+        for(int move: moves){
+            if(move == fieldNumber) return true;
+        }
+        return false;
     }
 
     public int getMouseX() {
