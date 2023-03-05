@@ -3,6 +3,7 @@ package ui;
 import GameStates.Playing;
 import utils.Constants;
 import utils.LoadSave;
+import utils.Piece;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -38,10 +39,6 @@ public class BoardOverlay {
     }
 
     private void createFields() {
-        moves.add(4);
-        moves.add(2);
-        moves.add(12);
-        moves.add(43);
         int board[] = playing.getBoard();
         fields = new BoardField[board.length];
         for(int i = 0; i<board.length; i++){
@@ -72,6 +69,7 @@ public class BoardOverlay {
         if(fields[col + row * BOARD_WIDTH].getPiece()!= ' ' && activeField<0){
             activeField = col + row * BOARD_WIDTH;
             fields[activeField].setMousePressed(true);
+            moves = Piece.PossibleMoves(activeField);
             showPossibleMoves();
             return;
         }
@@ -91,6 +89,7 @@ public class BoardOverlay {
             if(fields[newField].getPiece() != ' ' && activeField != newField){
                 activeField = newField;
                 fields[activeField].setMousePressed(true);
+                moves = Piece.PossibleMoves(activeField);
                 showPossibleMoves();
             }else{
                 activeField = -1;
@@ -101,6 +100,7 @@ public class BoardOverlay {
         }
 
         if(newField<0&&activeField>=0){
+            moves = Piece.PossibleMoves(activeField);
             showPossibleMoves();
         }
     }
@@ -121,6 +121,7 @@ public class BoardOverlay {
         }
 
         if(newField>=0){
+            moves = Piece.PossibleMoves(activeField);
             showPossibleMoves();
         }
             fields[activeField].setMousePressed(false);
@@ -148,10 +149,18 @@ public class BoardOverlay {
     }
 
     private void movePiece(int col, int row){
-        if(activeField == col + row * BOARD_WIDTH)
+        int moveField = col + row * BOARD_WIDTH;
+
+        if(activeField == moveField)
             fields[activeField].resetBools();
-        else{
-            fields[col + row * BOARD_WIDTH].setPiece(fields[activeField].getPiece());
+        else
+        {
+            if(Playing.ActivePieces.containsKey(moveField))
+                Playing.ActivePieces.remove(moveField);
+
+            Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
+            Playing.ActivePieces.remove(activeField);
+            fields[moveField].setPiece(fields[activeField].getPiece());
             fields[activeField].setPiece(' ');
         }
     }

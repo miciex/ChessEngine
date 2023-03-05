@@ -5,6 +5,7 @@ import ui.BoardOverlay;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.HashMap;
 
 import static main.Game.GAME_HEIGHT;
 import static main.Game.GAME_WIDTH;
@@ -26,6 +27,8 @@ public class Playing extends State implements StateMethods{
         board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
         initClasses();
     }
+
+    public static HashMap<Integer, Character> ActivePieces = new HashMap<>();
 
     private void initClasses(){
         overlay = new BoardOverlay(this);

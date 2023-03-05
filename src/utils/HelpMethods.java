@@ -1,5 +1,6 @@
 package utils;
 
+import GameStates.Playing;
 import utils.Constants.Pieces;
 
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class HelpMethods {
             }
 
             arr[num] = CharPieceToInt(currChar);
+            Playing.ActivePieces.put(num, currChar);
             num++;
 
         }
@@ -70,5 +72,13 @@ public class HelpMethods {
 
     public static int addPieceColorValue(Character p){
         return (isUpperCase(p)?Pieces.White:Pieces.Black);
+    }
+
+    public static boolean determineColor(Character p)
+    {
+        if(p != null)
+            return Character.isUpperCase(p) ? true : false;
+        else
+            return false;
     }
 }
