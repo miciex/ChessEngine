@@ -17,6 +17,7 @@ public class Playing extends State implements StateMethods{
     private final int BOARD_HEIGHT = 8;
     private final int BOARD_WIDTH = 8;
     private ArrayList<Move> moves;
+    public static boolean whitesMove = true;
 
     BoardOverlay overlay;
 
