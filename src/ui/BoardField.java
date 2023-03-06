@@ -1,11 +1,13 @@
 package ui;
 
 import GameStates.GameState;
+import utils.Constants;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
+import static utils.Constants.Field.CIRCLE_SIZE;
 import static utils.Constants.Field.FIELD_SIZE;
 
 public class BoardField {
@@ -16,6 +18,11 @@ public class BoardField {
     private Rectangle bounds;
     private Character piece;
     public Color fieldColor;
+    public Color activeColor;
+    public Color possibleMoveColor;
+    public boolean isActive = false;
+    public boolean isPossibleMove = false;
+    public String color;
 
     private boolean active;
     BoardOverlay overlay;
@@ -34,12 +41,9 @@ public class BoardField {
     }
 
     public void drawSquare(Graphics g){
-
-
         g.setColor(fieldColor);
+        g.setColor(Constants.Colors.basic.get(color));
         g.fillRect(xPos, yPos, FIELD_SIZE, FIELD_SIZE);
-
-
     }
 
     public void drawPiece(Graphics g){
@@ -50,6 +54,10 @@ public class BoardField {
         pieceY = mousePressed?overlay.getMouseY()-FIELD_SIZE/2:yPos;
         if(overlay.getChessPiecesImgs().containsKey(piece))
             g.drawImage(overlay.getChessPiecesImgs().get(piece), pieceX, pieceY, FIELD_SIZE, FIELD_SIZE, null);
+        if(isPossibleMove){
+            g.setColor(Constants.Colors.basic.get(color + "Active"));
+            g.fillOval(pieceX + (FIELD_SIZE-CIRCLE_SIZE)/2, pieceY+ (FIELD_SIZE-CIRCLE_SIZE)/2, CIRCLE_SIZE, CIRCLE_SIZE);
+        }
     }
 
     public void mouseMoved(MouseEvent e){

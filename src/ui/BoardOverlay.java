@@ -14,6 +14,8 @@ import java.util.HashMap;
 
 import static main.Game.GAME_HEIGHT;
 import static main.Game.GAME_WIDTH;
+import static utils.Constants.Colors.BLACK;
+import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.HelpMethods.intToCharPiece;
 
@@ -32,6 +34,7 @@ public class BoardOverlay {
     private ArrayList<Integer> moves= new ArrayList<>();
     private HashMap<Character, BufferedImage> chessPiecesImgs;
 
+
     public BoardOverlay(Playing playing){
         this.playing = playing;
         loadPiecesImgs();
@@ -46,9 +49,9 @@ public class BoardOverlay {
             int currY =  FIELD_SIZE * (int)(i/BOARD_WIDTH);
             fields[i] = new BoardField(START_X + currX, START_Y +currY, i, intToCharPiece(board[i]), this);
                 if (i%2!=(i/8)%2) {
-                    fields[i].fieldColor = Color.darkGray;
+                    fields[i].color = WHITE;
                 } else {
-                    fields[i].fieldColor = Color.white;
+                    fields[i].color = BLACK;
                 }
             }
         }
@@ -62,9 +65,7 @@ public class BoardOverlay {
         int col = (e.getX() - START_X)/FIELD_SIZE;
         int row = (e.getY() - START_Y)/FIELD_SIZE;
 
-
-
-        if(row < 0 && col < 0) return;
+        if(row < 0 && col < 0 || row >= 8 && col >= 8)  resetActivePieces();
 
         if(fields[col + row * BOARD_WIDTH].getPiece()!= ' ' && activeField<0){
             activeField = col + row * BOARD_WIDTH;
@@ -108,15 +109,16 @@ public class BoardOverlay {
     public void mouseReleased(MouseEvent e) {
         int col = (e.getX() - START_X)/FIELD_SIZE;
         int row = (e.getY() - START_Y)/FIELD_SIZE;
+
         if(activeField<0){
             return;
         }
 
+        if(row < 0 && col < 0 || row >= 8 && col >= 8) fields[activeField].setMousePressed(false);
+
         if(col + row * BOARD_WIDTH != activeField &&canMoveHere(col + row * BOARD_WIDTH) && newField<0) {
             movePiece(col, row);
-            activeField = -1;
-            newField = -1;
-            resetColors();
+            resetActivePieces();
             return;
         }
 
@@ -128,23 +130,26 @@ public class BoardOverlay {
 
     }
 
+    private void resetActivePieces(){
+        activeField = -1;
+        newField = -1;
+        resetColors();
+    }
+
     public void mouseClicked(MouseEvent e){
 
     }
 
     private void showPossibleMoves(){
         for (int move : moves) {
-            fields[move].fieldColor = Color.red;
+            fields[move].isPossibleMove = true;
         }
     }
 
     private void resetColors(){
         for(int i = 0; i<fields.length; i++){
-            if (i%2!=(i/8)%2) {
-                fields[i].fieldColor = Color.darkGray;
-            } else {
-                fields[i].fieldColor = Color.white;
-            }
+                fields[i].isPossibleMove = false;
+                fields[i].isActive = false;
         }
     }
 
