@@ -8,15 +8,15 @@ public class Piece
 {
     public static ArrayList<Integer> PossibleMoves(int position)
     {
-        switch(Playing.ActivePieces.get(position))
+        switch(Playing.ActivePieces.get(position)%8)
         {
-            case 'P': case 'p': return PossiblePawnMoves(position);
-            case 'K': case 'k': return PossibleKingMoves(position);
-            case 'N': case 'n': return PossibleKnightMoves(position);
+            case 1: return PossiblePawnMoves(position);
+            case 2: return PossibleKingMoves(position);
+            case 4: return PossibleKnightMoves(position);
         }
 
-        Character piece = Playing.ActivePieces.get(position);
-        boolean isWhite = HelpMethods.determineColor(piece);
+        int piece = Playing.ActivePieces.get(position);
+        boolean isWhite = HelpMethods.isWhite(piece);
 
         int row = (int)Math.ceil((double)(position + 1) / 8);
         int column = (position) % 8;
@@ -42,7 +42,7 @@ public class Piece
                 }
 
                 if(Playing.ActivePieces.containsKey(checkingPosition))
-                    if((HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite))
+                    if((HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite))
                     {
                         moves.add(checkingPosition);
                         break;
@@ -69,7 +69,7 @@ public class Piece
     {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        boolean isWhite = HelpMethods.determineColor(Playing.ActivePieces.get(position));
+        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
 
         if(isWhite == true)
         {
@@ -81,11 +81,11 @@ public class Piece
             }
 
             if(Playing.ActivePieces.containsKey(position - 9))
-                if(HelpMethods.determineColor(Playing.ActivePieces.get(position - 9)) != isWhite)
+                if(HelpMethods.isWhite(Playing.ActivePieces.get(position - 9)) != isWhite)
                     moves.add(position - 9);
 
             if(Playing.ActivePieces.containsKey(position - 7))
-                if(HelpMethods.determineColor(Playing.ActivePieces.get(position - 7)) != isWhite)
+                if(HelpMethods.isWhite(Playing.ActivePieces.get(position - 7)) != isWhite)
                     moves.add(position - 7);
         }
         else if(isWhite == false)
@@ -98,11 +98,11 @@ public class Piece
             }
 
             if(Playing.ActivePieces.containsKey(position + 9))
-                if(HelpMethods.determineColor(Playing.ActivePieces.get(position + 9)) != isWhite)
+                if(HelpMethods.isWhite(Playing.ActivePieces.get(position + 9)) != isWhite)
                     moves.add(position + 9);
 
             if(Playing.ActivePieces.containsKey(position + 7))
-                if(HelpMethods.determineColor(Playing.ActivePieces.get(position + 7)) != isWhite)
+                if(HelpMethods.isWhite(Playing.ActivePieces.get(position + 7)) != isWhite)
                     moves.add(position + 7);
         }
 
@@ -113,7 +113,7 @@ public class Piece
     {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        boolean isWhite = HelpMethods.determineColor(Playing.ActivePieces.get(position));
+        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
 
         int row = (int)Math.ceil((double)(position + 1) / 8);
         int column = (position) % 8;
@@ -141,7 +141,7 @@ public class Piece
             if(checkingPosition >= 0 && checkingPosition < 64)
             {
                 if(Playing.ActivePieces.containsKey(checkingPosition))
-                    if(HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite)
+                    if(HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
                     {
                         moves.add(checkingPosition);
                         continue;
@@ -162,7 +162,7 @@ public class Piece
     {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        boolean isWhite = HelpMethods.determineColor(Playing.ActivePieces.get(position));
+        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
 
         int row = (int)Math.ceil((double)(position + 1) / 8);
         int column = (position) % 8;
@@ -198,7 +198,7 @@ public class Piece
             if(checkingPosition >= 0 && checkingPosition < 64)
             {
                 if(Playing.ActivePieces.containsKey(checkingPosition))
-                    if(HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite)
+                    if(HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
                     {
                         moves.add(checkingPosition);
                         continue;
