@@ -35,8 +35,11 @@ public class Piece
             checkingRow = (int)Math.ceil((double)(checkingPosition + 1) / 8);
             checkingColumn = checkingPosition % 8;
 
-            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && ((checkingColumn == column || checkingRow == row || IsDiagonal(position, checkingPosition)) && IsCorrect(position, checkingDir)))
+            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && IsCorrect(position, checkingDir))
             {
+                if(Constants.Directions.get('r').contains(checkingDir) && (checkingColumn != column && checkingRow != row))
+                    break;
+
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if((HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite))
                     {
@@ -218,7 +221,6 @@ public class Piece
 
     private static boolean IsDiagonal(int position, int checkingPosition)
     {
-        //return ((checkingPosition + 1 - checkingPosition + 1) & 7) == ((checkingPosition + 1 >> 3) - (position + 1 >> 3));
         return ((checkingPosition - position) % 7) == 0 || ((checkingPosition - position) % 9) == 0;
     }
 }
