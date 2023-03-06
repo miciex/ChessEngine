@@ -33,15 +33,8 @@ public class Constants {
         put('r', new ArrayList<Integer>(Arrays.asList(1,-1,8,-8)));
         put('b', new ArrayList<Integer>(Arrays.asList(7,-7,9,-9)));
         put('p', new ArrayList<Integer>(Arrays.asList(8,7,9)));
-        put('k', new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9)));
+        put('k', new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9,15,-15,17,-17,6,-6,10,-10)));
         put('n', new ArrayList<Integer>(Arrays.asList(15,-15,17,-17,6,-6,10,-10)));
-    }};
-
-    public static final ArrayList<Integer> diagonalMoves = new ArrayList<>() {{
-        add(7);
-        add(-7);
-        add(9);
-        add(-9);
     }};
 
     public static class Boards{

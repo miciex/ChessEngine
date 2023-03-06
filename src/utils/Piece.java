@@ -8,8 +8,6 @@ public class Piece
 {
     public static ArrayList<Integer> PossibleMoves(int position)
     {
-        System.out.println(isChecked(4));
-
         switch(Playing.ActivePieces.get(position))
         {
             case 'P': case 'p': return PossiblePawnMoves(position);
@@ -63,41 +61,41 @@ public class Piece
         return moves;
     }
 
-    private static int isChecked(int position)
+    public static int isChecked(int position)
     {
         int positionChecking = -1;
 
-        int row = (int)Math.ceil((double)(position + 1) / 8);
-        int column = (position) % 8;
-
         boolean isWhite = HelpMethods.determineColor(Playing.ActivePieces.get(position));
 
-        int checkingDir, checkingPosition, checkingRow, checkingColumn;
+        int checkingDir, checkingPosition;
 
         for(int i = 0; i < Constants.Directions.get('k').size(); i++)
         {
             checkingDir = Constants.Directions.get('k').get(i);
-            checkingPosition = position += checkingDir;
-            checkingRow = (int)Math.ceil((double)(checkingPosition + 1) / 8);
-            checkingColumn = checkingPosition % 8;
+            checkingPosition = position + checkingDir;
 
-            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && ((checkingColumn == column || checkingRow == row) || IsDiagonal(position, checkingPosition)))
+            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && IsCorrect(position, checkingDir))
             {
-                if(Constants.Directions.get('r').contains(checkingDir))
-                    if(Playing.ActivePieces.containsKey(checkingPosition))
-                        if(HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite)
-                        {
-                            if (Character.toLowerCase(Playing.ActivePieces.get(checkingPosition)) == 'r')
-                                positionChecking = checkingPosition;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                if(i > 7)
+                {
+                    if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite && Character.toLowerCase(Playing.ActivePieces.get(checkingPosition)) != 'p')
+                    {
+                        positionChecking = checkingPosition;
+                        break;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) && PossibleMoves(checkingPosition).contains(position))
+                {
+                    positionChecking = checkingPosition;
+                    break;
+                }
 
                 checkingPosition += checkingDir;
-                checkingColumn = checkingPosition % 8;
-                checkingRow = (int)Math.ceil((double)(checkingPosition + 1) / 8);
             }
         }
 
@@ -113,7 +111,7 @@ public class Piece
         int checkingPosition, checkingDir;
 
         int row = (int)Math.ceil((double)(position + 1) / 8);
-        System.out.println(row);
+
         for(int i = 0; i < Constants.Directions.get('p').size(); i++)
         {
             checkingDir = isWhite ? -Constants.Directions.get('p').get(i) : Constants.Directions.get('p').get(i);
@@ -180,9 +178,6 @@ public class Piece
 
         boolean isWhite = HelpMethods.determineColor(Playing.ActivePieces.get(position));
 
-        int row = (int)Math.ceil((double)(position + 1) / 8);
-        int column = (position) % 8;
-
         int checkingPosition, checkingDir;
 
         for(int i = 0; i < Constants.Directions.get('n').size(); i++)
@@ -217,10 +212,5 @@ public class Piece
         int checkingColumn = position % 8 + help;
 
         return checkingRow<8 && checkingRow >= 0 && checkingColumn < 8 && checkingColumn >= 0;
-    }
-
-    private static boolean IsDiagonal(int position, int checkingPosition)
-    {
-        return ((checkingPosition - position) % 7) == 0 || ((checkingPosition - position) % 9) == 0;
     }
 }

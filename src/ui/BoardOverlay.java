@@ -168,6 +168,7 @@ public class BoardOverlay {
             fields[moveField].setPiece(fields[activeField].getPiece());
             fields[activeField].setPiece(' ');
         }
+        System.out.println(Piece.isChecked(4));
     }
 
     public void mouseMoved(MouseEvent e) {
