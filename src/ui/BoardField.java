@@ -16,7 +16,7 @@ public class BoardField {
     private int xOffsetCenter = FIELD_SIZE/2;
     private boolean mouseOver, mousePressed;
     private Rectangle bounds;
-    private Character piece;
+    private int piece;
     public Color fieldColor;
     public Color activeColor;
     public Color possibleMoveColor;
@@ -27,7 +27,7 @@ public class BoardField {
     private boolean active;
     BoardOverlay overlay;
 
-    public BoardField(int xPos, int yPos, int index, Character piece, BoardOverlay overlay){
+    public BoardField(int xPos, int yPos, int index, int piece, BoardOverlay overlay){
         this.xPos = xPos;
         this.yPos = yPos;
         this.fieldIndex = index;
@@ -56,7 +56,7 @@ public class BoardField {
             g.drawImage(overlay.getChessPiecesImgs().get(piece), pieceX, pieceY, FIELD_SIZE, FIELD_SIZE, null);
         if(isPossibleMove){
             g.setColor(Constants.Colors.basic.get(color + "Active"));
-            g.fillOval(pieceX + (FIELD_SIZE-CIRCLE_SIZE)/2, pieceY+ (FIELD_SIZE-CIRCLE_SIZE)/2, CIRCLE_SIZE, CIRCLE_SIZE);
+            g.fillOval(xPos + (FIELD_SIZE-CIRCLE_SIZE)/2, yPos+ (FIELD_SIZE-CIRCLE_SIZE)/2, CIRCLE_SIZE, CIRCLE_SIZE);
         }
     }
 
@@ -103,11 +103,11 @@ public class BoardField {
         mousePressed = false;
     }
 
-    public Character getPiece() {
+    public int getPiece() {
         return piece;
     }
 
-    public void setPiece(Character piece) {
+    public void setPiece(int piece) {
         this.piece = piece;
     }
 }
