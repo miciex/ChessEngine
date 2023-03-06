@@ -35,14 +35,8 @@ public class Piece
             checkingRow = (int)Math.ceil((double)(checkingPosition + 1) / 8);
             checkingColumn = checkingPosition % 8;
 
-            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && ((checkingColumn == column || checkingRow == row) || IsDiagonal(position, checkingPosition)))
+            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && ((checkingColumn == column || checkingRow == row || IsDiagonal(position, checkingPosition)) && IsCorrect(position, checkingDir)))
             {
-                if(Constants.Directions.get('b').contains(checkingDir))
-                {
-                    if((column == 0 && (checkingDir == -9 || checkingDir == 7)) || (column == 7 && (checkingDir == 9 || checkingDir == -7)))
-                        break;
-                }
-
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if((HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite))
                     {
@@ -113,21 +107,32 @@ public class Piece
 
         boolean isWhite = HelpMethods.determineColor(Playing.ActivePieces.get(position));
 
-        int checkingPosition;
+        int checkingPosition, checkingDir;
 
         int row = (int)Math.ceil((double)(position + 1) / 8);
-
+        System.out.println(row);
         for(int i = 0; i < Constants.Directions.get('p').size(); i++)
         {
-            checkingPosition = position + Constants.Directions.get('p').get(i);
+            checkingDir = isWhite ? -Constants.Directions.get('p').get(i) : Constants.Directions.get('p').get(i);
+            checkingPosition = position + checkingDir;
 
-            if(i > 0)
-                if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite)
+            if(IsCorrect(position, checkingDir))
+            {
+                if(i > 0)
+                    if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.determineColor(Playing.ActivePieces.get(checkingPosition)) != isWhite)
+                        moves.add(checkingPosition);
+                    else
+                        continue;
+
+                if(!Playing.ActivePieces.containsKey(checkingPosition))
                     moves.add(checkingPosition);
+            }
         }
 
-        if(row == 0 && isWhite == false)
-            moves.add(16);
+        if(isWhite == false && row == 2 && !Playing.ActivePieces.containsKey(position + 8) && !Playing.ActivePieces.containsKey(position + 16))
+            moves.add(position + 16);
+        else if(isWhite == true && row == 7 && !Playing.ActivePieces.containsKey(position - 8) && !Playing.ActivePieces.containsKey(position - 16))
+            moves.add(position -16);
 
         return moves;
     }
