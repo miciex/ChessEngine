@@ -5,30 +5,29 @@ import ui.BoardOverlay;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 
-import static main.Game.GAME_HEIGHT;
-import static main.Game.GAME_WIDTH;
 import static utils.Constants.Boards.classicBoard;
 import static utils.HelpMethods.FenToIntArray;
-import static utils.HelpMethods.intToCharPiece;
 
 public class Playing extends State implements StateMethods{
 
     private int[] board;
     private final int BOARD_HEIGHT = 8;
     private final int BOARD_WIDTH = 8;
-    private final int FIELD_SIZE = 32;
+    private ArrayList<Move> moves;
 
     BoardOverlay overlay;
 
     public Playing(Game game){
         super(game);
         board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        moves = new ArrayList<>();
         initClasses();
     }
 
-    public static HashMap<Integer, Character> ActivePieces = new HashMap<>();
+    public static HashMap<Integer, Integer> ActivePieces = new HashMap<>();
 
     private void initClasses(){
         overlay = new BoardOverlay(this);
@@ -74,6 +73,22 @@ public class Playing extends State implements StateMethods{
 
     public int[] getBoard(){
         return board;
+    }
+
+    public ArrayList<Move> getMoves() {
+        return moves;
+    }
+
+    public void setMoves(ArrayList<Move> moves) {
+        this.moves = moves;
+    }
+
+    public void addMove(Move move){
+        this.moves.add(move);
+    }
+
+    public void updateBoard(int index, int piece){
+        this.board[index] = piece;
     }
 
 }

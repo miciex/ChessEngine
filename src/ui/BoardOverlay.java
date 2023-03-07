@@ -1,7 +1,9 @@
 package ui;
 
+import GameStates.Move;
 import GameStates.Playing;
 import utils.Constants;
+import utils.HelpMethods;
 import utils.LoadSave;
 import utils.Piece;
 
@@ -32,7 +34,7 @@ public class BoardOverlay {
     private int mouseX;
     private int mouseY;
     private ArrayList<Integer> moves= new ArrayList<>();
-    private HashMap<Character, BufferedImage> chessPiecesImgs;
+    private HashMap<Integer, BufferedImage> chessPiecesImgs;
 
 
     public BoardOverlay(Playing playing){
@@ -44,10 +46,12 @@ public class BoardOverlay {
     private void createFields() {
         int board[] = playing.getBoard();
         fields = new BoardField[board.length];
+
         for(int i = 0; i<board.length; i++){
             int currX = FIELD_SIZE * (i%8);
             int currY =  FIELD_SIZE * (int)(i/BOARD_WIDTH);
-            fields[i] = new BoardField(START_X + currX, START_Y +currY, i, intToCharPiece(board[i]), this);
+            fields[i] = new BoardField(START_X + currX, START_Y +currY, i, board[i], this);
+
                 if (i%2!=(i/8)%2) {
                     fields[i].color = WHITE;
                 } else {
@@ -67,7 +71,7 @@ public class BoardOverlay {
 
         if(row < 0 && col < 0 || row >= 8 && col >= 8)  resetActivePieces();
 
-        if(fields[col + row * BOARD_WIDTH].getPiece()!= ' ' && activeField<0){
+        if(playing.getBoard()[col + row * BOARD_WIDTH]!= 0 && activeField<0){
             activeField = col + row * BOARD_WIDTH;
             fields[activeField].setMousePressed(true);
             moves = Piece.PossibleMoves(activeField);
@@ -87,7 +91,7 @@ public class BoardOverlay {
         }else if(newField>=0){
             fields[activeField].setMousePressed(false);
             resetColors();
-            if(fields[newField].getPiece() != ' ' && activeField != newField){
+            if(playing.getBoard()[newField] != 0 && activeField != newField){
                 activeField = newField;
                 fields[activeField].setMousePressed(true);
                 moves = Piece.PossibleMoves(activeField);
@@ -126,11 +130,12 @@ public class BoardOverlay {
             moves = Piece.PossibleMoves(activeField);
             showPossibleMoves();
         }
-            fields[activeField].setMousePressed(false);
+        fields[activeField].setMousePressed(false);
 
     }
 
     private void resetActivePieces(){
+        fields[activeField].setMousePressed(false);
         activeField = -1;
         newField = -1;
         resetColors();
@@ -160,13 +165,17 @@ public class BoardOverlay {
             fields[activeField].resetBools();
         else
         {
+            playing.addMove(new Move(fields[activeField].getPiece(), activeField, moveField, fields[moveField].getPiece(), moveField));
+
             if(Playing.ActivePieces.containsKey(moveField))
                 Playing.ActivePieces.remove(moveField);
 
             Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
             Playing.ActivePieces.remove(activeField);
+            //playing.updateBoard(moveField, fields[activeField].getPiece());
+            //playing.updateBoard(activeField, 0);
             fields[moveField].setPiece(fields[activeField].getPiece());
-            fields[activeField].setPiece(' ');
+            fields[activeField].setPiece(0);
         }
     }
 
@@ -191,9 +200,9 @@ public class BoardOverlay {
         chessPiecesImgs = new HashMap<>();
         for(int i = 0; i<12; i++){
             if(i<6)
-                chessPiecesImgs.put(Character.toUpperCase(Constants.Pieces.CHAR_PIECES[i%6]), img.getSubimage((img.getWidth()/6)*(i%6), 0,img.getWidth()/6, img.getHeight()/2 ));
+                chessPiecesImgs.put((HelpMethods.CharPieceToInt2(Constants.Pieces.CHAR_PIECES[i]) + Constants.Pieces.White), img.getSubimage((img.getWidth()/6)*(i%6), 0,img.getWidth()/6, img.getHeight()/2 ));
             else
-                chessPiecesImgs.put(Character.toLowerCase(Constants.Pieces.CHAR_PIECES[i%6]), img.getSubimage((img.getWidth()/6)*(i%6), (img.getHeight()/2),img.getWidth()/6, img.getHeight()/2 ));
+                chessPiecesImgs.put((HelpMethods.CharPieceToInt2(Constants.Pieces.CHAR_PIECES[(i%6)]) + Constants.Pieces.Black), img.getSubimage((img.getWidth()/6)*(i%6), (img.getHeight()/2),img.getWidth()/6, img.getHeight()/2 ));
         }
     }
 
@@ -212,7 +221,7 @@ public class BoardOverlay {
         return mouseY;
     }
 
-    public HashMap<Character, BufferedImage> getChessPiecesImgs() {
+    public HashMap<Integer, BufferedImage> getChessPiecesImgs() {
         return chessPiecesImgs;
     }
 }

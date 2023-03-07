@@ -27,7 +27,7 @@ public class HelpMethods {
             }
 
             arr[num] = CharPieceToInt(currChar);
-            Playing.ActivePieces.put(num, currChar);
+            Playing.ActivePieces.put(num, arr[num]);
             num++;
 
         }
@@ -48,6 +48,24 @@ public class HelpMethods {
                 return Pieces.Knight + addPieceColorValue(p);
             case 'b':
                 return Pieces.Bishop + addPieceColorValue(p);
+            default: return 0;
+        }
+    }
+
+    public static int CharPieceToInt2(Character p){
+        switch (toLowerCase(p)){
+            case 'q':
+                return Pieces.Queen;
+            case 'k':
+                return Pieces.King;
+            case 'p':
+                return Pieces.Pawn;
+            case 'r':
+                return Pieces.Rook;
+            case 'n':
+                return Pieces.Knight;
+            case 'b':
+                return Pieces.Bishop;
             default: return 0;
         }
     }
@@ -74,10 +92,10 @@ public class HelpMethods {
         return (isUpperCase(p)?Pieces.White:Pieces.Black);
     }
 
-    public static boolean determineColor(Character p)
+    public static boolean isWhite(int p)
     {
-        if(p != null)
-            return Character.isUpperCase(p) ? true : false;
+        if(p != 0)
+            return p<16 ? true : false;
         else
             return false;
     }
