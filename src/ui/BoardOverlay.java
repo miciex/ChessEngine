@@ -158,6 +158,8 @@ public class BoardOverlay {
     }
 
     private void showPossibleMoves(){
+        moves = Piece.deleteImpossibleMoves(activeField, moves);
+
         for (int move : moves) {
             fields[move].isPossibleMove = true;
         }

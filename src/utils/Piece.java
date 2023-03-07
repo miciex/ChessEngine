@@ -40,14 +40,12 @@ public class Piece
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if((HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite))
                     {
-                        if(!isUnderAttack(position, checkingPosition))
                             moves.add(checkingPosition);
                         break;
                     }
                     else
                         break;
 
-                if(!isUnderAttack(position, checkingPosition))
                     moves.add(checkingPosition);
 
                 if((Constants.Directions.get(Constants.Pieces.Bishop).contains(checkingDir) && (checkingColumn == 0 || checkingColumn == 7)))
@@ -62,24 +60,33 @@ public class Piece
         return moves;
     }
 
-    private static boolean isUnderAttack(int activeField, int moveField)
+    public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves)
     {
-        HashMap<Integer, Integer> copy = (HashMap<Integer, Integer>) Playing.ActivePieces.clone();
+        HashMap<Integer, Integer> copy;
+        int moveField;
 
-        if(Playing.ActivePieces.containsKey(moveField))
-            Playing.ActivePieces.remove(moveField);
+        for(int i = 0; i < moves.size(); i++)
+        {
+            moveField = activeField + moves.get(i);
 
-        Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
-        Playing.ActivePieces.remove(activeField);
+            copy = (HashMap<Integer, Integer>) Playing.ActivePieces.clone();
 
-        if(isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1) {
-            Playing.ActivePieces = copy;
-            return false;
+            if(Playing.ActivePieces.containsKey(moveField))
+                Playing.ActivePieces.remove(moveField);
+
+            Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
+            Playing.ActivePieces.remove(activeField);
+
+            if(isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1) {
+                Playing.ActivePieces = copy;
+            }
+            else {
+                Playing.ActivePieces = copy;
+                moves.remove(i);
+            }
         }
-        else {
-            Playing.ActivePieces = copy;
-            return true;
-        }
+
+        return moves;
     }
 
     public static int isChecked(int position)
@@ -142,22 +149,18 @@ public class Piece
             {
                 if(i > 0)
                     if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
-                        if(!isUnderAttack(position, checkingPosition))
                             moves.add(checkingPosition);
                     else
                         continue;
 
                 if(!Playing.ActivePieces.containsKey(checkingPosition))
-                    if(!isUnderAttack(position, checkingPosition))
                         moves.add(checkingPosition);
             }
         }
 
         if(isWhite == false && row == 2 && !Playing.ActivePieces.containsKey(position + 8) && !Playing.ActivePieces.containsKey(position + 16))
-            if(!isUnderAttack(position, position + 16))
                 moves.add(position + 16);
         else if(isWhite == true && row == 7 && !Playing.ActivePieces.containsKey(position - 8) && !Playing.ActivePieces.containsKey(position - 16))
-                if(!isUnderAttack(position, position - 16))
                     moves.add(position - 16);
 
         return moves;
@@ -182,7 +185,6 @@ public class Piece
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if(HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
                     {
-                        if(!isUnderAttack(position, checkingPosition))
                             moves.add(checkingPosition);
                         continue;
                     }
@@ -191,7 +193,6 @@ public class Piece
                         continue;
                     }
 
-                if(!isUnderAttack(position, checkingPosition))
                     moves.add(checkingPosition);
             }
         }
@@ -217,7 +218,6 @@ public class Piece
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if(HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
                     {
-                        if(!isUnderAttack(position, checkingPosition))
                             moves.add(checkingPosition);
                         continue;
                     }
@@ -226,7 +226,6 @@ public class Piece
                         continue;
                     }
 
-                if(!isUnderAttack(position, checkingPosition))
                     moves.add(checkingPosition);
             }
         }
