@@ -2,6 +2,8 @@ package GameStates;
 
 import main.Game;
 import ui.BoardOverlay;
+import ui.ButtonMethods;
+import ui.ButtonOverlay;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -9,17 +11,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static utils.Constants.Boards.classicBoard;
+import static utils.Constants.Field.FIELD_SIZE;
+import static utils.Constants.Game_Info.*;
 import static utils.HelpMethods.FenToIntArray;
+import static utils.HelpMethods.moveToChessNotation;
+import static utils.Constants.BoardInfo.*;
 
 public class Playing extends State implements StateMethods{
 
     private int[] board;
-    private final int BOARD_HEIGHT = 8;
-    private final int BOARD_WIDTH = 8;
     private ArrayList<Move> moves;
     public static boolean whitesMove = true;
+    public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
+    public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
 
-    BoardOverlay overlay;
+    BoardOverlay boardOverlay;
+    ButtonOverlay buttonOverlay;
+
+    public static HashMap<Integer, Integer> ActivePieces = new HashMap<>();
 
     public Playing(Game game){
         super(game);
@@ -28,10 +37,16 @@ public class Playing extends State implements StateMethods{
         initClasses();
     }
 
-    public static HashMap<Integer, Integer> ActivePieces = new HashMap<>();
+    public void resetGame(){
+        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        moves = new ArrayList<>();
+        boardOverlay.createFields();
+        whitesMove = true;
+    }
 
     private void initClasses(){
-        overlay = new BoardOverlay(this);
+        boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
+        buttonOverlay = new ButtonOverlay((BOARD_X + BOARD_WIDTH * FIELD_SIZE), 0, 0,0, this);
     }
 
     @Override
@@ -41,36 +56,39 @@ public class Playing extends State implements StateMethods{
 
     @Override
     public void draw(Graphics g){
-        drawBoard(g);
+        boardOverlay.draw(g);
+        buttonOverlay.draw(g);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        overlay.mouseClicked(e);
+        boardOverlay.mouseClicked(e);
+        buttonOverlay.mouseClicked(e);
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        overlay.mousePressed(e);
+        boardOverlay.mousePressed(e);
+        buttonOverlay.mousePressed(e);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        overlay.mouseReleased(e);
+        boardOverlay.mouseReleased(e);
+        buttonOverlay.mouseReleased(e);
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        overlay.mouseMoved(e);
+        boardOverlay.mouseMoved(e);
+        buttonOverlay.mouseMoved(e);
     }
 
     public void mouseDragged(MouseEvent e){
-        overlay.mouseDragged(e);
+        boardOverlay.mouseDragged(e);
     }
 
-    private void drawBoard(Graphics g){
-        overlay.draw(g);
-    }
+
 
     public int[] getBoard(){
         return board;
@@ -86,6 +104,7 @@ public class Playing extends State implements StateMethods{
 
     public void addMove(Move move){
         this.moves.add(move);
+        System.out.println(moveToChessNotation(move));
     }
 
     public void updateBoard(int index, int piece){

@@ -3,14 +3,12 @@ package main;
 import GameStates.Playing;
 
 import java.awt.*;
+import static utils.Constants.Game_Info.*;
 
 public class Game implements Runnable{
     private Thread gameThread;
     private final int FPS_SET = 120;
     private final int UPS_SET = 200;
-
-    public final static int GAME_WIDTH = 1200;
-    public final static int GAME_HEIGHT = 700;
 
     GamePanel gamePanel;
     GameWindow gameWindow;

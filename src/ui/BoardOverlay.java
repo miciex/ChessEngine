@@ -14,43 +14,42 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static main.Game.GAME_HEIGHT;
-import static main.Game.GAME_WIDTH;
+import static utils.Constants.BoardInfo.BOARD_WIDTH;
 import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.HelpMethods.intToCharPiece;
 
-public class BoardOverlay {
+public class BoardOverlay extends UIElement{
 
-    private final int BOARD_HEIGHT = 8;
-    private final int BOARD_WIDTH = 8;
     private BoardField[] fields;
-    private Playing playing;
-    private final int START_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
-    private final int START_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
+    public Playing playing;
     int activeField = -1;
     int newField = -1;
     private int mouseX;
     private int mouseY;
     private ArrayList<Integer> moves= new ArrayList<>();
     private HashMap<Integer, BufferedImage> chessPiecesImgs;
+    private ResetButton rb;
 
 
-    public BoardOverlay(Playing playing){
+    public BoardOverlay(int xPos, int yPos, Playing playing){
+        super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
         this.playing = playing;
         loadPiecesImgs();
         createFields();
     }
 
-    private void createFields() {
+
+
+    public void createFields() {
         int board[] = playing.getBoard();
         fields = new BoardField[board.length];
 
         for(int i = 0; i<board.length; i++){
             int currX = FIELD_SIZE * (i%8);
             int currY =  FIELD_SIZE * (int)(i/BOARD_WIDTH);
-            fields[i] = new BoardField(START_X + currX, START_Y +currY, i, board[i], this);
+            fields[i] = new BoardField(xPos + currX, yPos +currY, i, board[i], this);
 
                 if (i%2!=(i/8)%2) {
                     fields[i].color = WHITE;
@@ -66,10 +65,11 @@ public class BoardOverlay {
     }
 
     public void mousePressed(MouseEvent e) {
-        int col = (e.getX() - START_X)/FIELD_SIZE;
-        int row = (e.getY() - START_Y)/FIELD_SIZE;
+        int col = (e.getX() - xPos)/FIELD_SIZE;
+        int row = (e.getY() - yPos)/FIELD_SIZE;
 
-        if(row < 0 && col < 0 || row >= 8 && col >= 8)  resetActivePieces();
+        if((row < 0 || col < 0 || row >= 8 || col >= 8)&&activeField>=0)  resetActivePieces();
+        else if(row < 0 || col < 0 || row >= 8 || col >= 8) return;
 
         if(playing.getBoard()[col + row * BOARD_WIDTH]!= 0 && activeField<0){
             activeField = col + row * BOARD_WIDTH;
@@ -120,8 +120,8 @@ public class BoardOverlay {
     }
 
     public void mouseReleased(MouseEvent e) {
-        int col = (e.getX() - START_X)/FIELD_SIZE;
-        int row = (e.getY() - START_Y)/FIELD_SIZE;
+        int col = (e.getX() - xPos)/FIELD_SIZE;
+        int row = (e.getY() - yPos)/FIELD_SIZE;
 
         if(activeField<0){
             return;
@@ -154,7 +154,6 @@ public class BoardOverlay {
     }
 
     public void mouseClicked(MouseEvent e){
-
     }
 
     private void showPossibleMoves(){

@@ -10,6 +10,15 @@ import java.util.HashMap;
 
 public class Constants {
 
+    public static class Game_Info {
+        public final static int GAME_WIDTH = 1200;
+        public final static int GAME_HEIGHT = 700;
+    }
+
+    public static class Letters{
+        public static final char[] ALPHABET = new char[]{'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+    }
+
     public static class Field{
         public static final int FIELD_SIZE = 64;
         public static final int CIRCLE_SIZE = 32;
@@ -35,12 +44,17 @@ public class Constants {
         put(Pieces.Rook, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8)));
         put(Pieces.Bishop, new ArrayList<Integer>(Arrays.asList(7,-7,9,-9)));
         put(Pieces.Pawn, new ArrayList<Integer>(Arrays.asList(8,7,9)));
-        put(Pieces.King, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9,15,-15,17,-17,6,-6,10,-10)));
+        put(Pieces.King, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9)));
         put(Pieces.Knight, new ArrayList<Integer>(Arrays.asList(15,-15,17,-17,6,-6,10,-10)));
     }};
 
     public static class Boards{
         public final static String classicBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+    }
+
+    public static class BoardInfo{
+        public static final int BOARD_HEIGHT = 8;
+        public static final int BOARD_WIDTH = 8;
     }
 
     public static class Colors{
