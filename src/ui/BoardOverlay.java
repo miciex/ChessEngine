@@ -158,7 +158,8 @@ public class BoardOverlay {
     }
 
     private void showPossibleMoves(){
-        moves = Piece.deleteImpossibleMoves(activeField, moves);
+        if(Piece.isChecked(HelpMethods.findKing(Playing.whitesMove)) != -1)
+            moves = Piece.deleteImpossibleMoves(activeField, moves);
 
         for (int move : moves) {
             fields[move].isPossibleMove = true;
@@ -190,7 +191,6 @@ public class BoardOverlay {
             playing.updateBoard(activeField, 0);
             fields[moveField].setPiece(fields[activeField].getPiece());
             fields[activeField].setPiece(0);
-            System.out.println(Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)));
             Playing.whitesMove = (Playing.whitesMove == true) ? false : true;
         }
     }

@@ -62,13 +62,16 @@ public class Piece
 
     public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves)
     {
-        HashMap<Integer, Integer> copy;
+        int movesSize = moves.size();
+
+        HashMap<Integer, Integer> copy = (HashMap<Integer, Integer>) Playing.ActivePieces.clone();
         int moveField;
 
-        for(int i = 0; i < moves.size(); i++)
+        for(int i = 0; i < movesSize; i++)
         {
-            moveField = activeField + moves.get(i);
+            moveField = moves.get(i);
 
+            Playing.ActivePieces = copy;
             copy = (HashMap<Integer, Integer>) Playing.ActivePieces.clone();
 
             if(Playing.ActivePieces.containsKey(moveField))
@@ -77,12 +80,14 @@ public class Piece
             Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
             Playing.ActivePieces.remove(activeField);
 
-            if(isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1) {
+            if(isChecked(HelpMethods.findKing(Playing.whitesMove)) == -1) {
                 Playing.ActivePieces = copy;
             }
             else {
                 Playing.ActivePieces = copy;
                 moves.remove(i);
+                movesSize--;
+                i--;
             }
         }
 
