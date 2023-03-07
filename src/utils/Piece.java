@@ -10,18 +10,16 @@ public class Piece
     {
         switch(Playing.ActivePieces.get(position)%8)
         {
-            case 1: return PossiblePawnMoves(position);
-            case 2: return PossibleKingMoves(position);
-            case 4: return PossibleKnightMoves(position);
+            case Constants.Pieces.Pawn: return PossiblePawnMoves(position);
+            case Constants.Pieces.King: return PossibleKingMoves(position);
+            case Constants.Pieces.Knight: return PossibleKnightMoves(position);
         }
 
-        int piece = Playing.ActivePieces.get(position);
-        boolean isWhite = HelpMethods.isWhite(piece);
+        int piece = Playing.ActivePieces.get(position) % 8;
+        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
 
         int row = (int)Math.ceil((double)(position + 1) / 8);
         int column = (position) % 8;
-
-        piece = Character.toLowerCase(piece);
 
         ArrayList<Integer> moves = new ArrayList<>();
         int checkingDir, checkingPosition, checkingRow, checkingColumn;
@@ -33,13 +31,10 @@ public class Piece
             checkingRow = (int)Math.ceil((double)(checkingPosition + 1) / 8);
             checkingColumn = checkingPosition % 8;
 
-            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && ((checkingColumn == column || checkingRow == row) || IsDiagonal(position, checkingPosition)))
+            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && IsCorrect(position, checkingDir))
             {
-                if(Constants.diagonalMoves.contains(checkingDir))
-                {
-                    if((column == 0 && (checkingDir == -9 || checkingDir == 7)) || (column == 7 && (checkingDir == 9 || checkingDir == -7)))
-                        break;
-                }
+                if(Constants.Directions.get(Constants.Pieces.Rook).contains(checkingDir) && (checkingColumn != column && checkingRow != row))
+                    break;
 
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if((HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite))
@@ -50,10 +45,9 @@ public class Piece
                     else
                         break;
 
-                System.out.println(checkingPosition);
                 moves.add(checkingPosition);
 
-                if(Constants.diagonalMoves.contains(checkingDir) && (checkingColumn == 0 || checkingColumn == 7))
+                if((Constants.Directions.get(Constants.Pieces.Bishop).contains(checkingDir) && (checkingColumn == 0 || checkingColumn == 7)))
                     break;
 
                 checkingPosition += checkingDir;
@@ -65,46 +59,79 @@ public class Piece
         return moves;
     }
 
+    public static int isChecked(int position)
+    {
+        int positionChecking = -1;
+
+        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
+
+        int checkingDir, checkingPosition;
+
+        for(int i = 0; i < Constants.Directions.get(Constants.Pieces.King).size(); i++)
+        {
+            checkingDir = Constants.Directions.get(Constants.Pieces.King).get(i);
+            checkingPosition = position + checkingDir;
+
+            while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && IsCorrect(position, checkingDir))
+            {
+                if(i > 7)
+                {
+                    if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite && Playing.ActivePieces.get(checkingPosition) % 8 == Constants.Pieces.Knight)
+                    {
+                        positionChecking = checkingPosition;
+                        break;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) && PossibleMoves(checkingPosition).contains(position))
+                {
+                    positionChecking = checkingPosition;
+                    break;
+                }
+
+                checkingPosition += checkingDir;
+            }
+        }
+
+        return positionChecking;
+    }
+
     private static ArrayList<Integer> PossiblePawnMoves(int position)
     {
         ArrayList<Integer> moves = new ArrayList<>();
 
         boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
 
-        if(isWhite == true)
+        int checkingPosition, checkingDir;
+
+        int row = (int)Math.ceil((double)(position + 1) / 8);
+
+        for(int i = 0; i < Constants.Directions.get(Constants.Pieces.Pawn).size(); i++)
         {
-            if(Playing.ActivePieces.containsKey(position - 8) == false)
+            checkingDir = isWhite ? -Constants.Directions.get(Constants.Pieces.Pawn).get(i) : Constants.Directions.get(Constants.Pieces.Pawn).get(i);
+            checkingPosition = position + checkingDir;
+
+            if(IsCorrect(position, checkingDir))
             {
-                moves.add(position - 8);
-                if (position >= 48 && position <= 55 && !Playing.ActivePieces.containsKey(position - 16))
-                    moves.add(position - 16);
+                if(i > 0)
+                    if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
+                        moves.add(checkingPosition);
+                    else
+                        continue;
+
+                if(!Playing.ActivePieces.containsKey(checkingPosition))
+                    moves.add(checkingPosition);
             }
-
-            if(Playing.ActivePieces.containsKey(position - 9))
-                if(HelpMethods.isWhite(Playing.ActivePieces.get(position - 9)) != isWhite)
-                    moves.add(position - 9);
-
-            if(Playing.ActivePieces.containsKey(position - 7))
-                if(HelpMethods.isWhite(Playing.ActivePieces.get(position - 7)) != isWhite)
-                    moves.add(position - 7);
         }
-        else if(isWhite == false)
-        {
-            if(Playing.ActivePieces.containsKey(position + 8) == false)
-            {
-                moves.add(position + 8);
-                if (position >= 8 && position <= 15 && !Playing.ActivePieces.containsKey(position + 16))
-                    moves.add(position + 16);
-            }
 
-            if(Playing.ActivePieces.containsKey(position + 9))
-                if(HelpMethods.isWhite(Playing.ActivePieces.get(position + 9)) != isWhite)
-                    moves.add(position + 9);
-
-            if(Playing.ActivePieces.containsKey(position + 7))
-                if(HelpMethods.isWhite(Playing.ActivePieces.get(position + 7)) != isWhite)
-                    moves.add(position + 7);
-        }
+        if(isWhite == false && row == 2 && !Playing.ActivePieces.containsKey(position + 8) && !Playing.ActivePieces.containsKey(position + 16))
+            moves.add(position + 16);
+        else if(isWhite == true && row == 7 && !Playing.ActivePieces.containsKey(position - 8) && !Playing.ActivePieces.containsKey(position - 16))
+            moves.add(position -16);
 
         return moves;
     }
@@ -115,30 +142,15 @@ public class Piece
 
         boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
 
-        int row = (int)Math.ceil((double)(position + 1) / 8);
-        int column = (position) % 8;
-
         int checkingPosition, checkingDir;
 
-        for(int i = 0; i < Constants.Directions.get('k').size(); i++)
+        for(int i = 0; i < Constants.Directions.get(Constants.Pieces.King).size(); i++)
         {
-            checkingDir = Constants.Directions.get('k').get(i);
-
-            if(column == 0 && (checkingDir == -9 || checkingDir == -1 || checkingDir == 7))
-                continue;
-
-            if(column == 7 && (checkingDir == 9 || checkingDir == 1 || checkingDir == -7))
-                continue;
-
-            if(row == 0 && (checkingDir == -7 || checkingDir == -8 || checkingDir == -9))
-                continue;
-
-            if(row == 8 && (checkingDir == 7 || checkingDir == 8 || checkingDir == 9))
-                continue;
+            checkingDir = Constants.Directions.get(Constants.Pieces.King).get(i);
 
             checkingPosition = position + checkingDir;
 
-            if(checkingPosition >= 0 && checkingPosition < 64)
+            if(IsCorrect(position, checkingDir))
             {
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if(HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
@@ -164,38 +176,14 @@ public class Piece
 
         boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
 
-        int row = (int)Math.ceil((double)(position + 1) / 8);
-        int column = (position) % 8;
-
         int checkingPosition, checkingDir;
 
-        for(int i = 0; i < Constants.Directions.get('n').size(); i++)
+        for(int i = 0; i < Constants.Directions.get(Constants.Pieces.Knight).size(); i++)
         {
-            checkingDir = Constants.Directions.get('n').get(i);
-
-            if(column < 2 && (checkingDir == -10 || checkingDir == 6))
-                continue;
-            if(column == 0 && (checkingDir == -17 || checkingDir == 15))
-                continue;
-
-            if(column > 5 && (checkingDir == 10 || checkingDir == -6))
-                continue;
-            if(column == 7 && (checkingDir == 17 || checkingDir == -15))
-                continue;
-
-            if(row < 2 && (checkingDir == -17 || checkingDir == -15))
-                continue;
-            if(row == 0 && (checkingDir == -10 || checkingDir == -6))
-                continue;
-
-            if(row > 6 && (checkingDir == 15 || checkingDir == 17))
-                continue;
-            if(row == 8 && (checkingDir == 6 || checkingDir == 10))
-                continue;
-
+            checkingDir = Constants.Directions.get(Constants.Pieces.Knight).get(i);
             checkingPosition = position + checkingDir;
 
-            if(checkingPosition >= 0 && checkingPosition < 64)
+            if(IsCorrect(position, checkingDir))
             {
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if(HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
@@ -215,9 +203,12 @@ public class Piece
         return moves;
     }
 
-    private static boolean IsDiagonal(int position, int checkingPosition)
+    private static boolean IsCorrect(int position, int checkingDir)
     {
-        //return ((checkingPosition + 1 - checkingPosition + 1) & 7) == ((checkingPosition + 1 >> 3) - (position + 1 >> 3));
-        return ((checkingPosition - position) % 7) == 0 || ((checkingPosition - position) % 9) == 0;
+        int checkingRow = ((position) / 8) + (int)Math.round((double)checkingDir/8);
+        int help = Math.abs(checkingDir % 8) > 4 ? (checkingDir > 0 ? checkingDir % 8 - 8 : 8 + checkingDir % 8) : checkingDir % 8;
+        int checkingColumn = position % 8 + help;
+
+        return checkingRow<8 && checkingRow >= 0 && checkingColumn < 8 && checkingColumn >= 0;
     }
 }

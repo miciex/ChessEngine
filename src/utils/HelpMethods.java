@@ -88,6 +88,24 @@ public class HelpMethods {
         }
     }
 
+    public static Character intToPieceWithoutColor(int p){
+        switch (p%8){
+            case 1:
+                return p<16?'K':'k';
+            case 2:
+                return p<16?'P':'p';
+            case 3:
+                return p<16?'R':'r';
+            case 4:
+                return p<16?'N':'n';
+            case 5:
+                return p<16?'B':'b';
+            case 6:
+                return p<16?'Q':'q';
+            default: return ' ';
+        }
+    }
+
     public static int addPieceColorValue(Character p){
         return (isUpperCase(p)?Pieces.White:Pieces.Black);
     }
@@ -98,5 +116,18 @@ public class HelpMethods {
             return p<16 ? true : false;
         else
             return false;
+    }
+
+    public static int findKing(boolean white)
+    {
+        int position = -1;
+
+        for(int i : Playing.ActivePieces.keySet())
+        {
+            if (Playing.ActivePieces.get(i) % 8 == Pieces.King && HelpMethods.isWhite(Playing.ActivePieces.get(i)) == white)
+                return i;
+        }
+
+        return position;
     }
 }

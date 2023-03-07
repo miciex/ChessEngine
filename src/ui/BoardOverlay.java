@@ -74,8 +74,11 @@ public class BoardOverlay {
         if(playing.getBoard()[col + row * BOARD_WIDTH]!= 0 && activeField<0){
             activeField = col + row * BOARD_WIDTH;
             fields[activeField].setMousePressed(true);
-            moves = Piece.PossibleMoves(activeField);
-            showPossibleMoves();
+            if(HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove)
+            {
+                moves = Piece.PossibleMoves(activeField);
+                showPossibleMoves();
+            }
             return;
         }
         if(activeField >= 0 )
@@ -94,8 +97,11 @@ public class BoardOverlay {
             if(playing.getBoard()[newField] != 0 && activeField != newField){
                 activeField = newField;
                 fields[activeField].setMousePressed(true);
-                moves = Piece.PossibleMoves(activeField);
-                showPossibleMoves();
+                if(HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove)
+                {
+                    moves = Piece.PossibleMoves(activeField);
+                    showPossibleMoves();
+                }
             }else{
                 activeField = -1;
             }
@@ -105,8 +111,11 @@ public class BoardOverlay {
         }
 
         if(newField<0&&activeField>=0){
-            moves = Piece.PossibleMoves(activeField);
-            showPossibleMoves();
+            if(HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove)
+            {
+                moves = Piece.PossibleMoves(activeField);
+                showPossibleMoves();
+            }
         }
     }
 
@@ -127,8 +136,11 @@ public class BoardOverlay {
         }
 
         if(newField>=0){
-            moves = Piece.PossibleMoves(activeField);
-            showPossibleMoves();
+            if(HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove)
+            {
+                moves = Piece.PossibleMoves(activeField);
+                showPossibleMoves();
+            }
         }
         fields[activeField].setMousePressed(false);
 
@@ -172,10 +184,12 @@ public class BoardOverlay {
 
             Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
             Playing.ActivePieces.remove(activeField);
-            //playing.updateBoard(moveField, fields[activeField].getPiece());
-            //playing.updateBoard(activeField, 0);
+            playing.updateBoard(moveField, fields[activeField].getPiece());
+            playing.updateBoard(activeField, 0);
             fields[moveField].setPiece(fields[activeField].getPiece());
             fields[activeField].setPiece(0);
+            System.out.println(Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)));
+            Playing.whitesMove = (Playing.whitesMove == true) ? false : true;
         }
     }
 

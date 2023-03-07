@@ -1,5 +1,7 @@
 package utils;
 
+import jdk.jshell.spi.SPIResolutionException;
+
 import java.awt.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -28,20 +30,13 @@ public class Constants {
         public static final char[] CHAR_PIECES= new char[]{'K', 'Q', 'B', 'N', 'R','P'};
     }
 
-    public static final HashMap<Character, ArrayList<Integer>> Directions = new HashMap<>() {{
-        put('q', new ArrayList<Integer>(Arrays.asList(8,-8,1,-1,7,-7,9,-9)));
-        put('r', new ArrayList<Integer>(Arrays.asList(1,-1,8,-8)));
-        put('b', new ArrayList<Integer>(Arrays.asList(7,-7,9,-9)));
-        put('p', new ArrayList<Integer>(Arrays.asList(8)));
-        put('k', new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9)));
-        put('n', new ArrayList<Integer>(Arrays.asList(15,-15,17,-17,6,-6,10,-10)));
-    }};
-
-    public static final ArrayList<Integer> diagonalMoves = new ArrayList<>() {{
-        add(7);
-        add(-7);
-        add(9);
-        add(-9);
+    public static final HashMap<Integer, ArrayList<Integer>> Directions = new HashMap<>() {{
+        put(Pieces.Queen, new ArrayList<Integer>(Arrays.asList(8,-8,1,-1,7,-7,9,-9)));
+        put(Pieces.Rook, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8)));
+        put(Pieces.Bishop, new ArrayList<Integer>(Arrays.asList(7,-7,9,-9)));
+        put(Pieces.Pawn, new ArrayList<Integer>(Arrays.asList(8,7,9)));
+        put(Pieces.King, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9,15,-15,17,-17,6,-6,10,-10)));
+        put(Pieces.Knight, new ArrayList<Integer>(Arrays.asList(15,-15,17,-17,6,-6,10,-10)));
     }};
 
     public static class Boards{
