@@ -158,8 +158,7 @@ public class BoardOverlay {
     }
 
     private void showPossibleMoves(){
-        if(Piece.isChecked(HelpMethods.findKing(Playing.whitesMove)) != -1)
-            moves = Piece.deleteImpossibleMoves(activeField, moves);
+        moves = Piece.deleteImpossibleMoves(activeField, moves);
 
         for (int move : moves) {
             fields[move].isPossibleMove = true;
