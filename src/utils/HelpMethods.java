@@ -1,15 +1,38 @@
 package utils;
 
+import GameStates.Move;
 import GameStates.Playing;
 import utils.Constants.Pieces;
 
 import java.util.HashMap;
 
 import static java.lang.Character.*;
+import static utils.Constants.Letters.ALPHABET;
 
 public class HelpMethods {
 
+    public static String moveToChessNotation(Move move){
+        String note = "";
+        if(move.movedPiece%8 != 2){
+            note+= toUpperCase(HelpMethods.intToCharPiece(move.movedPiece));
+        }
+
+        if(move.takenPiece != 0){
+            note += fieldNumberToChessNotation(move.startField);
+            note += "x";
+        }
+            note+= fieldNumberToChessNotation(move.endField);
+
+        return note;
+    }
+
+    public static String fieldNumberToChessNotation(int fieldNumber){
+        String note = Character.toString(ALPHABET[fieldNumber%8]) + Integer.toString(8-fieldNumber/8);
+        return note;
+    }
+
     public static int[] FenToIntArray(String fen, int arrayLength){
+        Playing.ActivePieces.clear();
         int num = 0;
         int[] arr = new int[arrayLength];
         for(Character currChar : fen.toCharArray()){

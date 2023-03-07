@@ -7,8 +7,8 @@ import Inputs.MouseInputs;
 
 import javax.swing.*;
 import java.awt.*;
-import static main.Game.GAME_HEIGHT;
-import static main.Game.GAME_WIDTH;
+
+import static utils.Constants.Game_Info.*;
 
 public class GamePanel extends JPanel {
 
