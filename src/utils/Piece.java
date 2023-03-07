@@ -3,6 +3,7 @@ package utils;
 import GameStates.Playing;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Piece
 {
@@ -39,13 +40,15 @@ public class Piece
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if((HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite))
                     {
-                        moves.add(checkingPosition);
+                        if(!isUnderAttack(position, checkingPosition))
+                            moves.add(checkingPosition);
                         break;
                     }
                     else
                         break;
 
-                moves.add(checkingPosition);
+                if(!isUnderAttack(position, checkingPosition))
+                    moves.add(checkingPosition);
 
                 if((Constants.Directions.get(Constants.Pieces.Bishop).contains(checkingDir) && (checkingColumn == 0 || checkingColumn == 7)))
                     break;
@@ -59,6 +62,26 @@ public class Piece
         return moves;
     }
 
+    private static boolean isUnderAttack(int activeField, int moveField)
+    {
+        HashMap<Integer, Integer> copy = (HashMap<Integer, Integer>) Playing.ActivePieces.clone();
+
+        if(Playing.ActivePieces.containsKey(moveField))
+            Playing.ActivePieces.remove(moveField);
+
+        Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
+        Playing.ActivePieces.remove(activeField);
+
+        if(isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1) {
+            Playing.ActivePieces = copy;
+            return false;
+        }
+        else {
+            Playing.ActivePieces = copy;
+            return true;
+        }
+    }
+
     public static int isChecked(int position)
     {
         int positionChecking = -1;
@@ -67,9 +90,9 @@ public class Piece
 
         int checkingDir, checkingPosition;
 
-        for(int i = 0; i < Constants.Directions.get(Constants.Pieces.King).size(); i++)
+        for(int i = 0; i < Constants.Directions.get(2137).size(); i++)
         {
-            checkingDir = Constants.Directions.get(Constants.Pieces.King).get(i);
+            checkingDir = Constants.Directions.get(2137).get(i);
             checkingPosition = position + checkingDir;
 
             while(checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE && IsCorrect(position, checkingDir))
@@ -87,7 +110,7 @@ public class Piece
                     }
                 }
 
-                if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) && PossibleMoves(checkingPosition).contains(position))
+                if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite && PossibleMoves(checkingPosition).contains(position))
                 {
                     positionChecking = checkingPosition;
                     break;
@@ -119,19 +142,23 @@ public class Piece
             {
                 if(i > 0)
                     if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
-                        moves.add(checkingPosition);
+                        if(!isUnderAttack(position, checkingPosition))
+                            moves.add(checkingPosition);
                     else
                         continue;
 
                 if(!Playing.ActivePieces.containsKey(checkingPosition))
-                    moves.add(checkingPosition);
+                    if(!isUnderAttack(position, checkingPosition))
+                        moves.add(checkingPosition);
             }
         }
 
         if(isWhite == false && row == 2 && !Playing.ActivePieces.containsKey(position + 8) && !Playing.ActivePieces.containsKey(position + 16))
-            moves.add(position + 16);
+            if(!isUnderAttack(position, position + 16))
+                moves.add(position + 16);
         else if(isWhite == true && row == 7 && !Playing.ActivePieces.containsKey(position - 8) && !Playing.ActivePieces.containsKey(position - 16))
-            moves.add(position -16);
+                if(!isUnderAttack(position, position - 16))
+                    moves.add(position - 16);
 
         return moves;
     }
@@ -155,7 +182,8 @@ public class Piece
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if(HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
                     {
-                        moves.add(checkingPosition);
+                        if(!isUnderAttack(position, checkingPosition))
+                            moves.add(checkingPosition);
                         continue;
                     }
                     else
@@ -163,7 +191,8 @@ public class Piece
                         continue;
                     }
 
-                moves.add(checkingPosition);
+                if(!isUnderAttack(position, checkingPosition))
+                    moves.add(checkingPosition);
             }
         }
 
@@ -188,7 +217,8 @@ public class Piece
                 if(Playing.ActivePieces.containsKey(checkingPosition))
                     if(HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
                     {
-                        moves.add(checkingPosition);
+                        if(!isUnderAttack(position, checkingPosition))
+                            moves.add(checkingPosition);
                         continue;
                     }
                     else
@@ -196,7 +226,8 @@ public class Piece
                         continue;
                     }
 
-                moves.add(checkingPosition);
+                if(!isUnderAttack(position, checkingPosition))
+                    moves.add(checkingPosition);
             }
         }
 
