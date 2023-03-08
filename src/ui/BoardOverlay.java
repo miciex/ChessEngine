@@ -18,6 +18,7 @@ import static utils.Constants.BoardInfo.BOARD_WIDTH;
 import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
+import static utils.Constants.Pieces.*;
 import static utils.HelpMethods.intToCharPiece;
 
 public class BoardOverlay extends UIElement{
@@ -178,13 +179,18 @@ public class BoardOverlay extends UIElement{
             fields[activeField].resetBools();
         else
         {
-            playing.addMove(new Move(fields[activeField].getPiece(), activeField, moveField, fields[moveField].getPiece(), moveField));
+            Move move = new Move(fields[activeField].getPiece(), activeField, moveField, fields[moveField].getPiece(), 0, false);
 
             if(Playing.ActivePieces.containsKey(moveField))
                 Playing.ActivePieces.remove(moveField);
 
+            if((playing.getBoard()[activeField] == Rook) || playing.getBoard()[activeField] == King){
+
+            }
             Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
             Playing.ActivePieces.remove(activeField);
+            move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1 ? false : true;
+            playing.addMove(move);
             playing.updateBoard(moveField, fields[activeField].getPiece());
             playing.updateBoard(activeField, 0);
             fields[moveField].setPiece(fields[activeField].getPiece());
