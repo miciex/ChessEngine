@@ -5,29 +5,67 @@ import GameStates.Playing;
 import utils.Constants.Pieces;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.Character.*;
 import static utils.Constants.Letters.ALPHABET;
+import static utils.Constants.Pieces.*;
 
 public class HelpMethods {
 
+    public static void checkPossibleCastles(int position){
+        switch(position) {
+            case 0: Playing.possibleCastles[0] = false; return;
+            case 7: Playing.possibleCastles[1] = false; return;
+            case 56: Playing.possibleCastles[2] = false; return;
+            case 63: Playing.possibleCastles[3] = false; return;
+        }
+
+        if(!Playing.whitesMove && position == 4)
+        {
+            Playing.possibleCastles[0] = false;
+            Playing.possibleCastles[1] = false;
+        }
+        else if(Playing.whitesMove && position == 59)
+        {
+            Playing.possibleCastles[2] = false;
+            Playing.possibleCastles[3] = false;
+        }
+    }
+
     public static String moveToChessNotation(Move move){
         String note = "";
-        if(move.movedPiece%8 != 2){
+        if(move.movedPiece == King && move.endField - move.startField == 2){
+            note = "O-O";
+        }
+        else if(move.movedPiece == King && move.endField - move.startField == -2){
+            note = "O-O-O";
+        }else if(move.movedPiece%8 != 2){
             note+= toUpperCase(HelpMethods.intToCharPiece(move.movedPiece));
+        }else if(move.movedPiece == Pawn){
+            for (Map.Entry<Integer, Integer> set :
+                    Playing.ActivePieces.entrySet()) {
+                if(set.getValue()!= Pawn && move.takenPiece==0) continue;
+                note += ALPHABET[move.startField%8];
+            }
         }
 
         if(move.takenPiece != 0){
-            note += fieldNumberToChessNotation(move.startField);
             note += "x";
+            note += fieldNumberToChessNotation(move.startField);
         }
             note+= fieldNumberToChessNotation(move.endField);
-
+        if(move.promotePiece!=0){
+            note += "=" + toUpperCase(HelpMethods.intToCharPiece(move.promotePiece));
+        }
+        if(move.gaveCheck){
+            note += "+";
+        }
         return note;
     }
 
     public static String fieldNumberToChessNotation(int fieldNumber){
-        String note = Character.toString(ALPHABET[fieldNumber%8]) + Integer.toString(8-fieldNumber/8);
+        String note = ALPHABET[fieldNumber%8] + Integer.toString(8-fieldNumber/8);
         return note;
     }
 

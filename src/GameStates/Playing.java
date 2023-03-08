@@ -21,6 +21,7 @@ public class Playing extends State implements StateMethods{
 
     private int[] board;
     private ArrayList<Move> moves;
+    public static boolean[] possibleCastles;
     public static boolean whitesMove = true;
     public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
     public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
@@ -34,6 +35,7 @@ public class Playing extends State implements StateMethods{
         super(game);
         board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
+        possibleCastles = new boolean[]{true, true, true, true};
         initClasses();
     }
 
@@ -42,6 +44,7 @@ public class Playing extends State implements StateMethods{
         moves = new ArrayList<>();
         boardOverlay.createFields();
         whitesMove = true;
+        possibleCastles = new boolean[]{true, true, true, true};
     }
 
     private void initClasses(){
