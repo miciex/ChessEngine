@@ -3,6 +3,7 @@ package utils;
 import GameStates.Playing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Piece
@@ -60,6 +61,52 @@ public class Piece
         return moves;
     }
 
+    public static ArrayList<Integer> addCastlingMoves(int position)
+    {
+        ArrayList<Integer> moves = new ArrayList<>();
+
+        if(position == 4 && Playing.possibleCastles[0] == true && isCastlingPossible(position, -1))
+            moves.add(0);
+        if(position == 4 && Playing.possibleCastles[1] == true && isCastlingPossible(position, 1))
+            moves.add(7);
+        if(position == 60 && Playing.possibleCastles[2] == true && isCastlingPossible(position, -1))
+            moves.add(56);
+        if(position == 60 && Playing.possibleCastles[3] == true && isCastlingPossible(position, 1))
+            moves.add(63);
+
+        return moves;
+    }
+
+    private static boolean isCastlingPossible(int position, int dir)
+    {
+        int row = (int)Math.ceil((double)(position + 1) / 8);
+        int checkingRow = row, checkingPosition = position + dir;
+        int checkingColumn = (checkingPosition) % 8;
+
+        while(checkingRow == row)
+        {
+            if(checkingColumn == 0 || checkingColumn == 7)
+            {
+                if(Playing.ActivePieces.get(checkingPosition) % 8 != Constants.Pieces.Rook || HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != Playing.whitesMove)
+                    return false;
+                else
+                    return true;
+            }
+
+            if(Playing.ActivePieces.containsKey(checkingPosition)) return false;
+
+            if(Arrays.asList(2,3,5,6).contains(checkingColumn))
+                if(isChecked(checkingPosition) != -1)
+                    return false;
+
+            checkingPosition += dir;
+            checkingColumn = checkingPosition % 8;
+            checkingRow = (int)Math.ceil((double)(checkingPosition + 1) / 8);
+        }
+
+        return true;
+    }
+
     public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves)
     {
         int movesSize = moves.size();
@@ -98,7 +145,7 @@ public class Piece
     {
         int positionChecking = -1;
 
-        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
+        boolean isWhite = Playing.whitesMove;
 
         int checkingDir, checkingPosition;
 

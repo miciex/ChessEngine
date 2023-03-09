@@ -19,6 +19,7 @@ import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Pieces.*;
+import static utils.HelpMethods.checkPossibleCastles;
 import static utils.HelpMethods.intToCharPiece;
 
 public class BoardOverlay extends UIElement{
@@ -160,6 +161,9 @@ public class BoardOverlay extends UIElement{
     private void showPossibleMoves(){
         moves = Piece.deleteImpossibleMoves(activeField, moves);
 
+        if(playing.getBoard()[activeField] % 8 == King)
+            moves.addAll(Piece.addCastlingMoves(activeField));
+
         for (int move : moves) {
             fields[move].isPossibleMove = true;
         }
@@ -184,9 +188,16 @@ public class BoardOverlay extends UIElement{
             if(Playing.ActivePieces.containsKey(moveField))
                 Playing.ActivePieces.remove(moveField);
 
-            if((playing.getBoard()[activeField] == Rook) || playing.getBoard()[activeField] == King){
-
+            if((playing.getBoard()[activeField] % 8 == Rook) || playing.getBoard()[activeField] % 8 == King)
+            {
+                checkPossibleCastles(activeField);
             }
+
+            if(playing.getBoard()[activeField] % 8 == King && playing.getBoard()[moveField] % 8 == Rook && HelpMethods.isWhite(playing.getBoard()[moveField]) == Playing.whitesMove)
+            {
+                //moves king and rook by 2 fields
+            }
+
             Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
             Playing.ActivePieces.remove(activeField);
             move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1 ? false : true;

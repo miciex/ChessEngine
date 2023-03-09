@@ -15,21 +15,12 @@ public class HelpMethods {
 
     public static void checkPossibleCastles(int position){
         switch(position) {
-            case 0: Playing.possibleCastles[0] = false; return;
-            case 7: Playing.possibleCastles[1] = false; return;
-            case 56: Playing.possibleCastles[2] = false; return;
-            case 63: Playing.possibleCastles[3] = false; return;
-        }
-
-        if(!Playing.whitesMove && position == 4)
-        {
-            Playing.possibleCastles[0] = false;
-            Playing.possibleCastles[1] = false;
-        }
-        else if(Playing.whitesMove && position == 59)
-        {
-            Playing.possibleCastles[2] = false;
-            Playing.possibleCastles[3] = false;
+            case 0: Playing.possibleCastles[0] = false; break;
+            case 7: Playing.possibleCastles[1] = false; break;
+            case 56: Playing.possibleCastles[2] = false; break;
+            case 63: Playing.possibleCastles[3] = false; break;
+            case 4: Playing.possibleCastles[0] = false; Playing.possibleCastles[1] = false; break;
+            case 60: Playing.possibleCastles[2] = false; Playing.possibleCastles[3] = false; break;
         }
     }
 
@@ -132,24 +123,6 @@ public class HelpMethods {
     }
 
     public static Character intToCharPiece(int p){
-        switch (p%8){
-            case 1:
-                return p<16?'K':'k';
-            case 2:
-                return p<16?'P':'p';
-            case 3:
-                return p<16?'R':'r';
-            case 4:
-                return p<16?'N':'n';
-            case 5:
-                return p<16?'B':'b';
-            case 6:
-                return p<16?'Q':'q';
-            default: return ' ';
-        }
-    }
-
-    public static Character intToPieceWithoutColor(int p){
         switch (p%8){
             case 1:
                 return p<16?'K':'k';
