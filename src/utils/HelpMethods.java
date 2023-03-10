@@ -44,7 +44,7 @@ public class HelpMethods {
 
         if (move.movedPiece%8 != Pawn && move.movedPiece%8 != King) {
             ArrayList<Integer> fromWhereCouldMove = Piece.canMoveToSquare(move.startField, move.endField, move.movedPiece, board);
-            if(fromWhereCouldMove.size()>0) {
+            if(fromWhereCouldMove.size()>1) {
                 boolean row = false;
                 boolean col = false;
                 for (int i : fromWhereCouldMove) {

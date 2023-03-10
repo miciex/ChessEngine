@@ -106,9 +106,6 @@ public class Playing extends State implements StateMethods{
 
     public void addMove(Move move){
         this.moves.add(move);
-        String note = moveToChessNotation(move, board);
-        System.out.println(note);
-        //System.out.println(chessNotationToMove(note, board, whitesMove));
     }
 
     public void updateBoard(int index, int piece){

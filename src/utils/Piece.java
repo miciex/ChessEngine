@@ -298,11 +298,15 @@ public class Piece {
             }
         else if (piece % 8 != King) {
             for (int i : Constants.Directions.get(piece % 8)) {
+                int pos = endPosition += i;
                 while (IsCorrect(endPosition, i)) {
-                    if (board[endPosition + 1] == piece)
-                        moveList.add(endPosition + i);
-                    if (board[endPosition + i] != 0)
+                    if (board[pos] == piece) {
+                        moveList.add(pos);
                         break;
+                    }
+                    if(board[pos] != 0)
+                        break;
+                    pos += i;
                 }
             }
         }
@@ -324,13 +328,14 @@ public class Piece {
                     pos += i;
                     if (board[pos] == 0)
                         continue;
-                    if (board[pos] == piece)
-                        moveList.add(pos);
-                    if ((board[pos] > 16) != (piece > 16)) {
+                    if (board[pos] == piece) {
                         moveList.add(pos);
                         break;
                     }
-                    if (board[pos] != 0)
+                    if ((board[pos] > 16) != (piece > 16)) {
+                        moveList.add(pos);
+                        break;
+                    }else if(board[pos] != 0)
                         break;
                 }
             }

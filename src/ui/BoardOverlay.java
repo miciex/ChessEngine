@@ -184,7 +184,7 @@ public class BoardOverlay extends UIElement{
         else
         {
             Move move = new Move(fields[activeField].getPiece(), activeField, moveField, fields[moveField].getPiece(), fields[moveField].getPiece()==0 ? -1 : moveField,0, false);
-
+            //HelpMethods.chessNotationToMove(moveToChessNotation(move, playing.getBoard()), playing.getBoard(), Playing.whitesMove);
             if(Playing.ActivePieces.containsKey(moveField) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField)) != Playing.whitesMove)
                 Playing.ActivePieces.remove(moveField);
 
