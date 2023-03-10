@@ -4,6 +4,7 @@ import GameStates.Move;
 import GameStates.Playing;
 import utils.Constants.Pieces;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public class HelpMethods {
         }
     }
 
-    public static String moveToChessNotation(Move move){
+    public static String moveToChessNotation(Move move, int[] board){
         String note = "";
         if(move.movedPiece == King && move.endField - move.startField == 2){
             note = "O-O";
@@ -41,9 +42,31 @@ public class HelpMethods {
             }
         }
 
+        if (move.movedPiece%8 != Pawn && move.movedPiece%8 != King) {
+            ArrayList<Integer> fromWhereCouldMove = Piece.canMoveToSquare(move.startField, move.endField, move.movedPiece, board);
+            if(fromWhereCouldMove.size()>0) {
+                boolean row = false;
+                boolean col = false;
+                for (int i : fromWhereCouldMove) {
+                    if (i % 8 == move.startField % 8) {
+                        note += i / 8;
+                        row = true;
+                    }else if(i/8 == move.startField/8){
+                        note += ALPHABET[i%8];
+                    }
+                }
+                if (!row && col == true) {
+                    note += ALPHABET[move.startField % 8];
+                }
+            }
+        }
+
         if(move.takenPiece != 0){
+            if(move.movedPiece%8 == Pawn){
+                note+= ALPHABET[move.startField%8];
+            }
             note += "x";
-            note += fieldNumberToChessNotation(move.startField);
+
         }
             note+= fieldNumberToChessNotation(move.endField);
         if(move.promotePiece!=0){
@@ -55,9 +78,87 @@ public class HelpMethods {
         return note;
     }
 
+    public static Move chessNotationToMove(String notation, int[] board, boolean whitesMove){
+        char[] notationArr = notation.toCharArray();
+        Move move = new Move();
+        if(!notation.contains("=") && containsUpperCaseLetter(notation)){
+            move.movedPiece = CharPieceToInt2(notationArr[0]) + (whitesMove ? White : Black);
+
+            if(notation.contains("x")){
+                move.endField = getLetterIndexInAlphabet(notationArr[notation.indexOf('x') + 1])  + (8-Character.getNumericValue(notationArr[notation.indexOf('x')+2])) * 8;
+                move.takenPieceField = move.endField;
+                move.takenPiece = board[move.takenPieceField];
+            }
+            else{
+                move.endField = getLetterIndexInAlphabet(notationArr[1])  + (8-Character.getNumericValue(notationArr[2])) * 8;
+                //move.startField = whitesMove? move.endField -8 : move.endField + 8;
+            }
+
+            ArrayList<Integer> moves = Piece.canMoveToSquare(move.endField, move.movedPiece, board);
+
+            if(moves.size()>1){
+                if(isNumeric(Character.toString(notationArr[2]))){
+                    move.startField = getLetterIndexInAlphabet(notationArr[1]) + (8-Character.getNumericValue(notationArr[2]))*8;
+                }else
+                    for(int i : moves){
+                        if(isNumeric(Character.toString(notationArr[1])) &&8-i/8 == Character.getNumericValue(notationArr[1]) || !isNumeric(Character.toString(notationArr[1])) && i%8 == getLetterIndexInAlphabet(notationArr[1])){
+                            move.startField = i;
+                            break;
+                        }
+                    }}else
+                move.startField = moves.get(0);
+        }else{
+            move.movedPiece = Pawn + (whitesMove ? White : Black);
+            if(notation.contains("x")){
+                move.endField = getLetterIndexInAlphabet(notationArr[notation.indexOf('x') + 1])  + (8-Character.getNumericValue(notationArr[notation.indexOf('x')+2])) * 8;
+                move.startField = ((whitesMove? move.endField +8 : move.endField - 8)/8)*8 + getLetterIndexInAlphabet(notationArr[notation.indexOf('x') - 1]);
+                move.takenPiece = board[move.endField]!=0 ? board[move.endField] : Pawn;
+                move.takenPieceField = board[move.endField]!=0 ? move.endField : (move.startField/8) * 8 + getLetterIndexInAlphabet(notationArr[0]);
+            }else{
+                int col = getLetterIndexInAlphabet(notationArr[0]);
+                move.endField = col  + (8-Character.getNumericValue(notationArr[1])) * 8;
+                for(int i = 0; i<8; i++){
+                    if(board[i*8 + col]  == (Pawn + (whitesMove ? White : Black))) {
+                        move.startField = i*8 + col;
+                    }
+                }
+                //move.startField = whitesMove? move.endField -8 : move.endField + 8;
+            }
+            if(notation.contains("=")){
+                move.promotePiece = CharPieceToInt2(notationArr[notation.indexOf('=')+1]) + (whitesMove?White:Black);
+            }
+        }
+        //move.movedPiece += ;
+        move.gaveCheck = notation.contains("+") ? true : false;
+        return move;
+    }
+
+    public static boolean isNumeric(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch(NumberFormatException e){
+            return false;
+        }
+    }
+
+    public static boolean containsUpperCaseLetter(String str){
+        for(char i : str.toCharArray()){
+            if(isUpperCase(i)) return true;
+        }
+        return false;
+    }
+
     public static String fieldNumberToChessNotation(int fieldNumber){
         String note = ALPHABET[fieldNumber%8] + Integer.toString(8-fieldNumber/8);
         return note;
+    }
+
+    public static int getLetterIndexInAlphabet(char letter){
+        for(int i = 0; i<ALPHABET.length; i++){
+            if(Character.toLowerCase(letter) == ALPHABET[i]) return i;
+        }
+        return -1;
     }
 
     public static int[] FenToIntArray(String fen, int arrayLength){
@@ -144,16 +245,14 @@ public class HelpMethods {
         return (isUpperCase(p)?Pieces.White:Pieces.Black);
     }
 
-    public static boolean isWhite(int p)
-    {
+    public static boolean isWhite(int p) {
         if(p != 0)
             return p<16 ? true : false;
         else
             return false;
     }
 
-    public static int findKing(boolean white)
-    {
+    public static int findKing(boolean white) {
         int position = -1;
 
         for(int i : Playing.ActivePieces.keySet())

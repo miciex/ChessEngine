@@ -13,9 +13,8 @@ import java.util.HashMap;
 import static utils.Constants.Boards.classicBoard;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Game_Info.*;
-import static utils.HelpMethods.FenToIntArray;
-import static utils.HelpMethods.moveToChessNotation;
 import static utils.Constants.BoardInfo.*;
+import static utils.HelpMethods.*;
 
 public class Playing extends State implements StateMethods{
 
@@ -107,7 +106,9 @@ public class Playing extends State implements StateMethods{
 
     public void addMove(Move move){
         this.moves.add(move);
-        System.out.println(moveToChessNotation(move));
+        String note = moveToChessNotation(move, board);
+        System.out.println(note);
+        //System.out.println(chessNotationToMove(note, board, whitesMove));
     }
 
     public void updateBoard(int index, int piece){

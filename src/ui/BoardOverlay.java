@@ -19,8 +19,7 @@ import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Pieces.*;
-import static utils.HelpMethods.checkPossibleCastles;
-import static utils.HelpMethods.intToCharPiece;
+import static utils.HelpMethods.*;
 
 public class BoardOverlay extends UIElement{
 
@@ -183,7 +182,7 @@ public class BoardOverlay extends UIElement{
             fields[activeField].resetBools();
         else
         {
-            Move move = new Move(fields[activeField].getPiece(), activeField, moveField, fields[moveField].getPiece(), 0, false);
+            Move move = new Move(fields[activeField].getPiece(), activeField, moveField, fields[moveField].getPiece(), fields[moveField].getPiece()==0 ? -1 : moveField,0, false);
 
             if(Playing.ActivePieces.containsKey(moveField))
                 Playing.ActivePieces.remove(moveField);

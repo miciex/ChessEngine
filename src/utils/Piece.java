@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static utils.Constants.Pieces.*;
+
 public class Piece
 {
     public static ArrayList<Integer> PossibleMoves(int position)
@@ -14,7 +16,7 @@ public class Piece
         {
             case Constants.Pieces.Pawn: return PossiblePawnMoves(position);
             case Constants.Pieces.King: return PossibleKingMoves(position);
-            case Constants.Pieces.Knight: return PossibleKnightMoves(position);
+            case Knight: return PossibleKnightMoves(position);
         }
 
         int piece = Playing.ActivePieces.get(position) % 8;
@@ -158,7 +160,7 @@ public class Piece
             {
                 if(i > 7)
                 {
-                    if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite && Playing.ActivePieces.get(checkingPosition) % 8 == Constants.Pieces.Knight)
+                    if(Playing.ActivePieces.containsKey(checkingPosition) && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite && Playing.ActivePieces.get(checkingPosition) % 8 == Knight)
                     {
                         positionChecking = checkingPosition;
                         break;
@@ -260,9 +262,9 @@ public class Piece
 
         int checkingPosition, checkingDir;
 
-        for(int i = 0; i < Constants.Directions.get(Constants.Pieces.Knight).size(); i++)
+        for(int i = 0; i < Constants.Directions.get(Knight).size(); i++)
         {
-            checkingDir = Constants.Directions.get(Constants.Pieces.Knight).get(i);
+            checkingDir = Constants.Directions.get(Knight).get(i);
             checkingPosition = position + checkingDir;
 
             if(IsCorrect(position, checkingDir))
@@ -283,6 +285,49 @@ public class Piece
         }
 
         return moves;
+    }
+
+    public static ArrayList<Integer> canMoveToSquare(int startPosition, int endPosition, int piece, int[] board){
+        ArrayList<Integer> moveList = new ArrayList<>();
+        if(piece%8 == Knight)
+        for(int i : Constants.Directions.get(piece%8)){
+            if(IsCorrect(endPosition, i) && board[i + endPosition]==piece && startPosition!=i + endPosition){
+                moveList.add(endPosition + i);
+            }
+        }else if(piece%8 != King){
+            for(int i : Constants.Directions.get(piece%8)){
+                while(IsCorrect(endPosition, i)){
+                    if(board[endPosition + 1] == piece)  moveList.add(endPosition + i);
+                    if(board[endPosition + i] != 0) break;
+                }
+            }
+        }
+        return  moveList;
+    }
+
+    public static ArrayList<Integer> canMoveToSquare(int startPosition, int piece, int[] board){
+        ArrayList<Integer> moveList = new ArrayList<>();
+        if(piece%8 == Knight)
+            for(int i : Constants.Directions.get(piece%8)){
+                if(IsCorrect(startPosition, i) && board[i + startPosition]==piece ){
+                    moveList.add(startPosition + i);
+                }
+            }else if(piece%8 != King){
+            for(int i : Constants.Directions.get(piece%8)){
+                int pos = startPosition;
+                while(IsCorrect(pos, i)){
+                    pos += i;
+                    if(board[pos]==0) continue;
+                    if(board[pos] == piece)  moveList.add(pos);
+                    if((board[pos] > 16) != (piece > 16)){
+                        moveList.add(pos);
+                        break;
+                    }
+                    if(board[pos] != 0) break;
+                }
+            }
+        }
+        return  moveList;
     }
 
     private static boolean IsCorrect(int position, int checkingDir)
