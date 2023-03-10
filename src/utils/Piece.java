@@ -1,10 +1,14 @@
 package utils;
 
+import GameStates.Move;
 import GameStates.Playing;
+import ui.BoardOverlay;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+
+import static utils.Constants.Pieces.*;
 
 public class Piece
 {
@@ -13,7 +17,7 @@ public class Piece
         switch(Playing.ActivePieces.get(position)%8)
         {
             case Constants.Pieces.Pawn: return PossiblePawnMoves(position);
-            case Constants.Pieces.King: return PossibleKingMoves(position);
+            case King: return PossibleKingMoves(position);
             case Constants.Pieces.Knight: return PossibleKnightMoves(position);
         }
 
@@ -215,6 +219,26 @@ public class Piece
         else if(isWhite == true && row == 7 && !Playing.ActivePieces.containsKey(position - 8) && !Playing.ActivePieces.containsKey(position - 16))
                     moves.add(position - 16);
 
+
+
+        if(Playing.moves.size() > 0)
+        {
+            Move lastMove = Playing.moves.get(Playing.moves.size() - 1);
+
+            if (isWhite == true && row == 4 && lastMove.movedPiece % 8 == Pawn && Math.abs(lastMove.endField - lastMove.startField) == 16) {
+                if (lastMove.endField == position + 1 && !Playing.ActivePieces.containsKey(position - 7))
+                    moves.add(position - 7);
+                else if (lastMove.endField == position - 1 && !Playing.ActivePieces.containsKey(position - 9))
+                    moves.add(position - 9);
+            }
+            if (isWhite == false && row == 5 && lastMove.movedPiece % 8 == Pawn && Math.abs(lastMove.endField - lastMove.startField) == 16) {
+                if (lastMove.endField == position + 1 && !Playing.ActivePieces.containsKey(position + 9))
+                    moves.add(position + 9);
+                else if (lastMove.endField == position - 1 && !Playing.ActivePieces.containsKey(position + 7))
+                    moves.add(position + 7);
+            }
+        }
+
         return moves;
     }
 
@@ -226,9 +250,9 @@ public class Piece
 
         int checkingPosition, checkingDir;
 
-        for(int i = 0; i < Constants.Directions.get(Constants.Pieces.King).size(); i++)
+        for(int i = 0; i < Constants.Directions.get(King).size(); i++)
         {
-            checkingDir = Constants.Directions.get(Constants.Pieces.King).get(i);
+            checkingDir = Constants.Directions.get(King).get(i);
 
             checkingPosition = position + checkingDir;
 

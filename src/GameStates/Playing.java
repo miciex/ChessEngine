@@ -20,7 +20,7 @@ import static utils.Constants.BoardInfo.*;
 public class Playing extends State implements StateMethods{
 
     private int[] board;
-    private ArrayList<Move> moves;
+    public static ArrayList<Move> moves;
     public static boolean[] possibleCastles;
     public static boolean whitesMove = true;
     public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
