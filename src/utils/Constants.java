@@ -51,7 +51,6 @@ public class Constants {
 
     public static class Boards{
         public final static String classicBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-        public final static String promotionTesting = "rnb2bnr/pppPpk2/5ppp/8/8/7P/PPP2Pq1/RNBQKBNR";
     }
 
     public static class BoardInfo{

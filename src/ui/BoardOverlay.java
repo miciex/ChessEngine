@@ -231,13 +231,17 @@ public class BoardOverlay extends UIElement{
 
                 if(moveRow == 1 || moveRow == 8)
                 {
-                    int promotedFigure = Queen + ((Playing.whitesMove) ? Black : White);
+                    int promotedPiece = Queen + ((Playing.whitesMove) ? Black : White);
 
-                    playing.updateBoard(moveField, promotedFigure);
+                    playing.updateBoard(moveField, promotedPiece);
                     Playing.ActivePieces.remove(moveField);
-                    Playing.ActivePieces.put(moveField, promotedFigure);
-                    fields[moveField].setPiece(promotedFigure);
+                    Playing.ActivePieces.put(moveField, promotedPiece);
+                    fields[moveField].setPiece(promotedPiece);
+
+                    move.promotePiece = promotedPiece;
                 }
+
+                move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1 ? false : true;
             }
         }
     }
