@@ -191,7 +191,7 @@ public class BoardOverlay extends UIElement{
 
             if(Playing.ActivePieces.get(activeField) % 8 == Pawn)
             {
-                if(!Playing.ActivePieces.containsKey(moveField) && (moveField - activeField == - 7 || moveField - activeField == - 9) && Playing.whitesMove)
+                if(!Playing.ActivePieces.containsKey(moveField) && (moveField - activeField == - 7 || moveField - activeField == - 9) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField + 8)) != Playing.whitesMove && Playing.whitesMove)
                 {
                     finalField = moveField + 8;
                     playing.updateBoard(finalField, 0);
@@ -199,7 +199,7 @@ public class BoardOverlay extends UIElement{
                     Playing.ActivePieces.remove(finalField);
                 }
 
-                if(!Playing.ActivePieces.containsKey(moveField) && (moveField - activeField == 7 || moveField - activeField == 9) && !Playing.whitesMove)
+                if(!Playing.ActivePieces.containsKey(moveField) && (moveField - activeField == 7 || moveField - activeField == 9) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField - 8)) != Playing.whitesMove && !Playing.whitesMove)
                 {
                     finalField = moveField - 8;
                     playing.updateBoard(finalField, 0);
@@ -223,6 +223,21 @@ public class BoardOverlay extends UIElement{
             else
             {
                 move.gaveCheck = executeMove(move, activeField, moveField, false).gaveCheck;
+            }
+
+            if(Playing.ActivePieces.get(moveField) % 8 == Pawn)
+            {
+                int moveRow = (int)Math.ceil((double)(moveField + 1) / 8);
+
+                if(moveRow == 1 || moveRow == 8)
+                {
+                    int promotedFigure = Queen + ((Playing.whitesMove) ? Black : White);
+
+                    playing.updateBoard(moveField, promotedFigure);
+                    Playing.ActivePieces.remove(moveField);
+                    Playing.ActivePieces.put(moveField, promotedFigure);
+                    fields[moveField].setPiece(promotedFigure);
+                }
             }
         }
     }
