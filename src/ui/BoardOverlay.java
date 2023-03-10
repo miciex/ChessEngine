@@ -185,7 +185,7 @@ public class BoardOverlay extends UIElement{
         {
             Move move = new Move(fields[activeField].getPiece(), activeField, moveField, fields[moveField].getPiece(), 0, false);
 
-            if(Playing.ActivePieces.containsKey(moveField))
+            if(Playing.ActivePieces.containsKey(moveField) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField)) != Playing.whitesMove)
                 Playing.ActivePieces.remove(moveField);
 
             if((playing.getBoard()[activeField] % 8 == Rook) || playing.getBoard()[activeField] % 8 == King)
@@ -195,19 +195,36 @@ public class BoardOverlay extends UIElement{
 
             if(playing.getBoard()[activeField] % 8 == King && playing.getBoard()[moveField] % 8 == Rook && HelpMethods.isWhite(playing.getBoard()[moveField]) == Playing.whitesMove)
             {
-                //moves king and rook by 2 fields
-            }
+                int dir = (moveField % 8 > move.startField % 8) ? move.startField + 2 : move.startField - 2;
 
-            Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
-            Playing.ActivePieces.remove(activeField);
-            move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1 ? false : true;
-            playing.addMove(move);
-            playing.updateBoard(moveField, fields[activeField].getPiece());
-            playing.updateBoard(activeField, 0);
-            fields[moveField].setPiece(fields[activeField].getPiece());
-            fields[activeField].setPiece(0);
-            Playing.whitesMove = (Playing.whitesMove == true) ? false : true;
+                executeMove(move, activeField, dir, false);
+                executeMove(move, moveField, ((moveField % 8 > move.startField % 8) ? dir - 1 : dir + 1), true);
+
+                System.out.println(Playing.ActivePieces);
+            }
+            else
+            {
+                move.gaveCheck = executeMove(move, activeField, moveField, false).gaveCheck;
+            }
         }
+    }
+
+    private Move executeMove(Move move, int activeField, int moveField, boolean castling)
+    {
+        Playing.ActivePieces.put(moveField, Playing.ActivePieces.get(activeField));
+        Playing.ActivePieces.remove(activeField);
+        playing.updateBoard(moveField, fields[activeField].getPiece());
+        playing.updateBoard(activeField, 0);
+        fields[moveField].setPiece(fields[activeField].getPiece());
+        fields[activeField].setPiece(0);
+        //move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1 ? false : true;
+        if(!castling)
+        {
+            Playing.whitesMove = (Playing.whitesMove == true) ? false : true;
+            playing.addMove(move);
+        }
+
+        return move;
     }
 
     public void mouseMoved(MouseEvent e) {
