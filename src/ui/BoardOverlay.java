@@ -185,12 +185,9 @@ public class BoardOverlay extends UIElement{
         {
             Move move = new Move(fields[activeField].getPiece(), activeField, moveField, fields[moveField].getPiece(), fields[moveField].getPiece()==0 ? -1 : moveField,0, false);
 
-            if(Playing.ActivePieces.containsKey(moveField) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField)) != Playing.whitesMove)
-                Playing.ActivePieces.remove(moveField);
-
-            if(Playing.ActivePieces.get(activeField) % 8 == Pawn)
+            if(Playing.ActivePieces.get(activeField) % 8 == Pawn && !Playing.ActivePieces.containsKey(moveField))
             {
-                if(!Playing.ActivePieces.containsKey(moveField) && (moveField - activeField == - 7 || moveField - activeField == - 9) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField + 8)) != Playing.whitesMove && Playing.whitesMove)
+                if((moveField - activeField == - 7 || moveField - activeField == - 9) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField + 8)) != Playing.whitesMove && Playing.whitesMove)
                 {
                     finalField = moveField + 8;
                     playing.updateBoard(finalField, 0);
@@ -198,7 +195,7 @@ public class BoardOverlay extends UIElement{
                     Playing.ActivePieces.remove(finalField);
                 }
 
-                if(!Playing.ActivePieces.containsKey(moveField) && (moveField - activeField == 7 || moveField - activeField == 9) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField - 8)) != Playing.whitesMove && !Playing.whitesMove)
+                if((moveField - activeField == 7 || moveField - activeField == 9) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField - 8)) != Playing.whitesMove && !Playing.whitesMove)
                 {
                     finalField = moveField - 8;
                     playing.updateBoard(finalField, 0);
@@ -206,6 +203,9 @@ public class BoardOverlay extends UIElement{
                     Playing.ActivePieces.remove(finalField);
                 }
             }
+
+            if(Playing.ActivePieces.containsKey(moveField) && HelpMethods.isWhite(Playing.ActivePieces.get(moveField)) != Playing.whitesMove)
+                Playing.ActivePieces.remove(moveField);
 
             if((playing.getBoard()[activeField] % 8 == Rook) || playing.getBoard()[activeField] % 8 == King)
             {
