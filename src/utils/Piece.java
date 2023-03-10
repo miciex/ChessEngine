@@ -299,7 +299,7 @@ public class Piece {
         else if (piece % 8 != King) {
             for (int i : Constants.Directions.get(piece % 8)) {
                 int pos = endPosition += i;
-                while (IsCorrect(endPosition, i)) {
+                while (IsCorrect(pos-i, i)) {
                     if (board[pos] == piece) {
                         moveList.add(pos);
                         break;
@@ -333,7 +333,6 @@ public class Piece {
                         break;
                     }
                     if ((board[pos] > 16) != (piece > 16)) {
-                        moveList.add(pos);
                         break;
                     }else if(board[pos] != 0)
                         break;

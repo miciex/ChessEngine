@@ -175,6 +175,10 @@ public class BoardOverlay extends UIElement {
         int moveField = col + row * BOARD_WIDTH;
         int finalField = 0;
 
+        int[] copiedArray = new int[playing.getBoard().length];
+
+        System.arraycopy(playing.getBoard(), 0, copiedArray, 0, playing.getBoard().length);
+
         if (activeField == moveField)
             fields[activeField].resetBools();
         else {
@@ -189,6 +193,9 @@ public class BoardOverlay extends UIElement {
                     playing.updateBoard(finalField, 0);
                     fields[finalField].setPiece(0);
                     Playing.ActivePieces.remove(finalField);
+                    move.takenPiece = Pawn;
+                    move.takenPieceField = finalField;
+
                 }
 
                 if ((moveField - activeField == 7 || moveField - activeField == 9)
@@ -198,7 +205,11 @@ public class BoardOverlay extends UIElement {
                     playing.updateBoard(finalField, 0);
                     fields[finalField].setPiece(0);
                     Playing.ActivePieces.remove(finalField);
+                    move.takenPiece = Pawn;
+                    move.takenPieceField = finalField;
                 }
+
+                //move.gaveCheck = Piece.isChecked(findKing(Playing.whitesMove)) == -1 ? false : true;
             }
 
             if (Playing.ActivePieces.containsKey(moveField)
@@ -235,6 +246,8 @@ public class BoardOverlay extends UIElement {
 
                 move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1 ? false : true;
             }
+            move.gaveCheck = Piece.isChecked(HelpMethods.findKing(Playing.whitesMove)) == -1 ? false : true;
+            HelpMethods.chessNotationToMove(HelpMethods.moveToChessNotation(move, playing.getBoard()), copiedArray, !Playing.whitesMove);
         }
     }
 
