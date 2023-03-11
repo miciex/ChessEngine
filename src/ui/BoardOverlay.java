@@ -270,19 +270,22 @@ public class BoardOverlay extends UIElement {
         final int[] promotedPiece = {-1};
 
         JFrame frame = new JFrame("Piece Promotion");
-        frame.setSize(400,400);
+        frame.setSize(80,320);
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setUndecorated(true);
+        frame.setLocationRelativeTo(null);
         frame.setLayout(null);
         frame.setVisible(true);
         frame.requestFocus();
 
-        int y = 100;
+        int y = 0;
 
         for(int i = 0; i < piecePromotionButtons.length; i++)
         {
-            piecePromotionButtons[i] = new JButton();
-            piecePromotionButtons[i].setText(Constants.PromotionPieces[i]);
-            piecePromotionButtons[i].setBounds(100, y, 200, 50);
+            piecePromotionButtons[i] = new JButton(new ImageIcon(getChessPiecesImgs().get(Constants.PromotionPiecesInts[i] + 8).getScaledInstance(80, 80, Image.SCALE_DEFAULT)));
+            piecePromotionButtons[i].setBounds(0, y, 80, 80);
+            piecePromotionButtons[i].setBorder(BorderFactory.createEmptyBorder());
+            piecePromotionButtons[i].setContentAreaFilled(false);
             piecePromotionButtons[i].setVisible(true);
 
             int finalI = i;
@@ -294,7 +297,7 @@ public class BoardOverlay extends UIElement {
             });
 
             frame.add(piecePromotionButtons[i]);
-            y += 50;
+            y += 80;
         }
 
         return promotedPiece[0];

@@ -28,7 +28,6 @@ public class Playing extends State implements StateMethods{
 
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
-    ButtonOverlay additionButtonOverlay;
 
     public static HashMap<Integer, Integer> ActivePieces = new HashMap<>();
 
