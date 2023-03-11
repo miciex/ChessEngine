@@ -230,7 +230,7 @@ public class BoardOverlay extends UIElement {
                 move.gaveCheck = executeMove(move, activeField, moveField, false).gaveCheck;
             }
 
-            if (Playing.ActivePieces.get(moveField) % 8 == Pawn) {
+            if (Playing.ActivePieces.containsKey(moveField) && Playing.ActivePieces.get(moveField) % 8 == Pawn) {
                 int moveRow = (int) Math.ceil((double) (moveField + 1) / 8);
 
                 if (moveRow == 1 || moveRow == 8) {

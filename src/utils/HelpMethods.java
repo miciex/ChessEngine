@@ -93,7 +93,6 @@ public class HelpMethods {
             }
             else{
                 move.endField = getLetterIndexInAlphabet(notationArr[1])  + (8-Character.getNumericValue(notationArr[2])) * 8;
-                //move.startField = whitesMove? move.endField -8 : move.endField + 8;
             }
 
             ArrayList<Integer> moves = new ArrayList<>();
@@ -128,13 +127,13 @@ public class HelpMethods {
                         move.startField = i*8 + col;
                     }
                 }
-                //move.startField = whitesMove? move.endField -8 : move.endField + 8;
+
             }
             if(notation.contains("=")){
                 move.promotePiece = CharPieceToInt2(notationArr[notation.indexOf('=')+1]) + (whitesMove?White:Black);
             }
         }
-        //move.movedPiece += ;
+
         move.gaveCheck = notation.contains("+") ? true : false;
         return move;
     }
