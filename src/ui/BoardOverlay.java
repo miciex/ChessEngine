@@ -271,6 +271,7 @@ public class BoardOverlay extends UIElement {
 
         JFrame frame = new JFrame("Piece Promotion");
         frame.setSize(80,320);
+        frame.setSize(512,550);
         frame.setDefaultCloseOperation(0);
         frame.setUndecorated(true);
         frame.setLocationRelativeTo(null);

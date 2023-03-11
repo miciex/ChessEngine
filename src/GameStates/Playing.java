@@ -40,7 +40,7 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
-        board = FenToIntArray(promotionTestingBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         boardOverlay.createFields();
         whitesMove = true;
