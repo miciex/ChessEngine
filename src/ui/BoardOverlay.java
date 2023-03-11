@@ -271,12 +271,24 @@ public class BoardOverlay extends UIElement {
 
         JFrame frame = new JFrame("Piece Promotion");
         frame.setSize(80,320);
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setDefaultCloseOperation(0);
         frame.setUndecorated(true);
         frame.setLocationRelativeTo(null);
         frame.setLayout(null);
         frame.setVisible(true);
         frame.requestFocus();
+
+        frame.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                frame.requestFocus();
+            }
+        });
 
         int y = 0;
 
