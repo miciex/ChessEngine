@@ -32,6 +32,7 @@ public class BoardOverlay extends UIElement {
     private ArrayList<Integer> moves = new ArrayList<>();
     private HashMap<Integer, BufferedImage> chessPiecesImgs;
     private ResetButton rb;
+    public static int promotedPiece = -1;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
@@ -234,7 +235,7 @@ public class BoardOverlay extends UIElement {
                 int moveRow = (int) Math.ceil((double) (moveField + 1) / 8);
 
                 if (moveRow == 1 || moveRow == 8) {
-                    int promotedPiece = Queen + ((Playing.whitesMove) ? Black : White);
+                    promotedPiece += ((Playing.whitesMove) ? Black : White);
 
                     playing.updateBoard(moveField, promotedPiece);
                     Playing.ActivePieces.remove(moveField);
