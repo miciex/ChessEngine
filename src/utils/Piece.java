@@ -332,9 +332,7 @@ public class Piece {
                         moveList.add(pos);
                         break;
                     }
-                    if ((board[pos] > 16) != (piece > 16)) {
-                        break;
-                    }else if(board[pos] != 0)
+                    if(board[pos] != 0)
                         break;
                 }
             }

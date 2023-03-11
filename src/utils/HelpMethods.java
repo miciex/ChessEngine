@@ -39,6 +39,7 @@ public class HelpMethods {
                     Playing.ActivePieces.entrySet()) {
                 if(set.getValue()!= Pawn && move.takenPiece==0) continue;
                 note += ALPHABET[move.startField%8];
+                break;
             }
         }
 
@@ -53,6 +54,7 @@ public class HelpMethods {
                         row = true;
                     }else if(i/8 == move.startField/8){
                         note += ALPHABET[i%8];
+                        break;
                     }
                 }
                 if (!row && col == true) {
@@ -94,8 +96,12 @@ public class HelpMethods {
                 //move.startField = whitesMove? move.endField -8 : move.endField + 8;
             }
 
-            ArrayList<Integer> moves = Piece.canMoveToSquare(move.endField, move.movedPiece, board);
-
+            ArrayList<Integer> moves = new ArrayList<>();
+            if(move.movedPiece%8 == King){
+                move.startField = findKing(whitesMove);
+            }else{
+                moves = Piece.canMoveToSquare(move.endField, move.movedPiece, board);
+            }
             if(moves.size()>1){
                 if(isNumeric(Character.toString(notationArr[2]))){
                     move.startField = getLetterIndexInAlphabet(notationArr[1]) + (8-Character.getNumericValue(notationArr[2]))*8;
@@ -105,7 +111,7 @@ public class HelpMethods {
                             move.startField = i;
                             break;
                         }
-                    }}else
+                    }}else if(moves.size() == 1)
                 move.startField = moves.get(0);
         }else{
             move.movedPiece = Pawn + (whitesMove ? White : Black);

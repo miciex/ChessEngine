@@ -247,7 +247,7 @@ public class BoardOverlay extends UIElement {
                 move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1 ? false : true;
             }
             move.gaveCheck = Piece.isChecked(HelpMethods.findKing(Playing.whitesMove)) == -1 ? false : true;
-            HelpMethods.chessNotationToMove(HelpMethods.moveToChessNotation(move, playing.getBoard()), copiedArray, !Playing.whitesMove);
+            HelpMethods.chessNotationToMove(HelpMethods.moveToChessNotation(move, copiedArray), copiedArray, !Playing.whitesMove);
         }
     }
 
