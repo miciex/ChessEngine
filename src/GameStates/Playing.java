@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static utils.Constants.Boards.classicBoard;
+import static utils.Constants.Boards.promotionTestingBoard;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Game_Info.*;
 import static utils.Constants.BoardInfo.*;
@@ -40,7 +41,7 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
-        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(promotionTestingBoard, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         boardOverlay.createFields();
         whitesMove = true;

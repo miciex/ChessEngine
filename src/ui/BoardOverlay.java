@@ -2,15 +2,14 @@ package ui;
 
 import GameStates.Move;
 import GameStates.Playing;
-import utils.Constants;
-import utils.HelpMethods;
-import utils.LoadSave;
-import utils.Piece;
+import utils.*;
 
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -32,7 +31,8 @@ public class BoardOverlay extends UIElement {
     private ArrayList<Integer> moves = new ArrayList<>();
     private HashMap<Integer, BufferedImage> chessPiecesImgs;
     private ResetButton rb;
-    public static int promotedPiece = -1;
+    private int promotionPiece = -1;
+    private JButton[] piecePromotionButtons = new JButton[4];
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
@@ -84,7 +84,7 @@ public class BoardOverlay extends UIElement {
         if (activeField >= 0)
             newField = col + row * BOARD_WIDTH;
 
-        if (activeField != newField && newField >= 0 && canMoveHere(newField)) {
+        if (activeField != newField && newField >= 0 && canMoveHere(newField) && !HelpMethods.isPromotionNeeded()) {
             movePiece(col, row);
             fields[activeField].setMousePressed(false);
             activeField = -1;
@@ -128,7 +128,7 @@ public class BoardOverlay extends UIElement {
         if (row < 0 && col < 0 || row >= 8 && col >= 8)
             fields[activeField].setMousePressed(false);
 
-        if (col + row * BOARD_WIDTH != activeField && canMoveHere(col + row * BOARD_WIDTH) && newField < 0) {
+        if (col + row * BOARD_WIDTH != activeField && canMoveHere(col + row * BOARD_WIDTH) && newField < 0 && !HelpMethods.isPromotionNeeded()) {
             movePiece(col, row);
             resetActivePieces();
             return;
@@ -155,13 +155,16 @@ public class BoardOverlay extends UIElement {
     }
 
     private void showPossibleMoves() {
-        moves = Piece.deleteImpossibleMoves(activeField, moves);
+        if(!HelpMethods.isPromotionNeeded())
+        {
+            moves = Piece.deleteImpossibleMoves(activeField, moves);
 
-        if (playing.getBoard()[activeField] % 8 == King)
-            moves.addAll(Piece.addCastlingMoves(activeField));
+            if (playing.getBoard()[activeField] % 8 == King)
+                moves.addAll(Piece.addCastlingMoves(activeField));
 
-        for (int move : moves) {
-            fields[move].isPossibleMove = true;
+            for (int move : moves) {
+                fields[move].isPossibleMove = true;
+            }
         }
     }
 
@@ -235,14 +238,8 @@ public class BoardOverlay extends UIElement {
                 int moveRow = (int) Math.ceil((double) (moveField + 1) / 8);
 
                 if (moveRow == 1 || moveRow == 8) {
-                    promotedPiece += ((Playing.whitesMove) ? Black : White);
 
-                    playing.updateBoard(moveField, promotedPiece);
-                    Playing.ActivePieces.remove(moveField);
-                    Playing.ActivePieces.put(moveField, promotedPiece);
-                    fields[moveField].setPiece(promotedPiece);
-
-                    move.promotePiece = promotedPiece;
+                    move.promotePiece = GetPromotionPiece(moveField);
                 }
 
                 move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove)) == -1 ? false : true;
@@ -266,6 +263,51 @@ public class BoardOverlay extends UIElement {
         }
 
         return move;
+    }
+
+    private int GetPromotionPiece(int moveField)
+    {
+        final int[] promotedPiece = {-1};
+
+        JFrame frame = new JFrame("Piece Promotion");
+        frame.setSize(400,400);
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLayout(null);
+        frame.setVisible(true);
+        frame.requestFocus();
+
+        int y = 100;
+
+        for(int i = 0; i < piecePromotionButtons.length; i++)
+        {
+            piecePromotionButtons[i] = new JButton();
+            piecePromotionButtons[i].setText(Constants.PromotionPieces[i]);
+            piecePromotionButtons[i].setBounds(100, y, 200, 50);
+            piecePromotionButtons[i].setVisible(true);
+
+            int finalI = i;
+
+            piecePromotionButtons[i].addActionListener(e -> {
+                promotedPiece[0] = Constants.PromotionPiecesInts[finalI];
+                makePiecePromotion(moveField, promotedPiece[0]);
+                frame.setVisible(false);
+            });
+
+            frame.add(piecePromotionButtons[i]);
+            y += 50;
+        }
+
+        return promotedPiece[0];
+    }
+
+    private void makePiecePromotion(int moveField, int promotionPiece)
+    {
+        promotionPiece += ((Playing.whitesMove) ? Black : White);
+
+        playing.updateBoard(moveField, promotionPiece);
+        Playing.ActivePieces.remove(moveField);
+        Playing.ActivePieces.put(moveField, promotionPiece);
+        fields[moveField].setPiece(promotionPiece);
     }
 
     public void mouseMoved(MouseEvent e) {

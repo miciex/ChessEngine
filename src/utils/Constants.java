@@ -51,7 +51,11 @@ public class Constants {
 
     public static class Boards{
         public final static String classicBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+        public final static String promotionTestingBoard = "rnb2bnr/pppPkppp/4p3/8/3P1q2/8/PPP2PPP/RNBQKBNR";
     }
+
+    public static String PromotionPieces[] = {"Queen", "Rook", "Knight", "Bishop"};
+    public static int PromotionPiecesInts[] = {Pieces.Queen, Pieces.Rook, Pieces.Knight, Pieces.Bishop};
 
     public static class BoardInfo{
         public static final int BOARD_HEIGHT = 8;

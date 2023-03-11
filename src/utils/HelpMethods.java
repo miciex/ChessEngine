@@ -268,4 +268,17 @@ public class HelpMethods {
 
         return position;
     }
+
+    public static boolean isPromotionNeeded()
+    {
+        int row;
+
+        for(int i : Playing.ActivePieces.keySet())
+        {
+            row = (int) Math.ceil((double) (i + 1) / 8);
+            if(Playing.ActivePieces.get(i) % 8 == Pawn && (row == 1 || row == 8)) return true;
+        }
+
+        return false;
+    }
 }
