@@ -13,6 +13,7 @@ public class ButtonOverlay extends UIElement implements ButtonMethods{
     public ButtonOverlay(int xPos, int yPos, int width, int height, Playing playing) {
         super(xPos, yPos, width, height);
         this.playing = playing;
+
         initButtons();
     }
 
