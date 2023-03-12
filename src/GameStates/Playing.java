@@ -24,6 +24,7 @@ public class Playing extends State implements StateMethods{
     public static boolean whitesMove = true;
     public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
     public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
+    public ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
 
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
@@ -44,6 +45,8 @@ public class Playing extends State implements StateMethods{
         boardOverlay.createFields();
         whitesMove = true;
         possibleCastles = new boolean[]{true, true, true, true};
+        positions.clear();
+        positions.add(ActivePieces);
     }
 
     private void initClasses(){

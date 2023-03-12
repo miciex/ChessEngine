@@ -97,7 +97,7 @@ public class HelpMethods {
 
             ArrayList<Integer> moves = new ArrayList<>();
             if(move.movedPiece%8 == King){
-                move.startField = findKing(whitesMove);
+                move.startField = findKing(whitesMove, Playing.ActivePieces);
             }else{
                 moves = Piece.canMoveToSquare(move.endField, move.movedPiece, board);
             }
@@ -257,12 +257,12 @@ public class HelpMethods {
             return false;
     }
 
-    public static int findKing(boolean white) {
+    public static int findKing(boolean white, HashMap<Integer, Integer> activePieces) {
         int position = -1;
 
-        for(int i : Playing.ActivePieces.keySet())
+        for(int i : activePieces.keySet())
         {
-            if (Playing.ActivePieces.get(i) % 8 == Pieces.King && HelpMethods.isWhite(Playing.ActivePieces.get(i)) == white)
+            if (activePieces.get(i) % 8 == Pieces.King && HelpMethods.isWhite(activePieces.get(i)) == white)
                 return i;
         }
 

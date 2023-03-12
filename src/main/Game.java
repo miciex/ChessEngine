@@ -15,9 +15,7 @@ public class Game implements Runnable{
     Playing playing;
 
     public Game(){
-        gamePanel = new GamePanel(this);
-        playing = new Playing(this);
-        gameWindow = new GameWindow(800, 600, gamePanel);
+        initClasses();
         gamePanel.setFocusable(true);
         gamePanel.requestFocus();
 
@@ -25,7 +23,9 @@ public class Game implements Runnable{
     }
 
     private void initClasses(){
+        gamePanel = new GamePanel(this);
         playing = new Playing(this);
+        gameWindow = new GameWindow(800, 600, gamePanel);
     }
 
     private  void startGameLoop(){
