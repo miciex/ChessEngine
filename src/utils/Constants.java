@@ -36,6 +36,8 @@ public class Constants {
         public static final int White = 8;
         public static final int Black = 16;
 
+        public static final int[] PROMOTE_PIECES = new int[]{Rook, Knight, Bishop, Queen};
+
         public static final char[] CHAR_PIECES= new char[]{'K', 'Q', 'B', 'N', 'R','P'};
     }
 
@@ -52,6 +54,7 @@ public class Constants {
     public static class Boards{
         public final static String classicBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
         public final static String promotionTestingBoard = "rnb2bnr/pppPkppp/4p3/8/3P1q2/8/PPP2PPP/RNBQKBNR";
+        public final static String testPossibleMoves = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R";
     }
 
     public static String PromotionPieces[] = {"Queen", "Rook", "Knight", "Bishop"};

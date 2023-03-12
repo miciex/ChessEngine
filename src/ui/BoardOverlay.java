@@ -1,5 +1,6 @@
 package ui;
 
+import GameStates.GameResults;
 import GameStates.Move;
 import GameStates.Playing;
 import utils.*;
@@ -13,7 +14,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static utils.Constants.BoardInfo.BOARD_HEIGHT;
 import static utils.Constants.BoardInfo.BOARD_WIDTH;
+import static utils.Constants.Boards.testPossibleMoves;
 import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
@@ -30,15 +33,22 @@ public class BoardOverlay extends UIElement {
     private int mouseY;
     private ArrayList<Integer> moves = new ArrayList<>();
     private HashMap<Integer, BufferedImage> chessPiecesImgs;
-    private ResetButton rb;
     private int promotionPiece = -1;
     private JButton[] piecePromotionButtons = new JButton[4];
+    private int movesTo50MoveRule = 0;
+    private HashMap<Integer, Integer> boardMap;
+    private boolean whitesMove = true;
+    private int numPosition = 0;
+    private boolean castles[]  = new boolean[]{true, true, true, true};
+    Move lastMove;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
         this.playing = playing;
         loadPiecesImgs();
         createFields();
+        boardMap = boardToMap(playing.getBoard());
+        System.out.println(MoveGenerationTest(2));
     }
 
     public void createFields() {
@@ -58,6 +68,68 @@ public class BoardOverlay extends UIElement {
         }
     }
 
+    int MoveGenerationTest(int depth){
+        if(depth == 0){
+            return 1;
+        }
+
+        ArrayList<Move> moves = Piece.generateMoves(boardMap, whitesMove, lastMove, castles);
+
+        for(Move move : moves){
+            makeMove(move);
+            numPosition += MoveGenerationTest(depth -1);
+            unMakeMove(move);
+        }
+        return numPosition;
+    }
+
+    private void makeMove(Move move){
+        if(move.movedPiece == King && Math.abs(move.startField - move.endField)==2){
+            //Changing rooks placement in castling
+            boardMap.put((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2, boardMap.get((move.startField/8)*8 + ((move.endField % 8)/4) * 7));
+            boardMap.remove((move.startField/8)*8 + ((move.endField % 8)/4) * 7);
+
+            for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
+                castles[i] = false;
+            }
+        }else if(move.movedPiece == Pawn && move.startField/8 == move.takenPieceField/8 ){
+            //Removing the pawn which was taken end passant
+            boardMap.remove((move.startField/8)*8 + (move.endField % 8));
+        }
+            boardMap.put(move.endField, move.promotePiece==0? move.movedPiece : move.promotePiece + move.movedPiece - Pawn);
+            boardMap.remove(move.startField);
+            if(move.movedPiece == Rook){
+                switch (move.startField){
+                    case 0: castles[0] = false; break;
+                    case 7: castles[1] = false; break;
+                    case 56: castles[2] = false; break;
+                    case 63: castles[3] = false; break;
+                }
+            }
+    }
+
+    private void unMakeMove(Move move){
+        if(move.movedPiece == King && Math.abs(move.startField - move.endField)==2){
+            boardMap.put((move.startField/8)*8 + ((move.endField % 8)/4) * 7, boardMap.get((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2));
+            boardMap.remove((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2);
+            for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
+                castles[i] = true;
+            }
+            if(move.movedPiece == Rook){
+                switch (move.startField){
+                    case 0: castles[0] = true; break;
+                    case 7: castles[1] = true; break;
+                    case 56: castles[2] = true; break;
+                    case 63: castles[3] = true; break;
+                }
+            }
+        }else if(move.movedPiece == Pawn && move.startField/8 == move.takenPieceField/8){
+            boardMap.put(move.takenPieceField, Pawn);
+        }
+        boardMap.put(move.startField, move.movedPiece);
+        boardMap.remove(move.endField);
+    }
+
     public void mouseDragged(MouseEvent e) {
         mouseX = e.getX();
         mouseY = e.getY();
@@ -72,11 +144,11 @@ public class BoardOverlay extends UIElement {
         else if (row < 0 || col < 0 || row >= 8 || col >= 8)
             return;
 
-        if (playing.getBoard()[col + row * BOARD_WIDTH] != 0 && activeField < 0) {
+        if (playing.getBoard()[col + row * BOARD_WIDTH] != 0 && activeField < 0 && playing.result == GameResults.NONE) {
             activeField = col + row * BOARD_WIDTH;
             fields[activeField].setMousePressed(true);
             if (HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove) {
-                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces);
+                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, Playing.moves.get(Playing.moves.size()-1), Playing.whitesMove, Playing.possibleCastles);
                 showPossibleMoves();
             }
             return;
@@ -84,21 +156,21 @@ public class BoardOverlay extends UIElement {
         if (activeField >= 0)
             newField = col + row * BOARD_WIDTH;
 
-        if (activeField != newField && newField >= 0 && canMoveHere(newField) && !HelpMethods.isPromotionNeeded()) {
+        if (activeField != newField && newField >= 0 && canMoveHere(newField) && !HelpMethods.isPromotionNeeded() && playing.result == GameResults.NONE) {
             movePiece(col, row);
             fields[activeField].setMousePressed(false);
             activeField = -1;
             newField = -1;
             resetColors();
             return;
-        } else if (newField >= 0) {
+        } else if (newField >= 0 && playing.result == GameResults.NONE) {
             fields[activeField].setMousePressed(false);
             resetColors();
             if (playing.getBoard()[newField] != 0 && activeField != newField) {
                 activeField = newField;
                 fields[activeField].setMousePressed(true);
                 if (HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove) {
-                    moves = Piece.PossibleMoves(activeField, Playing.ActivePieces);
+                    moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, Playing.moves.get(Playing.moves.size()-1), Playing.whitesMove, Playing.possibleCastles);
                     showPossibleMoves();
                 }
             } else {
@@ -109,9 +181,9 @@ public class BoardOverlay extends UIElement {
             return;
         }
 
-        if (newField < 0 && activeField >= 0) {
+        if (newField < 0 && activeField >= 0 && playing.result == GameResults.NONE) {
             if (HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove) {
-                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces);
+                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, Playing.moves.get(Playing.moves.size()-1), Playing.whitesMove, Playing.possibleCastles);
                 showPossibleMoves();
             }
         }
@@ -130,14 +202,15 @@ public class BoardOverlay extends UIElement {
 
         if (col + row * BOARD_WIDTH != activeField && canMoveHere(col + row * BOARD_WIDTH) && newField < 0
                 && !HelpMethods.isPromotionNeeded()) {
-            movePiece(col, row);
+            if(playing.result == GameResults.NONE)
+                movePiece(col, row);
             resetActivePieces();
             return;
         }
 
-        if (newField >= 0) {
+        if (newField >= 0 && playing.result == GameResults.NONE) {
             if (HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove) {
-                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces);
+                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, Playing.moves.get(Playing.moves.size()-1), Playing.whitesMove, Playing.possibleCastles);
                 showPossibleMoves();
             }
         }
@@ -157,10 +230,10 @@ public class BoardOverlay extends UIElement {
 
     private void showPossibleMoves() {
         if (!HelpMethods.isPromotionNeeded()) {
-            moves = Piece.deleteImpossibleMoves(activeField, moves, Playing.ActivePieces, Playing.whitesMove);
+            moves = Piece.deleteImpossibleMoves(activeField, moves, Playing.ActivePieces, Playing.whitesMove, Playing.moves.get(Playing.moves.size()-1), Playing.possibleCastles);
 
             if (playing.getBoard()[activeField] % 8 == King)
-                moves.addAll(Piece.addCastlingMoves(activeField, Playing.ActivePieces, Playing.whitesMove));
+                moves.addAll(Piece.addCastlingMoves(activeField, Playing.ActivePieces, Playing.whitesMove, Playing.possibleCastles, Playing.moves.get(Playing.moves.size()-1)));
 
             for (int move : moves) {
                 fields[move].isPossibleMove = true;
@@ -212,9 +285,6 @@ public class BoardOverlay extends UIElement {
                     move.takenPiece = Pawn;
                     move.takenPieceField = finalField;
                 }
-
-                // move.gaveCheck = Piece.isChecked(findKing(Playing.whitesMove)) == -1 ? false
-                // : true;
             }
 
             if (Playing.ActivePieces.containsKey(moveField)
@@ -243,21 +313,31 @@ public class BoardOverlay extends UIElement {
                     move.promotePiece = GetPromotionPiece(moveField);
                 }
 
-                move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove, Playing.ActivePieces),
-                        Playing.ActivePieces, Playing.whitesMove) == -1 ? false : true;
+
             }
             move.gaveCheck = Piece.isChecked(HelpMethods.findKing(Playing.whitesMove, Playing.ActivePieces),
-                    Playing.ActivePieces, Playing.whitesMove) == -1 ? false : true;
+                    Playing.ActivePieces, Playing.whitesMove, Playing.moves.get(Playing.moves.size()-1), Playing.possibleCastles) == -1 ? false : true;
             HelpMethods.chessNotationToMove(HelpMethods.moveToChessNotation(move, copiedArray), copiedArray,
                     !Playing.whitesMove);
 
-            // System.out.println(CheckGameResults.isMate(Playing.ActivePieces,
-            // Playing.whitesMove));
-            if (move.takenPiece != 0 || (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2))
-                playing.positions.clear();
-            playing.positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
-            System.out.println(CheckGameResults.isThreefold(playing.positions));
+            checkGameResult(move);
+
         }
+    }
+
+    private void checkGameResult(Move move){
+        if (move.takenPiece != 0 || (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2))
+            playing.positions.clear();
+        playing.positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
+
+        movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, movesTo50MoveRule);
+
+        if(CheckGameResults.isThreefold(playing.positions)) playing.result = GameResults.THREE_FOLD;
+        else if(CheckGameResults.draw50MoveRule(movesTo50MoveRule)) playing.result = GameResults.DRAW_50_MOVE_RULE;
+        else if(CheckGameResults.insufficientMaterial(Playing.ActivePieces)) playing.result = GameResults.STALEMATE;
+        else if(CheckGameResults.insufficientMaterial(Playing.ActivePieces)) playing.result = GameResults.INSUFFICIENT_MATERIAL;
+        else if(CheckGameResults.isMate(Playing.ActivePieces, Playing.whitesMove, Playing.moves.get(Playing.moves.size()-1), Playing.possibleCastles)) playing.result = GameResults.MATE;
+        if(playing.result!=GameResults.NONE) System.out.println(gameResultToChessNotation(playing.result, Playing.whitesMove));
     }
 
     private Move executeMove(Move move, int activeField, int moveField, boolean castling) {
@@ -267,8 +347,6 @@ public class BoardOverlay extends UIElement {
         playing.updateBoard(activeField, 0);
         fields[moveField].setPiece(fields[activeField].getPiece());
         fields[activeField].setPiece(0);
-        move.gaveCheck = Piece.isChecked(HelpMethods.findKing(!Playing.whitesMove, Playing.ActivePieces),
-                Playing.ActivePieces, Playing.whitesMove) == -1 ? false : true;
         if (!castling) {
             Playing.whitesMove = (Playing.whitesMove == true) ? false : true;
             playing.addMove(move);

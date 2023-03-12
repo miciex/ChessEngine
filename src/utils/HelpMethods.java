@@ -1,5 +1,6 @@
 package utils;
 
+import GameStates.GameResults;
 import GameStates.Move;
 import GameStates.Playing;
 import utils.Constants.Pieces;
@@ -23,6 +24,14 @@ public class HelpMethods {
             case 4: Playing.possibleCastles[0] = false; Playing.possibleCastles[1] = false; break;
             case 60: Playing.possibleCastles[2] = false; Playing.possibleCastles[3] = false; break;
         }
+    }
+
+
+
+    public static String gameResultToChessNotation(GameResults result, boolean whitesMove){
+        if(result == GameResults.NONE) return "";
+        if(result == GameResults.MATE) return whitesMove ? "0-1" : "1-0";
+        return "1/2-1/2";
     }
 
     public static String moveToChessNotation(Move move, int[] board){
@@ -167,7 +176,6 @@ public class HelpMethods {
     }
 
     public static int[] FenToIntArray(String fen, int arrayLength){
-        Playing.ActivePieces.clear();
         int num = 0;
         int[] arr = new int[arrayLength];
         for(Character currChar : fen.toCharArray()){
@@ -185,11 +193,19 @@ public class HelpMethods {
             }
 
             arr[num] = CharPieceToInt(currChar);
-            Playing.ActivePieces.put(num, arr[num]);
             num++;
 
         }
         return arr;
+    }
+
+    public static HashMap<Integer, Integer> boardToMap(int[] board){
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for(int i = 0; i<board.length; i++){
+            if(board[i] != 0)
+                map.put(i, board[i]);
+        }
+        return map;
     }
 
     public static int CharPieceToInt(Character p){

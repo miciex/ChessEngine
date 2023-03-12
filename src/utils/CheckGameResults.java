@@ -12,20 +12,20 @@ import static utils.HelpMethods.findKing;
 
 public class CheckGameResults {
 
-    public static boolean isMate(HashMap<Integer, Integer> pieces, boolean whitesMove){
+    public static boolean isMate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles){
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
             if(entry.getValue() > 16 && !whitesMove || entry.getValue() < 16 && whitesMove)
-                if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces),pieces, whitesMove).size() > 0) return false;
+                if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces, lastMove, whitesMove, possibleCastles),pieces, whitesMove, lastMove, possibleCastles).size() > 0) return false;
         }
-      return Piece.isChecked(findKing(whitesMove, pieces), pieces, whitesMove) != -1;
+      return Piece.isChecked(findKing(whitesMove, pieces), pieces, whitesMove, lastMove, possibleCastles) != -1;
     }
 
-    public static boolean isStalemate(HashMap<Integer, Integer> pieces, boolean whitesMove){
+    public static boolean isStalemate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles){
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
             if(entry.getValue() > 16 && !whitesMove || entry.getValue() < 16 && whitesMove)
-                if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces),pieces, whitesMove).size() > 0) return false;
+                if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces, lastMove, whitesMove, possibleCastles),pieces, whitesMove, lastMove, possibleCastles).size() > 0) return false;
         }
-        return Piece.isChecked(findKing(whitesMove, pieces), pieces, whitesMove) == -1;
+        return Piece.isChecked(findKing(whitesMove, pieces), pieces, whitesMove, lastMove, possibleCastles) == -1;
     }
 
     public static boolean isThreefold(ArrayList<HashMap<Integer, Integer>> boards){

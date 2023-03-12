@@ -7,18 +7,44 @@ import ui.BoardOverlay;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import static utils.Constants.Pieces.*;
 
 public class Piece {
-    public static ArrayList<Integer> PossibleMoves(int position, HashMap<Integer, Integer> activePieces) {
+
+    public static ArrayList<Move> generateMoves(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove,  boolean[] possibleCastles){
+        ArrayList<Move> moves = new ArrayList<>();
+        for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
+            if(entry.getValue() > 16 != whitesMove)
+            moves.addAll(Piece.calcMoves(entry.getKey(), pieces, whitesMove, lastMove, possibleCastles));
+        }
+        return moves;
+    }
+
+    public static ArrayList<Move> calcMoves(int activeField, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles){
+        ArrayList<Integer> endingSquares = deleteImpossibleMoves(activeField, PossibleMoves(activeField, activePieces, lastMove, whitesMove, possibleCastles), activePieces, whitesMove, lastMove, possibleCastles);
+        ArrayList<Move> moves = new ArrayList<>();
+
+        for(int endSquare : endingSquares){
+            if(activePieces.get(activeField)%8 == Pawn && (endSquare/8==7 || endSquare/8==0)){
+                for(int i : PROMOTE_PIECES){
+                    moves.add(new Move(activePieces, activeField, endSquare, i));
+                }
+            }else
+                moves.add(new Move(activePieces, activeField, endSquare));
+        }
+        return moves;
+    }
+
+    public static ArrayList<Integer> PossibleMoves(int position, HashMap<Integer, Integer> activePieces, Move lastMove, boolean whitesMove, boolean[] possibleCastles) {
         switch (activePieces.get(position) % 8) {
             case Pawn:
-                return PossiblePawnMoves(position);
+                return PossiblePawnMoves(position, activePieces, lastMove);
             case King:
-                return PossibleKingMoves(position);
+                return PossibleKingMoves(position, activePieces, whitesMove, lastMove,possibleCastles);
             case Knight:
-                return PossibleKnightMoves(position);
+                return PossibleKnightMoves(position, activePieces);
         }
 
         int piece = activePieces.get(position) % 8;
@@ -64,40 +90,40 @@ public class Piece {
         return moves;
     }
 
-    public static ArrayList<Integer> addCastlingMoves(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove) {
+    public static ArrayList<Integer> addCastlingMoves(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, boolean[] possibleCastles, Move lastMove) {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        if (position == 4 && Playing.possibleCastles[0] == true && isCastlingPossible(position, -1, activePieces, whitesMove))
+        if (position == 4 && possibleCastles[0] && isCastlingPossible(position, -1, activePieces, whitesMove, lastMove, possibleCastles))
             moves.add(0);
-        if (position == 4 && Playing.possibleCastles[1] == true && isCastlingPossible(position, 1, activePieces, whitesMove))
+        if (position == 4 && possibleCastles[1] && isCastlingPossible(position, 1, activePieces, whitesMove, lastMove, possibleCastles))
             moves.add(7);
-        if (position == 60 && Playing.possibleCastles[2] == true && isCastlingPossible(position, -1, activePieces, whitesMove))
+        if (position == 60 && possibleCastles[2] && isCastlingPossible(position, -1, activePieces, whitesMove, lastMove, possibleCastles))
             moves.add(56);
-        if (position == 60 && Playing.possibleCastles[3] == true && isCastlingPossible(position, 1, activePieces, whitesMove))
-            moves.add(63);
+        if (position == 60 && possibleCastles[3] && isCastlingPossible(position, 1, activePieces, whitesMove, lastMove, possibleCastles))
+            moves.add(62);
 
         return moves;
     }
 
-    private static boolean isCastlingPossible(int position, int dir, HashMap<Integer, Integer> activePieces, boolean whitesMove) {
+    private static boolean isCastlingPossible(int position, int dir, HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
         int row = (int) Math.ceil((double) (position + 1) / 8);
         int checkingRow = row, checkingPosition = position + dir;
         int checkingColumn = (checkingPosition) % 8;
 
         while (checkingRow == row) {
             if (checkingColumn == 0 || checkingColumn == 7) {
-                if (activePieces.get(checkingPosition) % 8 != Constants.Pieces.Rook
-                        || HelpMethods.isWhite(activePieces.get(checkingPosition)) != whitesMove)
+                if (pieces.get(checkingPosition) % 8 != Constants.Pieces.Rook
+                        || HelpMethods.isWhite(pieces.get(checkingPosition)) != whitesMove)
                     return false;
                 else
                     return true;
             }
 
-            if (Playing.ActivePieces.containsKey(checkingPosition))
+            if (pieces.containsKey(checkingPosition))
                 return false;
 
             if (Arrays.asList(2, 3, 5, 6).contains(checkingColumn))
-                if (isChecked(checkingPosition, activePieces, whitesMove) != -1)
+                if (isChecked(checkingPosition, pieces, whitesMove, lastMove, possibleCastles) != -1)
                     return false;
 
             checkingPosition += dir;
@@ -108,7 +134,7 @@ public class Piece {
         return true;
     }
 
-    public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves, HashMap<Integer, Integer> activePieces, boolean whitesMove) {
+    public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
         int movesSize = moves.size();
 
         HashMap<Integer, Integer> copy = (HashMap<Integer, Integer>) activePieces.clone();
@@ -126,7 +152,7 @@ public class Piece {
             activePieces.put(moveField, activePieces.get(activeField));
             activePieces.remove(activeField);
 
-            if (isChecked(HelpMethods.findKing(whitesMove, activePieces), activePieces, whitesMove) == -1) {
+            if (isChecked(HelpMethods.findKing(whitesMove, activePieces), activePieces, whitesMove, lastMove, possibleCastles) == -1) {
                 activePieces = copy;
             } else {
                 activePieces = copy;
@@ -139,7 +165,7 @@ public class Piece {
         return moves;
     }
 
-    public static int isChecked(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove) {
+    public static int isChecked(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
         int positionChecking = -1;
 
         boolean isWhite = whitesMove;
@@ -165,7 +191,7 @@ public class Piece {
 
                 if (activePieces.containsKey(checkingPosition)
                         && HelpMethods.isWhite(activePieces.get(checkingPosition)) != isWhite
-                        && PossibleMoves(checkingPosition, activePieces).contains(position)) {
+                        && PossibleMoves(checkingPosition, activePieces, lastMove, whitesMove, possibleCastles).contains(position)) {
                     positionChecking = checkingPosition;
                     break;
                 }
@@ -177,10 +203,10 @@ public class Piece {
         return positionChecking;
     }
 
-    private static ArrayList<Integer> PossiblePawnMoves(int position) {
+    private static ArrayList<Integer> PossiblePawnMoves(int position, HashMap<Integer, Integer> pieces, Move lastMove) {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
+        boolean isWhite = HelpMethods.isWhite(pieces.get(position));
 
         int checkingPosition, checkingDir;
 
@@ -193,39 +219,38 @@ public class Piece {
 
             if (IsCorrect(position, checkingDir)) {
                 if (i > 0)
-                    if (Playing.ActivePieces.containsKey(checkingPosition)
-                            && HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite)
+                    if (pieces.containsKey(checkingPosition)
+                            && HelpMethods.isWhite(pieces.get(checkingPosition)) != isWhite)
                         moves.add(checkingPosition);
                     else
                         continue;
 
-                if (!Playing.ActivePieces.containsKey(checkingPosition))
+                if (!pieces.containsKey(checkingPosition))
                     moves.add(checkingPosition);
             }
         }
 
-        if (isWhite == false && row == 2 && !Playing.ActivePieces.containsKey(position + 8)
-                && !Playing.ActivePieces.containsKey(position + 16))
+        if (isWhite == false && row == 2 && !pieces.containsKey(position + 8)
+                && !pieces.containsKey(position + 16))
             moves.add(position + 16);
-        else if (isWhite == true && row == 7 && !Playing.ActivePieces.containsKey(position - 8)
-                && !Playing.ActivePieces.containsKey(position - 16))
+        else if (isWhite == true && row == 7 && !pieces.containsKey(position - 8)
+                && !pieces.containsKey(position - 16))
             moves.add(position - 16);
 
         if (Playing.moves.size() > 0) {
-            Move lastMove = Playing.moves.get(Playing.moves.size() - 1);
 
             if (isWhite == true && row == 4 && lastMove.movedPiece % 8 == Pawn
                     && Math.abs(lastMove.endField - lastMove.startField) == 16) {
-                if (lastMove.endField == position + 1 && !Playing.ActivePieces.containsKey(position - 7))
+                if (lastMove.endField == position + 1 && !pieces.containsKey(position - 7))
                     moves.add(position - 7);
-                else if (lastMove.endField == position - 1 && !Playing.ActivePieces.containsKey(position - 9))
+                else if (lastMove.endField == position - 1 && !pieces.containsKey(position - 9))
                     moves.add(position - 9);
             }
             if (isWhite == false && row == 5 && lastMove.movedPiece % 8 == Pawn
                     && Math.abs(lastMove.endField - lastMove.startField) == 16) {
-                if (lastMove.endField == position + 1 && !Playing.ActivePieces.containsKey(position + 9))
+                if (lastMove.endField == position + 1 && !pieces.containsKey(position + 9))
                     moves.add(position + 9);
-                else if (lastMove.endField == position - 1 && !Playing.ActivePieces.containsKey(position + 7))
+                else if (lastMove.endField == position - 1 && !pieces.containsKey(position + 7))
                     moves.add(position + 7);
             }
         }
@@ -233,10 +258,10 @@ public class Piece {
         return moves;
     }
 
-    private static ArrayList<Integer> PossibleKingMoves(int position) {
+    private static ArrayList<Integer> PossibleKingMoves(int position, HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
+        boolean isWhite = HelpMethods.isWhite(pieces.get(position));
 
         int checkingPosition, checkingDir;
 
@@ -246,8 +271,8 @@ public class Piece {
             checkingPosition = position + checkingDir;
 
             if (IsCorrect(position, checkingDir)) {
-                if (Playing.ActivePieces.containsKey(checkingPosition))
-                    if (HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite) {
+                if (pieces.containsKey(checkingPosition))
+                    if (HelpMethods.isWhite(pieces.get(checkingPosition)) != isWhite) {
                         moves.add(checkingPosition);
                         continue;
                     } else {
@@ -257,14 +282,14 @@ public class Piece {
                 moves.add(checkingPosition);
             }
         }
-
+        moves.addAll(addCastlingMoves(position, pieces, whitesMove, possibleCastles,lastMove));
         return moves;
     }
 
-    private static ArrayList<Integer> PossibleKnightMoves(int position) {
+    private static ArrayList<Integer> PossibleKnightMoves(int position, HashMap<Integer, Integer> pieces) {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        boolean isWhite = HelpMethods.isWhite(Playing.ActivePieces.get(position));
+        boolean isWhite = HelpMethods.isWhite(pieces.get(position));
 
         int checkingPosition, checkingDir;
 
@@ -273,8 +298,8 @@ public class Piece {
             checkingPosition = position + checkingDir;
 
             if (IsCorrect(position, checkingDir)) {
-                if (Playing.ActivePieces.containsKey(checkingPosition))
-                    if (HelpMethods.isWhite(Playing.ActivePieces.get(checkingPosition)) != isWhite) {
+                if (pieces.containsKey(checkingPosition))
+                    if (HelpMethods.isWhite(pieces.get(checkingPosition)) != isWhite) {
                         moves.add(checkingPosition);
                         continue;
                     } else {

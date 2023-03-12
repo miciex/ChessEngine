@@ -10,8 +10,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static utils.Constants.Boards.classicBoard;
-import static utils.Constants.Boards.promotionTestingBoard;
+import static utils.Constants.Boards.*;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Game_Info.*;
 import static utils.Constants.BoardInfo.*;
@@ -26,6 +25,7 @@ public class Playing extends State implements StateMethods{
     public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
     public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
     public ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
+    public GameResults result;
 
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
@@ -34,25 +34,32 @@ public class Playing extends State implements StateMethods{
 
     public Playing(Game game){
         super(game);
-        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(testPossibleMoves, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         possibleCastles = new boolean[]{true, true, true, true};
         initClasses();
+        ActivePieces = boardToMap(board);
+        result = GameResults.NONE;
+        positions.clear();
+        positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
     }
 
     public void resetGame(){
-        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(testPossibleMoves, BOARD_HEIGHT * BOARD_WIDTH);
+        ActivePieces = boardToMap(board);
         moves = new ArrayList<>();
         boardOverlay.createFields();
         whitesMove = true;
         possibleCastles = new boolean[]{true, true, true, true};
         positions.clear();
-        positions.add(ActivePieces);
+        positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
+        result = GameResults.NONE;
     }
 
     private void initClasses(){
         boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
         buttonOverlay = new ButtonOverlay((BOARD_X + BOARD_WIDTH * FIELD_SIZE), 0, 0,0, this);
+
     }
 
     @Override
