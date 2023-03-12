@@ -157,10 +157,10 @@ public class BoardOverlay extends UIElement {
 
     private void showPossibleMoves() {
         if (!HelpMethods.isPromotionNeeded()) {
-            moves = Piece.deleteImpossibleMoves(activeField, moves);
+            moves = Piece.deleteImpossibleMoves(activeField, moves, Playing.ActivePieces, Playing.whitesMove);
 
             if (playing.getBoard()[activeField] % 8 == King)
-                moves.addAll(Piece.addCastlingMoves(activeField));
+                moves.addAll(Piece.addCastlingMoves(activeField, Playing.ActivePieces, Playing.whitesMove));
 
             for (int move : moves) {
                 fields[move].isPossibleMove = true;
