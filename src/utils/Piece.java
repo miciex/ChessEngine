@@ -42,7 +42,7 @@ public class Piece {
             case Pawn:
                 return PossiblePawnMoves(position, activePieces, lastMove);
             case King:
-                return PossibleKingMoves(position, activePieces, whitesMove, lastMove,possibleCastles);
+                return allPossibleKingMoves(position, activePieces, whitesMove, possibleCastles, lastMove);
             case Knight:
                 return PossibleKnightMoves(position, activePieces);
         }
@@ -135,34 +135,58 @@ public class Piece {
     }
 
     public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
-        int movesSize = moves.size();
-
+        ArrayList<Integer> possibleMoves = new ArrayList<>();
         HashMap<Integer, Integer> copy = (HashMap<Integer, Integer>) activePieces.clone();
-        int moveField;
+        for (int i : moves) {
+            Move move = new Move(copy, activeField, i);
+            copy = makeMove(move, copy, possibleCastles);
 
-        for (int i = 0; i < movesSize; i++) {
-            moveField = moves.get(i);
-
-            activePieces = copy;
-            copy = (HashMap<Integer, Integer>) activePieces.clone();
-
-            if (activePieces.containsKey(moveField))
-                activePieces.remove(moveField);
-
-            activePieces.put(moveField, activePieces.get(activeField));
-            activePieces.remove(activeField);
-
-            if (isChecked(HelpMethods.findKing(whitesMove, activePieces), activePieces, whitesMove, lastMove, possibleCastles) == -1) {
-                activePieces = copy;
-            } else {
-                activePieces = copy;
-                moves.remove(i);
-                movesSize--;
-                i--;
+            if(isChecked(copy, whitesMove, lastMove, possibleCastles) == -1){
+                possibleMoves.add(i);
             }
+            copy = unMakeMove(move, copy, possibleCastles);
         }
 
         return moves;
+    }
+
+    public static int isChecked( HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
+        int position = HelpMethods.findKing(whitesMove, activePieces);
+        int positionChecking = -1;
+
+        boolean isWhite = whitesMove;
+
+        int checkingDir, checkingPosition;
+
+        for (int i = 0; i < Constants.Directions.get(2137).size(); i++) {
+            checkingDir = Constants.Directions.get(2137).get(i);
+            checkingPosition = position + checkingDir;
+
+            while (checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE
+                    && IsCorrect(position, checkingDir)) {
+                if (i > 7) {
+                    if (activePieces.containsKey(checkingPosition)
+                            && HelpMethods.isWhite(activePieces.get(checkingPosition)) != isWhite
+                            && activePieces.get(checkingPosition) % 8 == Knight) {
+                        positionChecking = checkingPosition;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+
+                if (activePieces.containsKey(checkingPosition)
+                        && HelpMethods.isWhite(activePieces.get(checkingPosition)) != isWhite
+                        && PossibleMoves(checkingPosition, activePieces, lastMove, whitesMove, possibleCastles).contains(position)) {
+                    positionChecking = checkingPosition;
+                    break;
+                }
+
+                checkingPosition += checkingDir;
+            }
+        }
+
+        return positionChecking;
     }
 
     public static int isChecked(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
@@ -282,7 +306,12 @@ public class Piece {
                 moves.add(checkingPosition);
             }
         }
-        moves.addAll(addCastlingMoves(position, pieces, whitesMove, possibleCastles,lastMove));
+        return moves;
+    }
+
+    private static ArrayList<Integer> allPossibleKingMoves(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, boolean[] possibleCastles, Move lastMove){
+        ArrayList<Integer> moves = PossibleKingMoves(position, activePieces, whitesMove, lastMove, possibleCastles);
+        moves.addAll(addCastlingMoves(position, activePieces, whitesMove, possibleCastles,lastMove));
         return moves;
     }
 
@@ -342,7 +371,7 @@ public class Piece {
         ArrayList<Integer> moveList = new ArrayList<>();
         if (piece % 8 == Knight)
             for (int i : Constants.Directions.get(piece % 8)) {
-                if (IsCorrect(startPosition, i) && board[i + startPosition] == piece) {
+                if (IsCorrect(startPosition, i) && board[i + startPosition] == piece ) {
                     moveList.add(startPosition + i);
                 }
             }
@@ -372,5 +401,40 @@ public class Piece {
         int checkingColumn = position % 8 + help;
 
         return checkingRow < 8 && checkingRow >= 0 && checkingColumn < 8 && checkingColumn >= 0;
+    }
+
+    public static HashMap<Integer, Integer> makeMove(Move move, HashMap<Integer, Integer> boardMap, boolean[] castles){
+        if(move.movedPiece == King && Math.abs(move.startField - move.endField)==2){
+            //Changing rooks placement in castling
+            boardMap.put((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2, boardMap.get((move.startField/8)*8 + ((move.endField % 8)/4) * 7));
+            boardMap.remove((move.startField/8)*8 + ((move.endField % 8)/4) * 7);
+
+            for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
+                castles[i] = false;
+            }
+        }else if(move.movedPiece == Pawn && move.startField/8 == move.takenPieceField/8 ){
+            //Removing the pawn which was taken end passant
+            boardMap.remove((move.startField/8)*8 + (move.endField % 8));
+        }
+        boardMap.put(move.endField, move.promotePiece==0? move.movedPiece : move.promotePiece + move.movedPiece - Pawn);
+        boardMap.remove(move.startField);
+        return boardMap;
+
+
+
+    }
+
+    public static HashMap<Integer, Integer> unMakeMove(Move move, HashMap<Integer, Integer> boardMap, boolean[] castles){
+        if(move.movedPiece == King && Math.abs(move.startField - move.endField)==2){
+            boardMap.put((move.startField/8)*8 + ((move.endField % 8)/4) * 7, boardMap.get((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2));
+            boardMap.remove((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2);
+            for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
+                castles[i] = true;
+            }
+        }
+        boardMap.put(move.startField, move.movedPiece);
+        boardMap.remove(move.endField);
+        boardMap.put(move.takenPieceField, move.takenPiece);
+        return boardMap;
     }
 }

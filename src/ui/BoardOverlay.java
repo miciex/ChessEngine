@@ -22,6 +22,8 @@ import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Pieces.*;
 import static utils.HelpMethods.*;
+import static utils.Piece.makeMove;
+import static utils.Piece.unMakeMove;
 
 public class BoardOverlay extends UIElement {
 
@@ -40,7 +42,7 @@ public class BoardOverlay extends UIElement {
     private boolean whitesMove = true;
     private int numPosition = 0;
     private boolean castles[]  = new boolean[]{true, true, true, true};
-    Move lastMove;
+     ArrayList<Move> lastMoves;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
@@ -48,6 +50,7 @@ public class BoardOverlay extends UIElement {
         loadPiecesImgs();
         createFields();
         boardMap = boardToMap(playing.getBoard());
+        lastMoves = new ArrayList<>();
         System.out.println(MoveGenerationTest(2));
     }
 
@@ -73,62 +76,21 @@ public class BoardOverlay extends UIElement {
             return 1;
         }
 
-        ArrayList<Move> moves = Piece.generateMoves(boardMap, whitesMove, lastMove, castles);
+        ArrayList<Move> moves = Piece.generateMoves(boardMap, whitesMove,lastMoves.size() != 0? lastMoves.get(lastMoves.size()-1):new Move(), castles);
 
         for(Move move : moves){
-            makeMove(move);
+            boardMap = makeMove(move, boardMap, castles);
+            lastMoves.add(move);
+            whitesMove = !whitesMove;
             numPosition += MoveGenerationTest(depth -1);
-            unMakeMove(move);
+            boardMap = unMakeMove(move, boardMap, castles);
+            whitesMove = !whitesMove;
+            lastMoves.remove(lastMoves.size()-1);
         }
         return numPosition;
     }
 
-    private void makeMove(Move move){
-        if(move.movedPiece == King && Math.abs(move.startField - move.endField)==2){
-            //Changing rooks placement in castling
-            boardMap.put((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2, boardMap.get((move.startField/8)*8 + ((move.endField % 8)/4) * 7));
-            boardMap.remove((move.startField/8)*8 + ((move.endField % 8)/4) * 7);
 
-            for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
-                castles[i] = false;
-            }
-        }else if(move.movedPiece == Pawn && move.startField/8 == move.takenPieceField/8 ){
-            //Removing the pawn which was taken end passant
-            boardMap.remove((move.startField/8)*8 + (move.endField % 8));
-        }
-            boardMap.put(move.endField, move.promotePiece==0? move.movedPiece : move.promotePiece + move.movedPiece - Pawn);
-            boardMap.remove(move.startField);
-            if(move.movedPiece == Rook){
-                switch (move.startField){
-                    case 0: castles[0] = false; break;
-                    case 7: castles[1] = false; break;
-                    case 56: castles[2] = false; break;
-                    case 63: castles[3] = false; break;
-                }
-            }
-    }
-
-    private void unMakeMove(Move move){
-        if(move.movedPiece == King && Math.abs(move.startField - move.endField)==2){
-            boardMap.put((move.startField/8)*8 + ((move.endField % 8)/4) * 7, boardMap.get((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2));
-            boardMap.remove((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2);
-            for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
-                castles[i] = true;
-            }
-            if(move.movedPiece == Rook){
-                switch (move.startField){
-                    case 0: castles[0] = true; break;
-                    case 7: castles[1] = true; break;
-                    case 56: castles[2] = true; break;
-                    case 63: castles[3] = true; break;
-                }
-            }
-        }else if(move.movedPiece == Pawn && move.startField/8 == move.takenPieceField/8){
-            boardMap.put(move.takenPieceField, Pawn);
-        }
-        boardMap.put(move.startField, move.movedPiece);
-        boardMap.remove(move.endField);
-    }
 
     public void mouseDragged(MouseEvent e) {
         mouseX = e.getX();
@@ -315,8 +277,7 @@ public class BoardOverlay extends UIElement {
 
 
             }
-            move.gaveCheck = Piece.isChecked(HelpMethods.findKing(Playing.whitesMove, Playing.ActivePieces),
-                    Playing.ActivePieces, Playing.whitesMove, Playing.moves.get(Playing.moves.size()-1), Playing.possibleCastles) == -1 ? false : true;
+            move.gaveCheck = Piece.isChecked(Playing.ActivePieces, Playing.whitesMove, Playing.moves.get(Playing.moves.size()-1), Playing.possibleCastles) == -1 ? false : true;
             HelpMethods.chessNotationToMove(HelpMethods.moveToChessNotation(move, copiedArray), copiedArray,
                     !Playing.whitesMove);
 

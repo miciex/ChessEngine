@@ -14,6 +14,9 @@ public class Move {
     public boolean gaveCheck;
     public int takenPieceField;
 
+    public Move(){
+    }
+
     public Move(int movedPiece, int startField, int endField, int takenPiece, int takenPieceField, int promotePiece, boolean gaveCheck){
         this.movedPiece = movedPiece;
         this.startField = startField;
@@ -24,9 +27,7 @@ public class Move {
         this.gaveCheck = gaveCheck;
     }
 
-    public Move(){
 
-    }
 
     public Move(HashMap<Integer, Integer> pieces, int startField, int endField, int promotePiece){
         this.startField = startField;
