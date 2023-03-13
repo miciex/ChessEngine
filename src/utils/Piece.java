@@ -404,7 +404,7 @@ public class Piece {
     }
 
     public static HashMap<Integer, Integer> makeMove(Move move, HashMap<Integer, Integer> boardMap, boolean[] castles){
-        if(move.movedPiece == King && Math.abs(move.startField - move.endField)==2){
+        if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField)==2){
             //Changing rooks placement in castling
             boardMap.put((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2, boardMap.get((move.startField/8)*8 + ((move.endField % 8)/4) * 7));
             boardMap.remove((move.startField/8)*8 + ((move.endField % 8)/4) * 7);
@@ -425,7 +425,7 @@ public class Piece {
     }
 
     public static HashMap<Integer, Integer> unMakeMove(Move move, HashMap<Integer, Integer> boardMap, boolean[] castles){
-        if(move.movedPiece == King && Math.abs(move.startField - move.endField)==2){
+        if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField)==2){
             boardMap.put((move.startField/8)*8 + ((move.endField % 8)/4) * 7, boardMap.get((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2));
             boardMap.remove((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2);
             for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
