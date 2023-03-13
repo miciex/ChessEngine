@@ -13,7 +13,7 @@ import static utils.Constants.Pieces.*;
 
 public class Piece {
 
-    public static ArrayList<Move> generateMoves(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove,  boolean[] possibleCastles){
+    public static ArrayList<Move> generateMoves(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove,  int[] possibleCastles){
         ArrayList<Move> moves = new ArrayList<>();
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
             if(entry.getValue() > 16 != whitesMove)
@@ -22,7 +22,7 @@ public class Piece {
         return moves;
     }
 
-    public static ArrayList<Move> calcMoves(int activeField, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles){
+    public static ArrayList<Move> calcMoves(int activeField, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles){
         ArrayList<Integer> endingSquares = deleteImpossibleMoves(activeField, PossibleMoves(activeField, activePieces, lastMove, whitesMove, possibleCastles), activePieces, whitesMove, lastMove, possibleCastles);
         ArrayList<Move> moves = new ArrayList<>();
 
@@ -37,7 +37,7 @@ public class Piece {
         return moves;
     }
 
-    public static ArrayList<Integer> PossibleMoves(int position, HashMap<Integer, Integer> activePieces, Move lastMove, boolean whitesMove, boolean[] possibleCastles) {
+    public static ArrayList<Integer> PossibleMoves(int position, HashMap<Integer, Integer> activePieces, Move lastMove, boolean whitesMove, int[] possibleCastles) {
         switch (activePieces.get(position) % 8) {
             case Pawn:
                 return PossiblePawnMoves(position, activePieces, lastMove);
@@ -90,22 +90,22 @@ public class Piece {
         return moves;
     }
 
-    public static ArrayList<Integer> addCastlingMoves(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, boolean[] possibleCastles, Move lastMove) {
+    public static ArrayList<Integer> addCastlingMoves(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, int[] possibleCastles, Move lastMove) {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        if (position == 4 && possibleCastles[0] && activePieces.containsKey(0) && activePieces.get(0)%8 == Rook && isCastlingPossible(position, -1, activePieces, whitesMove, lastMove, possibleCastles))
+        if (position == 4 && possibleCastles[0] == 0 && activePieces.containsKey(0) && activePieces.get(0)%8 == Rook && isCastlingPossible(position, -1, activePieces, whitesMove, lastMove))
             moves.add(2);
-        if (position == 4 && possibleCastles[1] && activePieces.containsKey(7) && activePieces.get(7)%8 == Rook && isCastlingPossible(position, 1, activePieces, whitesMove, lastMove, possibleCastles))
+        if (position == 4 && possibleCastles[1] == 0 && activePieces.containsKey(7) && activePieces.get(7)%8 == Rook && isCastlingPossible(position, 1, activePieces, whitesMove, lastMove))
             moves.add(6);
-        if (position == 60 && possibleCastles[2] && activePieces.containsKey(56) && activePieces.get(56)%8 == Rook && isCastlingPossible(position, -1, activePieces, whitesMove, lastMove, possibleCastles))
+        if (position == 60 && possibleCastles[2] == 0 && activePieces.containsKey(56) && activePieces.get(56)%8 == Rook && isCastlingPossible(position, -1, activePieces, whitesMove, lastMove))
             moves.add(58);
-        if (position == 60 && possibleCastles[3] && activePieces.containsKey(63) && activePieces.get(63)%8 == Rook && isCastlingPossible(position, 1, activePieces, whitesMove, lastMove, possibleCastles))
+        if (position == 60 && possibleCastles[3] == 0 && activePieces.containsKey(63) && activePieces.get(63)%8 == Rook && isCastlingPossible(position, 1, activePieces, whitesMove, lastMove))
             moves.add(62);
 
         return moves;
     }
 
-    private static boolean isCastlingPossible(int position, int dir, HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
+    private static boolean isCastlingPossible(int position, int dir, HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove) {
         int row = (int) Math.ceil((double) (position + 1) / 8);
         int checkingRow = row, checkingPosition = position + dir;
         int checkingColumn = (checkingPosition) % 8;
@@ -130,7 +130,7 @@ public class Piece {
         return true;
     }
 
-    public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
+    public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
         ArrayList<Integer> possibleMoves = new ArrayList<>();
         HashMap<Integer, Integer> copy = (HashMap<Integer, Integer>) activePieces.clone();
         for (int i : moves) {
@@ -153,7 +153,7 @@ public class Piece {
         return possibleMoves;
     }
 
-    public static int isChecked( HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
+    public static int isChecked( HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
         int position = HelpMethods.findKing(whitesMove, activePieces);
         int positionChecking = -1;
 
@@ -192,7 +192,7 @@ public class Piece {
         return positionChecking;
     }
 
-    public static int isChecked(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
+    public static int isChecked(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
         int positionChecking = -1;
 
         boolean isWhite = whitesMove;
@@ -285,7 +285,7 @@ public class Piece {
         return moves;
     }
 
-    private static ArrayList<Integer> PossibleKingMoves(int position, HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles) {
+    private static ArrayList<Integer> PossibleKingMoves(int position, HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
         ArrayList<Integer> moves = new ArrayList<>();
 
         boolean isWhite = HelpMethods.isWhite(pieces.get(position));
@@ -312,7 +312,7 @@ public class Piece {
         return moves;
     }
 
-    private static ArrayList<Integer> allPossibleKingMoves(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, boolean[] possibleCastles, Move lastMove){
+    private static ArrayList<Integer> allPossibleKingMoves(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, int[] possibleCastles, Move lastMove){
         ArrayList<Integer> moves = PossibleKingMoves(position, activePieces, whitesMove, lastMove, possibleCastles);
         moves.addAll(addCastlingMoves(position, activePieces, whitesMove, possibleCastles,lastMove));
         return moves;
@@ -406,46 +406,56 @@ public class Piece {
         return checkingRow < 8 && checkingRow >= 0 && checkingColumn < 8 && checkingColumn >= 0;
     }
 
-    public static HashMap<Integer, Integer> makeMove(Move move, HashMap<Integer, Integer> boardMap, boolean[] castles){
+    public static HashMap<Integer, Integer> makeMove(Move move, HashMap<Integer, Integer> boardMap, int[] castles){
         if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField)==2){
             //Changing rooks placement in castling
-            if(!boardMap.containsKey(63) && move.movedPiece < 16){
-                System.out.println("Doesn't contain Rook");
-            }
             boardMap.put((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2, boardMap.get((move.startField/8)*8 + ((move.endField % 8)/4) * 7));
             boardMap.remove((move.startField/8)*8 + ((move.endField % 8)/4) * 7);
-
-            for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
-                castles[i] = false;
-            }
         }else if(move.movedPiece == Pawn && move.startField/8 == move.takenPieceField/8 && move.takenPiece == Pawn){
             //Removing the pawn which was taken end passant
             boardMap.remove((move.startField/8)*8 + (move.endField % 8));
         }
         boardMap.put(move.endField, move.promotePiece==0? move.movedPiece : move.promotePiece + move.movedPiece - Pawn);
         boardMap.remove(move.startField);
-        if(boardMap.containsValue(null)){
-            System.out.println("not good");
-        }
         return boardMap;
     }
 
-    public static HashMap<Integer, Integer> unMakeMove(Move move, HashMap<Integer, Integer> boardMap, boolean[] castles){
+    public static HashMap<Integer, Integer> unMakeMove(Move move, HashMap<Integer, Integer> boardMap, int[] castles){
 
         if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField)==2){
             boardMap.put((move.startField/8)*8 + ((move.endField % 8)/4) * 7, boardMap.get( move.startField + (move.endField - move.startField)/2));
             boardMap.remove(  move.startField + (move.endField - move.startField)/2);
-            for (int i = move.startField/8==0 ? 0 : 2; i<castles.length; i++){
-                castles[i] = true;
-            }
         }
         boardMap.put(move.startField, move.movedPiece);
         boardMap.remove(move.endField);
         if(move.takenPiece>0)
             boardMap.put(move.takenPieceField, move.takenPiece);
-        if(boardMap.containsValue(null)){
-            System.out.println("not good");
-        }
         return boardMap;
     }
+
+    public static int[] setCastles(int[] castles, ArrayList<Move> moves) {
+        if (moves.size() == 0) return castles;
+        Move lastMove = moves.get(moves.size() - 1);
+        if (Math.abs(lastMove.endField - lastMove.startField) == 2) {
+            for (int i = lastMove.movedPiece > 16 ? 0 : 2; i < castles.length; i++) {
+                castles[i] = moves.size();
+                return castles;
+            }
+        }
+        if (lastMove.movedPiece == Rook) {
+            for (int i = 0; i < castles.length; i++) {
+                if (castles[i] == 0 && lastMove.startField == (7 * (i % 2)) + (i / 2) * 56) {
+                    castles[i] = moves.size();
+                    return castles;
+                }
+            }
+        }
+        for(int i = 0; i< castles.length; i++){
+            if(castles[i]<moves.size()) castles[i] = 0;
+        }
+
+        return castles;
+    }
+
+
 }

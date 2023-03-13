@@ -20,7 +20,7 @@ public class Playing extends State implements StateMethods{
 
     private int[] board;
     public static ArrayList<Move> moves;
-    public static boolean[] possibleCastles;
+    public static int[] possibleCastles;
     public static boolean whitesMove = true;
     public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
     public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
@@ -34,9 +34,9 @@ public class Playing extends State implements StateMethods{
 
     public Playing(Game game){
         super(game);
-        board = FenToIntArray(testPossibleMoves, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(TestBoards.testBoard5, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
-        possibleCastles = new boolean[]{true, true, true, true};
+        possibleCastles = new int[]{0,0,0,0};
         initClasses();
         ActivePieces = boardToMap(board);
         result = GameResults.NONE;
@@ -45,12 +45,12 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
-        board = FenToIntArray(testPossibleMoves, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(TestBoards.testBoard5, BOARD_HEIGHT * BOARD_WIDTH);
         ActivePieces = boardToMap(board);
         moves = new ArrayList<>();
         boardOverlay.createFields();
         whitesMove = true;
-        possibleCastles = new boolean[]{true, true, true, true};
+        possibleCastles = new int[]{0,0,0,0};
         positions.clear();
         positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
         result = GameResults.NONE;
