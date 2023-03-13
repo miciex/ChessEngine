@@ -141,20 +141,12 @@ public class Piece {
             {
                 if(activePieces.get(activeField) % 8 == King && Math.abs(i - activeField) == 2)
                 {
-                    if (i - activeField > 0 && isChecked(activeField + (i - activeField)/2, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(i, activePieces, whitesMove, lastMove, possibleCastles) != -1)
+                    if (isChecked(activeField + (i - activeField)/2, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(i, activePieces, whitesMove, lastMove, possibleCastles) == -1)
                         possibleMoves.add(i);
                 }
+                else
+                    possibleMoves.add(i);
             }
-
-            if(activePieces.get(activeField) % 8 == King && Math.abs(i - activeField) == 2)
-            {
-                if (i - activeField > 0 && (isChecked(activeField + 1, activePieces, whitesMove, lastMove, possibleCastles) != -1 || isChecked(activeField + 2, activePieces, whitesMove, lastMove, possibleCastles) != -1))
-                    possibleMoves.remove(i);
-                if(i - activeField < 0 && (isChecked(activeField - 1, activePieces, whitesMove, lastMove, possibleCastles) != -1 || isChecked(activeField - 2, activePieces, whitesMove, lastMove, possibleCastles) != -1))
-                    possibleMoves.remove(i);
-            }
-
-
             copy = unMakeMove(move, copy, possibleCastles);
         }
 
