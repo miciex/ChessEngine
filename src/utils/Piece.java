@@ -94,11 +94,11 @@ public class Piece {
         ArrayList<Integer> moves = new ArrayList<>();
 
         if (position == 4 && possibleCastles[0] && isCastlingPossible(position, -1, activePieces, whitesMove, lastMove, possibleCastles))
-            moves.add(0);
+            moves.add(2);
         if (position == 4 && possibleCastles[1] && isCastlingPossible(position, 1, activePieces, whitesMove, lastMove, possibleCastles))
-            moves.add(7);
+            moves.add(6);
         if (position == 60 && possibleCastles[2] && isCastlingPossible(position, -1, activePieces, whitesMove, lastMove, possibleCastles))
-            moves.add(56);
+            moves.add(58);
         if (position == 60 && possibleCastles[3] && isCastlingPossible(position, 1, activePieces, whitesMove, lastMove, possibleCastles))
             moves.add(62);
 
@@ -122,10 +122,6 @@ public class Piece {
             if (pieces.containsKey(checkingPosition))
                 return false;
 
-            if (Arrays.asList(2, 3, 5, 6).contains(checkingColumn))
-                if (isChecked(checkingPosition, pieces, whitesMove, lastMove, possibleCastles) != -1)
-                    return false;
-
             checkingPosition += dir;
             checkingColumn = checkingPosition % 8;
             checkingRow = (int) Math.ceil((double) (checkingPosition + 1) / 8);
@@ -141,9 +137,24 @@ public class Piece {
             Move move = new Move(copy, activeField, i);
             copy = makeMove(move, copy, possibleCastles);
 
-            if(isChecked(copy, whitesMove, lastMove, possibleCastles) == -1){
-                possibleMoves.add(i);
+            if(isChecked(copy, whitesMove, lastMove, possibleCastles) == -1)
+            {
+                if(activePieces.get(activeField) % 8 == King && Math.abs(i - activeField) == 2)
+                {
+                    if (i - activeField > 0 && isChecked(activeField + (i - activeField)/2, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(i, activePieces, whitesMove, lastMove, possibleCastles) != -1)
+                        possibleMoves.add(i);
+                }
             }
+
+            if(activePieces.get(activeField) % 8 == King && Math.abs(i - activeField) == 2)
+            {
+                if (i - activeField > 0 && (isChecked(activeField + 1, activePieces, whitesMove, lastMove, possibleCastles) != -1 || isChecked(activeField + 2, activePieces, whitesMove, lastMove, possibleCastles) != -1))
+                    possibleMoves.remove(i);
+                if(i - activeField < 0 && (isChecked(activeField - 1, activePieces, whitesMove, lastMove, possibleCastles) != -1 || isChecked(activeField - 2, activePieces, whitesMove, lastMove, possibleCastles) != -1))
+                    possibleMoves.remove(i);
+            }
+
+
             copy = unMakeMove(move, copy, possibleCastles);
         }
 
