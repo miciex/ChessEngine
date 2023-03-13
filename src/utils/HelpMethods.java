@@ -278,7 +278,7 @@ public class HelpMethods {
 
         for(int i : activePieces.keySet())
         {
-            if (activePieces.get(i) % 8 == Pieces.King && HelpMethods.isWhite(activePieces.get(i)) == white)
+            if (activePieces.containsKey(i) && activePieces.get(i) % 8 == Pieces.King && HelpMethods.isWhite(activePieces.get(i)) == white)
                 return i;
         }
 
