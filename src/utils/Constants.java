@@ -45,7 +45,7 @@ public class Constants {
         put(Pieces.Queen, new ArrayList<Integer>(Arrays.asList(8,-8,1,-1,7,-7,9,-9)));
         put(Pieces.Rook, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8)));
         put(Pieces.Bishop, new ArrayList<Integer>(Arrays.asList(7,-7,9,-9)));
-        put(Pieces.Pawn, new ArrayList<Integer>(Arrays.asList(8,7,9)));
+        put(Pieces.Pawn, new ArrayList<Integer>(Arrays.asList(8,16,7,9)));
         put(Pieces.King, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9)));
         put(Pieces.Knight, new ArrayList<Integer>(Arrays.asList(15,-15,17,-17,6,-6,10,-10)));
         put(2137, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9,15,-15,17,-17,6,-6,10,-10)));

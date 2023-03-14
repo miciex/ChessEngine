@@ -47,14 +47,19 @@ public class Move {
     }
 
     private int calcTakenPiece(int piece, int pieceOnNewField,int startPos, int endPos){
-        if(piece%8 != Pawn || Math.abs((startPos%8)-(endPos%8)) == None || pieceOnNewField != None) return pieceOnNewField;
-        return Pawn;
+        if(piece%8 == Pawn && pieceOnNewField == None && startPos%8 != endPos%8)
+            return Pawn + (piece>16 ? 8: 16);
+        return pieceOnNewField;
     }
 
     private int calcTakenPieceField(int piece, int pieceOnNewField,int startPos, int endPos){
         if(takenPiece == None) return -1;
-        if(piece%8 != Pawn || Math.abs((startPos%8)-(endPos%8)) == None || pieceOnNewField != None) return endPos;
-        return (startPos/8) * 8 + endPos % 8;
+        if(piece%8 == Pawn && pieceOnNewField == None && startPos%8 != endPos%8) {
+            int a = (startPos / 8) * 8 ;
+            a+= endPos%8;
+            return a;
+        }
+        return endPos;
     }
 
 }

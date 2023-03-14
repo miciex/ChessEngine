@@ -14,9 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static utils.Constants.BoardInfo.BOARD_HEIGHT;
-import static utils.Constants.BoardInfo.BOARD_WIDTH;
 import static utils.Constants.Boards.TestBoards.*;
+import static utils.Constants.BoardInfo.BOARD_WIDTH;
 import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
@@ -48,17 +47,10 @@ public class BoardOverlay extends UIElement {
         this.playing = playing;
         loadPiecesImgs();
         createFields();
-        boardMap = boardToMap(FenToIntArray(testBoard1, 64));
+        boardMap = boardToMap(FenToIntArray(testBoard3, 64));
         lastMoves = new ArrayList<>();
 
-        System.out.println(MoveGenerationTest(5, true));
-    }
-
-    private void testing(int depth, String fen){
-        for(int i = 1; i<=depth; i++){
-            boardMap = boardToMap(FenToIntArray(fen, 64));
-            MoveGenerationTest(i, true);
-        }
+        System.out.println(MoveGenerationTest(4, true));
     }
 
     public void createFields() {
@@ -88,11 +80,11 @@ public class BoardOverlay extends UIElement {
         for(Move move : moves){
             boardMap = makeMove(move, boardMap, castles);
             lastMoves.add(move);
-            castles = setCastles(castles, lastMoves);
+            castles = Piece.setCastles(castles, lastMoves);
             numPosition += MoveGenerationTest(depth -1, !isWhite);
             boardMap = unMakeMove(move, boardMap, castles);
             lastMoves.remove(lastMoves.size()-1);
-            castles = setCastles(castles, lastMoves);
+            castles = Piece.setCastles(castles, lastMoves);
         }
         return numPosition;
     }

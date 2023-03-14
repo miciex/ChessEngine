@@ -4,6 +4,7 @@ import GameStates.Move;
 import GameStates.Playing;
 import ui.BoardOverlay;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -234,51 +235,26 @@ public class Piece {
         ArrayList<Integer> moves = new ArrayList<>();
 
         boolean isWhite = HelpMethods.isWhite(pieces.get(position));
+        int mulptiplier = isWhite ? -1 : 1;
+        ArrayList<Integer> directions = Constants.Directions.get(Constants.Pieces.Pawn);
+        for(int i = 0; i<directions.size(); i++){
+            if(!IsCorrect(position , mulptiplier * directions.get(i))) continue;
+            int pos = mulptiplier * directions.get(i) + position;
+            if(i<2 && !pieces.containsKey(pos) ){
+                if(i==0)
+                    moves.add(pos);
+                else if((int)(3.5 - (float)mulptiplier * 2.5) == position/8 && !pieces.containsKey(pos - 8 * mulptiplier)){
+                    moves.add(pos);
+                }
+            }else if(i==1){
 
-        int checkingPosition, checkingDir;
-
-        int row = (int) Math.ceil((double) (position + 1) / 8);
-
-        for (int i = 0; i < Constants.Directions.get(Constants.Pieces.Pawn).size(); i++) {
-            checkingDir = isWhite ? -Constants.Directions.get(Constants.Pieces.Pawn).get(i)
-                    : Constants.Directions.get(Constants.Pieces.Pawn).get(i);
-            checkingPosition = position + checkingDir;
-
-            if (IsCorrect(position, checkingDir)) {
-                if (i > 0)
-                    if (pieces.containsKey(checkingPosition)
-                            && HelpMethods.isWhite(pieces.get(checkingPosition)) != isWhite)
-                        moves.add(checkingPosition);
-                    else
-                        continue;
-
-                if (!pieces.containsKey(checkingPosition))
-                    moves.add(checkingPosition);
             }
-        }
-
-        if (isWhite == false && row == 2 && !pieces.containsKey(position + 8)
-                && !pieces.containsKey(position + 16))
-            moves.add(position + 16);
-        else if (isWhite == true && row == 7 && !pieces.containsKey(position - 8)
-                && !pieces.containsKey(position - 16))
-            moves.add(position - 16);
-
-        if (Playing.moves.size() > 0) {
-
-            if (isWhite == true && row == 4 && lastMove.movedPiece % 8 == Pawn
-                    && Math.abs(lastMove.endField - lastMove.startField) == 16) {
-                if (lastMove.endField == position + 1 && !pieces.containsKey(position - 7))
-                    moves.add(position - 7);
-                else if (lastMove.endField == position - 1 && !pieces.containsKey(position - 9))
-                    moves.add(position - 9);
+            else if(i > 1 && pieces.containsKey(pos) && (pieces.get(pos) < 16 != isWhite)){
+                moves.add(pos);
             }
-            if (isWhite == false && row == 5 && lastMove.movedPiece % 8 == Pawn
-                    && Math.abs(lastMove.endField - lastMove.startField) == 16) {
-                if (lastMove.endField == position + 1 && !pieces.containsKey(position + 9))
-                    moves.add(position + 9);
-                else if (lastMove.endField == position - 1 && !pieces.containsKey(position + 7))
-                    moves.add(position + 7);
+            else if(i > 1 && lastMove.movedPiece%8 == Pawn  && Math.abs((lastMove.startField/8) - (lastMove.endField/8))==2 ){
+                if(pos == lastMove.endField + 8 * mulptiplier)
+                moves.add(pos);
             }
         }
 
@@ -411,9 +387,9 @@ public class Piece {
             //Changing rooks placement in castling
             boardMap.put((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2, boardMap.get((move.startField/8)*8 + ((move.endField % 8)/4) * 7));
             boardMap.remove((move.startField/8)*8 + ((move.endField % 8)/4) * 7);
-        }else if(move.movedPiece == Pawn && move.startField/8 == move.takenPieceField/8 && move.takenPiece == Pawn){
+        }else if(move.movedPiece%8 == Pawn  && move.takenPiece%8 == Pawn && move.endField!=move.takenPieceField){
             //Removing the pawn which was taken end passant
-            boardMap.remove((move.startField/8)*8 + (move.endField % 8));
+            boardMap.remove(move.takenPieceField);
         }
         boardMap.put(move.endField, move.promotePiece==0? move.movedPiece : move.promotePiece + move.movedPiece - Pawn);
         boardMap.remove(move.startField);
@@ -436,9 +412,10 @@ public class Piece {
     public static int[] setCastles(int[] castles, ArrayList<Move> moves) {
         if (moves.size() == 0) return castles;
         Move lastMove = moves.get(moves.size() - 1);
-        if (Math.abs(lastMove.endField - lastMove.startField) == 2) {
+        if (Math.abs(lastMove.endField - lastMove.startField) == 2 && lastMove.movedPiece%8==King) {
             for (int i = lastMove.movedPiece > 16 ? 0 : 2; i < castles.length; i++) {
-                castles[i] = moves.size();
+                if(castles[i]==0)
+                    castles[i] = moves.size();
                 return castles;
             }
         }
