@@ -60,6 +60,7 @@ public class Constants {
             public final static String testBoard3 = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8";
             public final static String testBoard4 = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1";
             public final static String testBoard5 = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R";
+            public final static String testBoard7 = "r1Qq1k1r/pp2bppp/n1p5/8/2B5/8/PPP1NnPP/RNBQK2R";
             public final static String testBoard6 = "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1";
         }
     }
