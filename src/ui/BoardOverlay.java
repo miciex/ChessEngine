@@ -47,9 +47,9 @@ public class BoardOverlay extends UIElement {
         this.playing = playing;
         loadPiecesImgs();
         initClasses();
-        boardMap = boardToMap(FenToIntArray(testBoard2, 64));
+        boardMap = boardToMap(FenToIntArray(playing.currentBoard, 64));
         lastMoves = new ArrayList<>();
-        System.out.println(MoveGenerationTest(4, true));
+        //System.out.println(MoveGenerationTest(4, true));
     }
 
     private void initClasses(){
@@ -71,6 +71,12 @@ public class BoardOverlay extends UIElement {
             } else {
                 fields[i].color = BLACK;
             }
+        }
+    }
+
+    public void update(){
+        if(Playing.whitesMove == playing.engine.isWhite){
+            playComputerMove();
         }
     }
 
@@ -242,8 +248,11 @@ public class BoardOverlay extends UIElement {
 
     private void playMove(int endField){
         Move move = new Move(Playing.ActivePieces,activeField, endField);
+        if((endField/8 == 0 || endField/8 == 7) && boardMap.get(activeField)%8 == Pawn){
+            move.promotePiece = GetPromotionPiece(endField);
+        }
         Playing.ActivePieces = makeMove(move, Playing.ActivePieces);
-        playing.updateWholeBard(mapToBoard(Playing.ActivePieces));
+        playing.updateWholeBoard(mapToBoard(Playing.ActivePieces));
         updateFieldsValue(playing.getBoard());
         Playing.moves.add(move);
         setCastles(castles, Playing.moves);
@@ -253,7 +262,7 @@ public class BoardOverlay extends UIElement {
     private void playComputerMove(){
         Move move = playing.engine.getRandomMove(Playing.ActivePieces, castles, Playing.moves);
         Playing.ActivePieces = makeMove(move, Playing.ActivePieces);
-        playing.updateWholeBard(mapToBoard(Playing.ActivePieces));
+        playing.updateWholeBoard(mapToBoard(Playing.ActivePieces));
         updateFieldsValue(playing.getBoard());
         Playing.moves.add(move);
         setCastles(castles, Playing.moves);
@@ -261,10 +270,11 @@ public class BoardOverlay extends UIElement {
     }
 
     private void movePiece(int col, int row) {
-        if(Playing.whitesMove == playing.playerWhite){
+        if(Playing.whitesMove == playing.playerWhite  && Playing.ActivePieces.containsKey(activeField)){
             playMove(col + row * 8);
-            playComputerMove();
         }
+
+
 
 
 //        int moveField = col + row * BOARD_WIDTH;

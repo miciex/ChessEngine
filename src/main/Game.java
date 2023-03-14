@@ -57,7 +57,7 @@ public class Game implements Runnable{
             previousTime = currentTime;
 
             if(deltaU>=1){
-                //update();
+                update();
                 updates++;
                 deltaU--;
             }
@@ -76,6 +76,10 @@ public class Game implements Runnable{
             }
         }
 
+    }
+
+    public void update(){
+        playing.update();
     }
 
     public void render(Graphics g) {
