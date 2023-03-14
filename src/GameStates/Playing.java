@@ -20,7 +20,7 @@ public class Playing extends State implements StateMethods{
 
     private int[] board;
     public static ArrayList<Move> moves;
-    public static int[] possibleCastles;
+    public int[] possibleCastles;
     public static boolean whitesMove = true;
     public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
     public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;

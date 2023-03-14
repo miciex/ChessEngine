@@ -41,7 +41,7 @@ public class BoardOverlay extends UIElement {
     private boolean whitesMove = true;
     //private int numPosition = 0;
     private int castles[]  = new int[]{0,0,0,0};
-     ArrayList<Move> lastMoves;
+    ArrayList<Move> lastMoves;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
@@ -51,7 +51,7 @@ public class BoardOverlay extends UIElement {
         boardMap = boardToMap(FenToIntArray(testBoard1, 64));
         lastMoves = new ArrayList<>();
 
-        System.out.println(MoveGenerationTest(5, true));
+        System.out.println(MoveGenerationTest(1, true));
     }
 
     private void testing(int depth, String fen){
@@ -117,7 +117,7 @@ public class BoardOverlay extends UIElement {
             activeField = col + row * BOARD_WIDTH;
             fields[activeField].setMousePressed(true);
             if (HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove) {
-                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, playing.getLastMove(), Playing.whitesMove, Playing.possibleCastles);
+                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, playing.getLastMove(), Playing.whitesMove, playing.possibleCastles);
                 showPossibleMoves();
             }
             return;
@@ -139,7 +139,7 @@ public class BoardOverlay extends UIElement {
                 activeField = newField;
                 fields[activeField].setMousePressed(true);
                 if (HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove) {
-                    moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, playing.getLastMove(), Playing.whitesMove, Playing.possibleCastles);
+                    moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, playing.getLastMove(), Playing.whitesMove, playing.possibleCastles);
                     showPossibleMoves();
                 }
             } else {
@@ -152,7 +152,7 @@ public class BoardOverlay extends UIElement {
 
         if (newField < 0 && activeField >= 0 && playing.result == GameResults.NONE) {
             if (HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove) {
-                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, playing.getLastMove(), Playing.whitesMove, Playing.possibleCastles);
+                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, playing.getLastMove(), Playing.whitesMove, playing.possibleCastles);
                 showPossibleMoves();
             }
         }
@@ -179,7 +179,7 @@ public class BoardOverlay extends UIElement {
 
         if (newField >= 0 && playing.result == GameResults.NONE) {
             if (HelpMethods.isWhite(Playing.ActivePieces.get(activeField)) == Playing.whitesMove) {
-                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, playing.getLastMove(), Playing.whitesMove, Playing.possibleCastles);
+                moves = Piece.PossibleMoves(activeField, Playing.ActivePieces, playing.getLastMove(), Playing.whitesMove, playing.possibleCastles);
                 showPossibleMoves();
             }
         }
@@ -199,10 +199,7 @@ public class BoardOverlay extends UIElement {
 
     private void showPossibleMoves() {
         if (!HelpMethods.isPromotionNeeded()) {
-            moves = Piece.deleteImpossibleMoves(activeField, moves, Playing.ActivePieces, Playing.whitesMove, playing.getLastMove(), Playing.possibleCastles);
-
-            if (playing.getBoard()[activeField] % 8 == King)
-                moves.addAll(Piece.addCastlingMoves(activeField, Playing.ActivePieces, Playing.whitesMove, Playing.possibleCastles, playing.getLastMove()));
+            moves = Piece.deleteImpossibleMoves(activeField, moves, Playing.ActivePieces, Playing.whitesMove, playing.getLastMove(), playing.possibleCastles);
 
             for (int move : moves) {
                 fields[move].isPossibleMove = true;
@@ -262,12 +259,11 @@ public class BoardOverlay extends UIElement {
 
 
 
-            if (playing.getBoard()[activeField] % 8 == King && playing.getBoard()[moveField] % 8 == Rook
-                    && HelpMethods.isWhite(playing.getBoard()[moveField]) == Playing.whitesMove) {
-                int dir = (moveField % 8 > move.startField % 8) ? move.startField + 2 : move.startField - 2;
+            if (playing.getBoard()[activeField] % 8 == King && Math.abs(moveField - activeField) == 2) {
+                int rook = (moveField % 8 > move.startField % 8) ? move.startField + 3 : move.startField - 4;
 
-                move.gaveCheck = executeMove(move, activeField, dir, false).gaveCheck;
-                executeMove(move, moveField, ((moveField % 8 > move.startField % 8) ? dir - 1 : dir + 1), true);
+                move.gaveCheck = executeMove(move, activeField, moveField, false).gaveCheck;
+                executeMove(move, rook, activeField + (moveField - activeField)/2, true);
             } else {
                 move.gaveCheck = executeMove(move, activeField, moveField, false).gaveCheck;
             }
@@ -282,10 +278,11 @@ public class BoardOverlay extends UIElement {
 
 
             }
-            move.gaveCheck = Piece.isChecked(Playing.ActivePieces, Playing.whitesMove, playing.getLastMove(), Playing.possibleCastles) == -1 ? false : true;
+            move.gaveCheck = Piece.isChecked(Playing.ActivePieces, Playing.whitesMove, playing.getLastMove(), playing.possibleCastles) == -1 ? false : true;
             HelpMethods.chessNotationToMove(HelpMethods.moveToChessNotation(move, copiedArray), copiedArray,
                     !Playing.whitesMove);
 
+            playing.possibleCastles = Piece.setCastles(playing.possibleCastles, lastMoves);
             checkGameResult(move);
 
         }
@@ -302,7 +299,7 @@ public class BoardOverlay extends UIElement {
         else if(CheckGameResults.draw50MoveRule(movesTo50MoveRule)) playing.result = GameResults.DRAW_50_MOVE_RULE;
         else if(CheckGameResults.insufficientMaterial(Playing.ActivePieces)) playing.result = GameResults.STALEMATE;
         else if(CheckGameResults.insufficientMaterial(Playing.ActivePieces)) playing.result = GameResults.INSUFFICIENT_MATERIAL;
-        else if(CheckGameResults.isMate(Playing.ActivePieces, Playing.whitesMove, playing.getLastMove(), Playing.possibleCastles)) playing.result = GameResults.MATE;
+        else if(CheckGameResults.isMate(Playing.ActivePieces, Playing.whitesMove, playing.getLastMove(), playing.possibleCastles)) playing.result = GameResults.MATE;
         if(playing.result!=GameResults.NONE) System.out.println(gameResultToChessNotation(playing.result, Playing.whitesMove));
     }
 
