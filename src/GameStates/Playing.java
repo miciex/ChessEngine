@@ -103,6 +103,11 @@ public class Playing extends State implements StateMethods{
 
 
 
+    public Move getLastMove()
+    {
+        return (moves.size() > 0) ? moves.get(moves.size()-1) : new Move();
+    }
+
     public int[] getBoard(){
         return board;
     }
