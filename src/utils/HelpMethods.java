@@ -188,6 +188,32 @@ public class HelpMethods {
         return arr;
     }
 
+    public static String IntArrayToFen(int[] arr) {
+        StringBuilder sb = new StringBuilder();
+        int emptyCount = 0;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == Pieces.None) {
+                emptyCount++;
+            } else {
+                if (emptyCount > 0) {
+                    sb.append(emptyCount);
+                    emptyCount = 0;
+                }
+                sb.append(intToCharPiece(arr[i]));
+            }
+            if (i % 8 == 7) {
+                if (emptyCount > 0) {
+                    sb.append(emptyCount);
+                    emptyCount = 0;
+                }
+                if (i < arr.length - 1) {
+                    sb.append('/');
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     public static HashMap<Integer, Integer> boardToMap(int[] board){
         HashMap<Integer, Integer> map = new HashMap<>();
         for(int i = 0; i<board.length; i++){
@@ -195,6 +221,14 @@ public class HelpMethods {
                 map.put(i, board[i]);
         }
         return map;
+    }
+
+    public static int[] mapToBoard(HashMap<Integer, Integer> map, int boardSize) {
+        int[] board = new int[boardSize];
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            board[entry.getKey()] = entry.getValue();
+        }
+        return board;
     }
 
     public static int CharPieceToInt(Character p){

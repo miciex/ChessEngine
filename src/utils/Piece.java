@@ -18,7 +18,7 @@ public class Piece {
         ArrayList<Move> moves = new ArrayList<>();
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
             if(entry.getValue() > 16 != whitesMove)
-            moves.addAll(Piece.calcMoves(entry.getKey(), pieces, whitesMove, lastMove, possibleCastles));
+                moves.addAll(Piece.calcMoves(entry.getKey(), pieces, whitesMove, lastMove, possibleCastles));
         }
         return moves;
     }

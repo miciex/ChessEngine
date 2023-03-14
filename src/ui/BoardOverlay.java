@@ -41,6 +41,7 @@ public class BoardOverlay extends UIElement {
     // private int numPosition = 0;
     private int castles[] = new int[] { 0, 0, 0, 0 };
     ArrayList<Move> lastMoves;
+    public static int ep = 0;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
