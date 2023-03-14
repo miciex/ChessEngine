@@ -34,7 +34,7 @@ public class Playing extends State implements StateMethods{
 
     public Playing(Game game){
         super(game);
-        board = FenToIntArray(TestBoards.testBoard3, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(TestBoards.testBoard5, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         possibleCastles = new int[]{0,0,0,0};
         initClasses();
@@ -45,7 +45,7 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
-        board = FenToIntArray(TestBoards.testBoard3, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(TestBoards.testBoard5, BOARD_HEIGHT * BOARD_WIDTH);
         ActivePieces = boardToMap(board);
         moves = new ArrayList<>();
         boardOverlay.createFields();

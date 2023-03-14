@@ -197,6 +197,14 @@ public class HelpMethods {
         return map;
     }
 
+    public static int[] mapToBoard(HashMap<Integer, Integer> map){
+        int[] board = new int[64];
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            board[entry.getKey()] = entry.getValue();
+        }
+        return board;
+    }
+
     public static int CharPieceToInt(Character p){
         switch (toLowerCase(p)){
             case 'q':

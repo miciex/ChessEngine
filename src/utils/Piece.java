@@ -47,46 +47,22 @@ public class Piece {
             case Knight:
                 return PossibleKnightMoves(position, activePieces);
         }
-
-        int piece = activePieces.get(position) % 8;
-        boolean isWhite = HelpMethods.isWhite(activePieces.get(position));
-
-        int row = (int) Math.ceil((double) (position + 1) / 8);
-        int column = (position) % 8;
-
         ArrayList<Integer> moves = new ArrayList<>();
-        int checkingDir, checkingPosition, checkingRow, checkingColumn;
-
-        for (int i = 0; i < Constants.Directions.get(piece).size(); i++) {
-            checkingDir = Constants.Directions.get(piece).get(i);
-            checkingPosition = position + checkingDir;
-            checkingRow = (int) Math.ceil((double) (checkingPosition + 1) / 8);
-            checkingColumn = checkingPosition % 8;
-
-            while (checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE
-                    && IsCorrect(position, checkingDir)) {
-                if (Constants.Directions.get(Constants.Pieces.Rook).contains(checkingDir)
-                        && (checkingColumn != column && checkingRow != row))
+        for (int i : Constants.Directions.get(activePieces.get(position) % 8)) {
+            int pos = position;
+            while (IsCorrect(pos, i)) {
+                pos += i;
+                if (!activePieces.containsKey(pos)){
+                    moves.add(pos);
+                }
+                else if (activePieces.get(pos)<16 != activePieces.get(position)<16) {
+                    moves.add(pos);
                     break;
-
-                if (activePieces.containsKey(checkingPosition))
-                    if ((HelpMethods.isWhite(activePieces.get(checkingPosition)) != isWhite)) {
-                        moves.add(checkingPosition);
-                        break;
-                    } else
-                        break;
-
-                moves.add(checkingPosition);
-
-                if ((Constants.Directions.get(Constants.Pieces.Bishop).contains(checkingDir)
-                        && (checkingColumn == 0 || checkingColumn == 7)))
+                }else
                     break;
-
-                checkingPosition += checkingDir;
-                checkingColumn = checkingPosition % 8;
-                checkingRow = (int) Math.ceil((double) (checkingPosition + 1) / 8);
             }
         }
+
 
         return moves;
     }
@@ -145,7 +121,7 @@ public class Piece {
                     if (isChecked(activeField, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(activeField + (i - activeField)/2, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(i, activePieces, whitesMove, lastMove, possibleCastles) == -1)
                         possibleMoves.add(i);
                 }
-                else if(Math.abs(i - activeField) != 2)
+                else
                     possibleMoves.add(i);
             }
             copy = unMakeMove(move, copy, possibleCastles);
@@ -421,14 +397,14 @@ public class Piece {
         }
         if (lastMove.movedPiece == Rook) {
             for (int i = 0; i < castles.length; i++) {
-                if (castles[i] == 0 && lastMove.startField == (7 * (i % 2)) + (i / 2) * 56) {
+                if (castles[i]!=-1 && castles[i] == 0 && lastMove.startField == (7 * (i % 2)) + (i / 2) * 56) {
                     castles[i] = moves.size();
                     return castles;
                 }
             }
         }
         for(int i = 0; i< castles.length; i++){
-            if(castles[i]<moves.size()) castles[i] = 0;
+            if(castles[i]!=-1 && castles[i]<moves.size()) castles[i] = 0;
         }
 
         return castles;

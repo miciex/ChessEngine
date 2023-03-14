@@ -39,7 +39,7 @@ public class BoardOverlay extends UIElement {
     private HashMap<Integer, Integer> boardMap;
     private boolean whitesMove = true;
     // private int numPosition = 0;
-    private int castles[] = new int[] { 0, 0, 0, 0 };
+    private int castles[] = new int[] { -1, -1, 0, 0 };
     ArrayList<Move> lastMoves;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
@@ -47,10 +47,10 @@ public class BoardOverlay extends UIElement {
         this.playing = playing;
         loadPiecesImgs();
         createFields();
-        boardMap = boardToMap(FenToIntArray(testBoard3, 64));
+        //9 checked
+        boardMap = boardToMap(FenToIntArray(testBoard5, 64));
         lastMoves = new ArrayList<>();
-
-        System.out.println(MoveGenerationTest(4, true));
+        moves(4, true);
     }
 
     public void createFields() {
@@ -68,6 +68,25 @@ public class BoardOverlay extends UIElement {
                 fields[i].color = BLACK;
             }
         }
+    }
+
+    void moves(int depth, boolean isWhite){
+        int all = 0;
+        ArrayList<Move> moves = Piece.generateMoves(boardMap, isWhite,
+                lastMoves.size() != 0 ? lastMoves.get(lastMoves.size() - 1) : new Move(), castles);
+        for(Move move : moves){
+            boardMap = makeMove(move, boardMap, castles);
+            lastMoves.add(move);
+            castles = Piece.setCastles(castles, lastMoves);
+            int b = MoveGenerationTest(depth - 1, !isWhite);
+            boardMap = unMakeMove(move, boardMap, castles);
+            lastMoves.remove(lastMoves.size() - 1);
+            castles = Piece.setCastles(castles, lastMoves);
+            String a = moveToChessNotation(move, mapToBoard(boardMap)) + "  " + b;
+            System.out.println(a);
+            all+=b;
+        }
+        System.out.println("All: "+all);
     }
 
     int MoveGenerationTest(int depth, boolean isWhite) {
