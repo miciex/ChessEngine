@@ -388,25 +388,32 @@ public class Piece {
     public static int[] setCastles(int[] castles, ArrayList<Move> moves) {
         if (moves.size() == 0) return castles;
         Move lastMove = moves.get(moves.size() - 1);
-        if (Math.abs(lastMove.endField - lastMove.startField) == 2 && lastMove.movedPiece%8==King) {
-            for (int i = lastMove.movedPiece > 16 ? 0 : 2; i < castles.length; i++) {
+        if ( lastMove.movedPiece%8==King) {
+            for (int i = lastMove.movedPiece > 16 ? 0 : 2; i - (lastMove.movedPiece > 16 ? 0 : 2) < 2; i++) {
                 if(castles[i]==0)
                     castles[i] = moves.size();
-                return castles;
+
             }
+            return castles;
         }
         if (lastMove.movedPiece == Rook) {
             for (int i = 0; i < castles.length; i++) {
-                if (castles[i]!=-1 && castles[i] == 0 && lastMove.startField == (7 * (i % 2)) + (i / 2) * 56) {
+                if ( castles[i] == 0 && lastMove.startField == (7 * (i % 2)) + (i / 2) * 56) {
                     castles[i] = moves.size();
                     return castles;
                 }
             }
         }
-        for(int i = 0; i< castles.length; i++){
-            if(castles[i]!=-1 && castles[i]<moves.size()) castles[i] = 0;
-        }
 
+
+        return castles;
+    }
+
+    public static int[] unsetCastles(int[] castles, ArrayList<Move> moves){
+        for(int i = 0; i< castles.length; i++){
+            if(castles[i]>moves.size())
+                castles[i] = 0;
+        }
         return castles;
     }
 
