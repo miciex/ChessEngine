@@ -39,7 +39,7 @@ public class BoardOverlay extends UIElement {
     private HashMap<Integer, Integer> boardMap;
     private boolean whitesMove = true;
     // private int numPosition = 0;
-    private int castles[] = new int[] { -1, -1, 0, 0 };
+    private int castles[] = new int[] { 0,0,0,0 };
     ArrayList<Move> lastMoves;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
@@ -50,7 +50,7 @@ public class BoardOverlay extends UIElement {
         //9 checked
         boardMap = boardToMap(FenToIntArray(testBoard5, 64));
         lastMoves = new ArrayList<>();
-        moves(4, true);
+        System.out.println(MoveGenerationTest(4, whitesMove));
     }
 
     public void createFields() {
@@ -104,7 +104,7 @@ public class BoardOverlay extends UIElement {
             numPosition += MoveGenerationTest(depth - 1, !isWhite);
             boardMap = unMakeMove(move, boardMap, castles);
             lastMoves.remove(lastMoves.size() - 1);
-            castles = Piece.setCastles(castles, lastMoves);
+            castles = Piece.unsetCastles(castles, lastMoves);
         }
         return numPosition;
     }
