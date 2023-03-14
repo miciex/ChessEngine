@@ -142,10 +142,10 @@ public class Piece {
             {
                 if(activePieces.get(activeField) % 8 == King && Math.abs(i - activeField) == 2)
                 {
-                    if (isChecked(activeField + (i - activeField)/2, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(i, activePieces, whitesMove, lastMove, possibleCastles) == -1)
+                    if (isChecked(activeField, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(activeField + (i - activeField)/2, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(i, activePieces, whitesMove, lastMove, possibleCastles) == -1)
                         possibleMoves.add(i);
                 }
-                else
+                else if(Math.abs(i - activeField) != 2)
                     possibleMoves.add(i);
             }
             copy = unMakeMove(move, copy, possibleCastles);
@@ -154,7 +154,7 @@ public class Piece {
         return possibleMoves;
     }
 
-    public static int isChecked( HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
+    public static int isChecked(HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
         int position = HelpMethods.findKing(whitesMove, activePieces);
         int positionChecking = -1;
 
