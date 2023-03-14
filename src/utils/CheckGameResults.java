@@ -7,12 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static utils.Constants.Pieces.*;
-import static utils.HelpMethods.checkPossibleCastles;
 import static utils.HelpMethods.findKing;
 
 public class CheckGameResults {
 
-    public static boolean isMate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles){
+    public static boolean isMate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles){
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
             if(entry.getValue() > 16 && !whitesMove || entry.getValue() < 16 && whitesMove)
                 if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces, lastMove, whitesMove, possibleCastles),pieces, whitesMove, lastMove, possibleCastles).size() > 0) return false;
@@ -20,7 +19,7 @@ public class CheckGameResults {
       return Piece.isChecked(pieces, whitesMove, lastMove, possibleCastles) != -1;
     }
 
-    public static boolean isStalemate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, boolean[] possibleCastles){
+    public static boolean isStalemate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles){
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
             if(entry.getValue() > 16 && !whitesMove || entry.getValue() < 16 && whitesMove)
                 if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces, lastMove, whitesMove, possibleCastles),pieces, whitesMove, lastMove, possibleCastles).size() > 0) return false;

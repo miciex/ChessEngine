@@ -16,14 +16,13 @@ import java.util.HashMap;
 
 import static utils.Constants.BoardInfo.BOARD_HEIGHT;
 import static utils.Constants.BoardInfo.BOARD_WIDTH;
-import static utils.Constants.Boards.testPossibleMoves;
+import static utils.Constants.Boards.TestBoards.*;
 import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Pieces.*;
 import static utils.HelpMethods.*;
-import static utils.Piece.makeMove;
-import static utils.Piece.unMakeMove;
+import static utils.Piece.*;
 
 public class BoardOverlay extends UIElement {
 
@@ -40,8 +39,8 @@ public class BoardOverlay extends UIElement {
     private int movesTo50MoveRule = 0;
     private HashMap<Integer, Integer> boardMap;
     private boolean whitesMove = true;
-    private int numPosition = 0;
-    private boolean castles[]  = new boolean[]{true, true, true, true};
+    //private int numPosition = 0;
+    private int castles[]  = new int[]{0,0,0,0};
      ArrayList<Move> lastMoves;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
@@ -49,9 +48,17 @@ public class BoardOverlay extends UIElement {
         this.playing = playing;
         loadPiecesImgs();
         createFields();
-        boardMap = boardToMap(playing.getBoard());
+        boardMap = boardToMap(FenToIntArray(testBoard1, 64));
         lastMoves = new ArrayList<>();
-        System.out.println(MoveGenerationTest(2));
+
+        System.out.println(MoveGenerationTest(5, true));
+    }
+
+    private void testing(int depth, String fen){
+        for(int i = 1; i<=depth; i++){
+            boardMap = boardToMap(FenToIntArray(fen, 64));
+            MoveGenerationTest(i, true);
+        }
     }
 
     public void createFields() {
@@ -71,21 +78,21 @@ public class BoardOverlay extends UIElement {
         }
     }
 
-    int MoveGenerationTest(int depth){
+    int MoveGenerationTest(int depth, boolean isWhite){
         if(depth == 0){
             return 1;
         }
 
-        ArrayList<Move> moves = Piece.generateMoves(boardMap, whitesMove,lastMoves.size() != 0? lastMoves.get(lastMoves.size()-1):new Move(), castles);
-
+        ArrayList<Move> moves = Piece.generateMoves(boardMap, isWhite, lastMoves.size() != 0? lastMoves.get(lastMoves.size()-1):new Move(), castles);
+        int numPosition = 0;
         for(Move move : moves){
             boardMap = makeMove(move, boardMap, castles);
             lastMoves.add(move);
-            whitesMove = !whitesMove;
-            numPosition += MoveGenerationTest(depth -1);
+            castles = setCastles(castles, lastMoves);
+            numPosition += MoveGenerationTest(depth -1, !isWhite);
             boardMap = unMakeMove(move, boardMap, castles);
-            whitesMove = !whitesMove;
             lastMoves.remove(lastMoves.size()-1);
+            castles = setCastles(castles, lastMoves);
         }
         return numPosition;
     }
@@ -253,9 +260,7 @@ public class BoardOverlay extends UIElement {
                     && HelpMethods.isWhite(Playing.ActivePieces.get(moveField)) != Playing.whitesMove)
                 Playing.ActivePieces.remove(moveField);
 
-            if ((playing.getBoard()[activeField] % 8 == Rook) || playing.getBoard()[activeField] % 8 == King) {
-                checkPossibleCastles(activeField);
-            }
+
 
             if (playing.getBoard()[activeField] % 8 == King && playing.getBoard()[moveField] % 8 == Rook
                     && HelpMethods.isWhite(playing.getBoard()[moveField]) == Playing.whitesMove) {

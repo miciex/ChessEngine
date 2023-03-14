@@ -15,17 +15,6 @@ import static utils.Constants.Pieces.*;
 
 public class HelpMethods {
 
-    public static void checkPossibleCastles(int position){
-        switch(position) {
-            case 0: Playing.possibleCastles[0] = false; break;
-            case 7: Playing.possibleCastles[1] = false; break;
-            case 56: Playing.possibleCastles[2] = false; break;
-            case 63: Playing.possibleCastles[3] = false; break;
-            case 4: Playing.possibleCastles[0] = false; Playing.possibleCastles[1] = false; break;
-            case 60: Playing.possibleCastles[2] = false; Playing.possibleCastles[3] = false; break;
-        }
-    }
-
 
 
     public static String gameResultToChessNotation(GameResults result, boolean whitesMove){
@@ -278,7 +267,7 @@ public class HelpMethods {
 
         for(int i : activePieces.keySet())
         {
-            if (activePieces.get(i) % 8 == Pieces.King && HelpMethods.isWhite(activePieces.get(i)) == white)
+            if (activePieces.containsKey(i) && activePieces.get(i) % 8 == Pieces.King && HelpMethods.isWhite(activePieces.get(i)) == white)
                 return i;
         }
 
