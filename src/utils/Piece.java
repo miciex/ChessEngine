@@ -144,8 +144,6 @@ public class Piece {
                 {
                     if (isChecked(activeField, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(activeField + (i - activeField)/2, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(i, activePieces, whitesMove, lastMove, possibleCastles) == -1)
                         possibleMoves.add(i);
-                    else
-                        break;
                 }
                 else
                     possibleMoves.add(i);
