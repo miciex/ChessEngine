@@ -30,6 +30,7 @@ public class Playing extends State implements StateMethods{
     public GameResults result;
     public boolean playerWhite = true;
 
+
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
     public Engine engine;
