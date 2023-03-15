@@ -16,6 +16,7 @@ import java.util.HashMap;
 
 import static utils.Constants.Boards.TestBoards.*;
 import static utils.Constants.BoardInfo.BOARD_WIDTH;
+import static utils.Constants.Boards.classicBoard;
 import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
@@ -41,7 +42,6 @@ public class BoardOverlay extends UIElement {
     // private int numPosition = 0;
     private int castles[] = new int[] { 0,0,0,0 };
     ArrayList<Move> lastMoves;
-    public static int ep = 0;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
@@ -49,9 +49,9 @@ public class BoardOverlay extends UIElement {
         loadPiecesImgs();
         createFields();
         //9 checked
-        boardMap = boardToMap(FenToIntArray(testBoard5, 64));
+        boardMap = boardToMap(FenToIntArray(testBoard8, 64));
         lastMoves = new ArrayList<>();
-        System.out.println(MoveGenerationTest(4, whitesMove));
+        System.out.println(MoveGenerationTest(1, whitesMove));
     }
 
     public void createFields() {
@@ -76,11 +76,11 @@ public class BoardOverlay extends UIElement {
         ArrayList<Move> moves = Piece.generateMoves(boardMap, isWhite,
                 lastMoves.size() != 0 ? lastMoves.get(lastMoves.size() - 1) : new Move(), castles);
         for(Move move : moves){
-            boardMap = makeMove(move, boardMap, castles);
+            boardMap = makeMove(move, boardMap);
             lastMoves.add(move);
             castles = Piece.setCastles(castles, lastMoves);
             int b = MoveGenerationTest(depth - 1, !isWhite);
-            boardMap = unMakeMove(move, boardMap, castles);
+            boardMap = unMakeMove(move, boardMap);
             lastMoves.remove(lastMoves.size() - 1);
             castles = Piece.setCastles(castles, lastMoves);
             String a = moveToChessNotation(move, mapToBoard(boardMap)) + "  " + b;
@@ -99,11 +99,11 @@ public class BoardOverlay extends UIElement {
                 lastMoves.size() != 0 ? lastMoves.get(lastMoves.size() - 1) : new Move(), castles);
         int numPosition = 0;
         for (Move move : moves) {
-            boardMap = makeMove(move, boardMap, castles);
+            boardMap = makeMove(move, boardMap);
             lastMoves.add(move);
             castles = Piece.setCastles(castles, lastMoves);
             numPosition += MoveGenerationTest(depth - 1, !isWhite);
-            boardMap = unMakeMove(move, boardMap, castles);
+            boardMap = unMakeMove(move, boardMap);
             lastMoves.remove(lastMoves.size() - 1);
             castles = Piece.unsetCastles(castles, lastMoves);
         }
