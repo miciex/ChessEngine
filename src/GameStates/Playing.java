@@ -20,6 +20,7 @@ import static utils.HelpMethods.*;
 public class Playing extends State implements StateMethods{
 
     private int[] board;
+    public String currentBoard = classicBoard;
     public static ArrayList<Move> moves;
     public int[] possibleCastles;
     public static boolean whitesMove = true;
@@ -29,16 +30,17 @@ public class Playing extends State implements StateMethods{
     public GameResults result;
     public boolean playerWhite = true;
 
-    public Engine engine;
 
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
+    public Engine engine;
+
 
     public static HashMap<Integer, Integer> ActivePieces = new HashMap<>();
 
     public Playing(Game game){
         super(game);
-        board = FenToIntArray(TestBoards.testBoard8, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(currentBoard, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         possibleCastles = new int[]{0,0,0,0};
         initClasses();
@@ -49,7 +51,7 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
-        board = FenToIntArray(TestBoards.testBoard8, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(currentBoard, BOARD_HEIGHT * BOARD_WIDTH);
         ActivePieces = boardToMap(board);
         moves = new ArrayList<>();
         boardOverlay.createFields();
@@ -68,7 +70,7 @@ public class Playing extends State implements StateMethods{
 
     @Override
     public void update() {
-
+        boardOverlay.update();
     }
 
     @Override
@@ -128,10 +130,10 @@ public class Playing extends State implements StateMethods{
         this.moves.add(move);
     }
 
-    public void updateWholeBard(int[] board){this.board = board;}
-
     public void updateBoard(int index, int piece){
         this.board[index] = piece;
     }
+
+    public void updateWholeBoard(int[] board){this.board = board;}
 
 }

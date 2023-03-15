@@ -221,14 +221,11 @@ public class Piece {
                 else if((int)(3.5 - (float)mulptiplier * 2.5) == position/8 && !pieces.containsKey(pos - 8 * mulptiplier)){
                     moves.add(pos);
                 }
-            }else if(i==1){
-
             }
             else if(i > 1 && pieces.containsKey(pos) && (pieces.get(pos) < 16 != isWhite)){
                 moves.add(pos);
             }
-            else if(i > 1 && lastMove.movedPiece%8 == Pawn  && Math.abs((lastMove.startField/8) - (lastMove.endField/8))==2 ){
-                if(pos == lastMove.endField + 8 * mulptiplier)
+            else if(i > 1 && lastMove.movedPiece%8 == Pawn  && Math.abs((lastMove.startField/8) - (lastMove.endField/8))==2 && pos == lastMove.endField + 8 * mulptiplier){
                 moves.add(pos);
             }
         }
