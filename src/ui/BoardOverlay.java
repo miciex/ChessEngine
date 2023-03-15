@@ -49,9 +49,9 @@ public class BoardOverlay extends UIElement {
         loadPiecesImgs();
         createFields();
         //9 checked
-        boardMap = boardToMap(FenToIntArray(testBoard8, 64));
+        boardMap = boardToMap(FenToIntArray(testBoard2, 64));
         lastMoves = new ArrayList<>();
-        System.out.println(MoveGenerationTest(1, whitesMove));
+        System.out.println(MoveGenerationTest(4, whitesMove));
     }
 
     public void createFields() {

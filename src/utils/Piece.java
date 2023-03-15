@@ -111,6 +111,9 @@ public class Piece {
     public static ArrayList<Integer> deleteImpossibleMoves(int activeField, ArrayList<Integer> moves, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
         ArrayList<Integer> possibleMoves = new ArrayList<>();
         HashMap<Integer, Integer> copy = (HashMap<Integer, Integer>) activePieces.clone();
+
+        int multiplier = whitesMove ? -1 : 1;
+
         for (int i : moves) {
             Move move = new Move(copy, activeField, i);
             copy = makeMove(move, copy);
@@ -120,7 +123,8 @@ public class Piece {
                 if(activePieces.get(activeField) % 8 == King && Math.abs(i - activeField) == 2)
                 {
                     if (isChecked(activeField, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(activeField + (i - activeField)/2, activePieces, whitesMove, lastMove, possibleCastles) == -1 && isChecked(i, activePieces, whitesMove, lastMove, possibleCastles) == -1)
-                        possibleMoves.add(i);
+                        if(!(activePieces.containsKey(activeField + (8 * multiplier)) && HelpMethods.isWhite(activePieces.get(activeField + (8 * multiplier))) != whitesMove && activePieces.get(activeField + (8 * multiplier)) % 8 == Pawn))
+                            possibleMoves.add(i);
                 }
                 else
                     possibleMoves.add(i);
@@ -151,6 +155,8 @@ public class Piece {
 
             while (checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE
                     && IsCorrect(position, i)) {
+                if(activePieces.containsKey(checkingPosition) && HelpMethods.isWhite(activePieces.get(checkingPosition)) == whitesMove)
+                    break;
 
                 if (activePieces.containsKey(checkingPosition)
                         && HelpMethods.isWhite(activePieces.get(checkingPosition)) != whitesMove
@@ -184,6 +190,8 @@ public class Piece {
 
             while (checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE
                     && IsCorrect(position, i)) {
+                if(activePieces.containsKey(checkingPosition) && HelpMethods.isWhite(activePieces.get(checkingPosition)) == whitesMove)
+                    break;
 
                 if (activePieces.containsKey(checkingPosition)
                         && HelpMethods.isWhite(activePieces.get(checkingPosition)) != whitesMove
