@@ -43,6 +43,7 @@ public class BoardOverlay extends UIElement {
     private boolean whitesMove = true;
     private int castles[] = new int[] { 0,0,0,0 };
     private Move currMove;
+    private int testingStartField = -1;
     ArrayList<Move> lastMoves;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
@@ -143,7 +144,7 @@ public class BoardOverlay extends UIElement {
         if(promoting){
             currMove.promotePiece = GetPromotionPiece(col + row * 8) + (Playing.whitesMove ? 8 : 16);
             promoting = false;
-            playMove(0);
+            playMove(0,-1);
             return;
         }
 
@@ -260,22 +261,31 @@ public class BoardOverlay extends UIElement {
         }
     }
 
-    private void playMove(int endField){
-        if(!promoting) {
-            currMove = new Move(Playing.ActivePieces, activeField, endField);
+    private void playMove(int endField, int promotingPiece){
+        if(!promoting)
+        {
+            currMove = new Move(Playing.ActivePieces, (activeField == -1) ? testingStartField : activeField, endField);
             if ((endField / 8 == 0 || endField / 8 == 7) && currMove.movedPiece % 8 == Pawn) {
                 promoting = true;
-                GetPromotionPiece(endField);
-                return;
+                if(promotingPiece == -1) GetPromotionPiece(endField);
             }
         }
-        Playing.ActivePieces = makeMove(currMove, Playing.ActivePieces);
-        playing.updateWholeBoard(mapToBoard(Playing.ActivePieces));
-        updateFieldsValue(playing.getBoard());
-        Playing.moves.add(currMove);
-        setCastles(castles, Playing.moves);
-        Playing.whitesMove  = !Playing.whitesMove;
-        currMove = null;
+        if(promotingPiece == -1)
+        {
+            Playing.ActivePieces = makeMove(currMove, Playing.ActivePieces);
+            playing.updateWholeBoard(mapToBoard(Playing.ActivePieces));
+            updateFieldsValue(playing.getBoard());
+            Playing.moves.add(currMove);
+            setCastles(castles, Playing.moves);
+            Playing.whitesMove  = !Playing.whitesMove;
+            currMove = null;
+        }
+        else {
+            promotingPiece += (whitesMove== true) ? White : Black;
+            makePiecePromotion(endField, promotingPiece);
+            promoting = false;
+            Playing.whitesMove = (Playing.whitesMove) ? false : true;
+        }
     }
 
     private void playComputerMove(){
@@ -291,7 +301,7 @@ public class BoardOverlay extends UIElement {
     private void movePiece(int col, int row) {
         if(promoting) return;
         if(Playing.whitesMove == playing.playerWhite  && Playing.ActivePieces.containsKey(activeField)){
-            playMove(col + row * 8);
+            playMove(col + row * 8,-1);
             promoting = false;
         }
     }
@@ -334,6 +344,7 @@ public class BoardOverlay extends UIElement {
     }
 
     private int GetPromotionPiece(int moveField) {
+        testingStartField = moveField;
         final int[] promotedPiece = { -1 };
 
         JFrame frame = new JFrame("Piece Promotion");
@@ -373,19 +384,18 @@ public class BoardOverlay extends UIElement {
             piecePromotionButtons[i].addActionListener(e -> {
                 promotedPiece[0] = Constants.PromotionPiecesInts[finalI];
                 //makePiecePromotion(moveField, promotedPiece[0]);
+                playMove(moveField, Constants.PromotionPiecesInts[finalI]);
                 frame.setVisible(false);
             });
 
             frame.add(piecePromotionButtons[i]);
             y += 80;
         }
-        promotedPiece[0] += Playing.whitesMove ? White : Black;
+
         return promotedPiece[0];
     }
 
     private void makePiecePromotion(int moveField, int promotionPiece) {
-        promotionPiece += ((Playing.whitesMove) ? Black : White);
-
         playing.updateBoard(moveField, promotionPiece);
         Playing.ActivePieces.remove(moveField);
         Playing.ActivePieces.put(moveField, promotionPiece);
