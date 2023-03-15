@@ -8,6 +8,7 @@ import utils.Constants.Pieces;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static java.lang.Character.*;
 import static utils.Constants.Letters.ALPHABET;
@@ -294,4 +295,10 @@ public class HelpMethods {
 
         return false;
     }
+
+    public static <T> T getRandom(ArrayList<T> list) {
+        int rnd = new Random().nextInt(list.size());
+        return list.get(rnd);
+    }
+
 }
