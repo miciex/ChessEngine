@@ -1,5 +1,6 @@
 package GameStates;
 
+import Engine.Engine;
 import main.Game;
 import ui.BoardOverlay;
 import ui.ButtonMethods;
@@ -26,6 +27,9 @@ public class Playing extends State implements StateMethods{
     public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
     public ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
     public GameResults result;
+    public boolean playerWhite = true;
+
+    public Engine engine;
 
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
@@ -59,7 +63,7 @@ public class Playing extends State implements StateMethods{
     private void initClasses(){
         boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
         buttonOverlay = new ButtonOverlay((BOARD_X + BOARD_WIDTH * FIELD_SIZE), 0, 0,0, this);
-
+        engine = new Engine(playerWhite);
     }
 
     @Override
@@ -123,6 +127,8 @@ public class Playing extends State implements StateMethods{
     public void addMove(Move move){
         this.moves.add(move);
     }
+
+    public void updateWholeBard(int[] board){this.board = board;}
 
     public void updateBoard(int index, int piece){
         this.board[index] = piece;
