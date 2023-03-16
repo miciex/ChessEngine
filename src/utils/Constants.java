@@ -36,6 +36,13 @@ public class Constants {
         public static final int White = 8;
         public static final int Black = 16;
 
+        public static final int KingValue = Integer.MAX_VALUE;
+        public static final int PawnValue = 1;
+        public static final int RookValue = 5;
+        public static final int KnightValue = 3;
+        public static final int BishopValue = 3;
+        public static final int QueenValue = 9;
+
         public static final int[] PROMOTE_PIECES = new int[]{Rook, Knight, Bishop, Queen};
 
         public static final char[] CHAR_PIECES= new char[]{'K', 'Q', 'B', 'N', 'R','P'};

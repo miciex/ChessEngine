@@ -321,7 +321,8 @@ public class Piece {
         return checkingRow < 8 && checkingRow >= 0 && checkingColumn < 8 && checkingColumn >= 0;
     }
 
-    public static HashMap<Integer, Integer> makeMove(Move move, HashMap<Integer, Integer> boardMap){
+    public static HashMap<Integer, Integer> makeMove(Move move, HashMap<Integer, Integer> board){
+        HashMap<Integer, Integer> boardMap = (HashMap<Integer, Integer>) board.clone();
         if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField)==2){
             //Changing rooks placement in castling
             boardMap.put((move.startField/8)*8 + move.startField%8 + (move.endField - move.startField)/2, boardMap.get((move.startField/8)*8 + ((move.endField % 8)/4) * 7));
@@ -335,8 +336,8 @@ public class Piece {
         return boardMap;
     }
 
-    public static HashMap<Integer, Integer> unMakeMove(Move move, HashMap<Integer, Integer> boardMap){
-
+    public static HashMap<Integer, Integer> unMakeMove(Move move, HashMap<Integer, Integer> board){
+        HashMap<Integer, Integer> boardMap = (HashMap<Integer, Integer>) board.clone();
         if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField)==2){
             boardMap.put((move.startField/8)*8 + ((move.endField % 8)/4) * 7, boardMap.get( move.startField + (move.endField - move.startField)/2));
             boardMap.remove(  move.startField + (move.endField - move.startField)/2);
@@ -380,5 +381,15 @@ public class Piece {
         return castles;
     }
 
+    public static void makeMoveSetCastles(Move move, HashMap<Integer, Integer> boardMap, int[] castles, ArrayList<Move> moves){
+        setCastles(castles, moves);
+        makeMove(move, boardMap);
+
+    }
+
+    public static void unmakeMoveUnsetCastles(Move move, HashMap<Integer, Integer> boardMap, int[] castles, ArrayList<Move> moves){
+        unMakeMove(move, boardMap);
+        setCastles(castles, moves);
+    }
 
 }
