@@ -17,6 +17,16 @@ import static utils.Constants.Pieces.*;
 public class HelpMethods {
 
 
+    public static int getPieceValue(int piece){
+        switch (piece %8){
+            case Pawn: return PawnValue;
+            case Knight: return KnightValue;
+            case Bishop: return BishopValue;
+            case Rook: return RookValue;
+            case Queen: return QueenValue;
+            default: return 0;
+        }
+    }
 
     public static String gameResultToChessNotation(GameResults result, boolean whitesMove){
         if(result == GameResults.NONE) return "";

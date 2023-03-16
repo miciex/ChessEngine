@@ -5,6 +5,7 @@ import main.Game;
 import ui.BoardOverlay;
 import ui.ButtonMethods;
 import ui.ButtonOverlay;
+import utils.CheckGameResults;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -15,6 +16,7 @@ import static utils.Constants.Boards.*;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Game_Info.*;
 import static utils.Constants.BoardInfo.*;
+import static utils.Constants.Pieces.King;
 import static utils.HelpMethods.*;
 
 public class Playing extends State implements StateMethods{
@@ -30,6 +32,8 @@ public class Playing extends State implements StateMethods{
     public GameResults result;
     public boolean playerWhite = true;
 
+    public int castles[] = new int[] { 0,0,0,0 };
+    public int movesTo50MoveRule = 0;
 
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
@@ -63,9 +67,33 @@ public class Playing extends State implements StateMethods{
     }
 
     private void initClasses(){
+        engine = new Engine(playerWhite, this);
         boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
         buttonOverlay = new ButtonOverlay((BOARD_X + BOARD_WIDTH * FIELD_SIZE), 0, 0,0, this);
-        engine = new Engine(playerWhite);
+
+    }
+
+    public GameResults checkGameResult(Move move) {
+        if (move.takenPiece != 0 || (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2))
+            positions.clear();
+        positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
+
+        //movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, movesTo50MoveRule);
+
+        if (CheckGameResults.isThreefold(positions))
+            result = GameResults.THREE_FOLD;
+        else if (CheckGameResults.draw50MoveRule(movesTo50MoveRule))
+            result = GameResults.DRAW_50_MOVE_RULE;
+        else if (CheckGameResults.isStalemate(Playing.ActivePieces, Playing.whitesMove, getLastMove(), castles))
+            result = GameResults.STALEMATE;
+        else if (CheckGameResults.insufficientMaterial(Playing.ActivePieces))
+            result = GameResults.INSUFFICIENT_MATERIAL;
+        else if (CheckGameResults.isMate(Playing.ActivePieces, Playing.whitesMove, getLastMove(),
+                possibleCastles))
+            result = GameResults.MATE;
+        if (result != GameResults.NONE)
+            System.out.println(gameResultToChessNotation(result, Playing.whitesMove));
+        return result;
     }
 
     @Override
