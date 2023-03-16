@@ -155,13 +155,18 @@ public class Piece {
 
             while (checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE
                     && IsCorrect(position, i)) {
+
                 if(activePieces.containsKey(checkingPosition) && HelpMethods.isWhite(activePieces.get(checkingPosition)) == whitesMove)
                     break;
 
-                if (activePieces.containsKey(checkingPosition)
-                        && HelpMethods.isWhite(activePieces.get(checkingPosition)) != whitesMove
-                        && PossibleMoves(checkingPosition, activePieces, lastMove, whitesMove, possibleCastles).contains(position)) {
-                    return checkingPosition;
+                if (activePieces.containsKey(checkingPosition)) {
+                    if(HelpMethods.isWhite(activePieces.get(checkingPosition)) != whitesMove) {
+                        if (PossibleMoves(checkingPosition, activePieces, lastMove, whitesMove, possibleCastles).contains(position)) {
+                            return checkingPosition;
+                        }
+                        else
+                            break;
+                    }
                 }
 
                 checkingPosition += i;
@@ -190,13 +195,18 @@ public class Piece {
 
             while (checkingPosition >= 0 && checkingPosition < Constants.Field.FIELD_SIZE
                     && IsCorrect(position, i)) {
+
                 if(activePieces.containsKey(checkingPosition) && HelpMethods.isWhite(activePieces.get(checkingPosition)) == whitesMove)
                     break;
 
-                if (activePieces.containsKey(checkingPosition)
-                        && HelpMethods.isWhite(activePieces.get(checkingPosition)) != whitesMove
-                        && PossibleMoves(checkingPosition, activePieces, lastMove, whitesMove, possibleCastles).contains(position)) {
-                    return checkingPosition;
+                if (activePieces.containsKey(checkingPosition)) {
+                    if(HelpMethods.isWhite(activePieces.get(checkingPosition)) != whitesMove) {
+                        if (PossibleMoves(checkingPosition, activePieces, lastMove, whitesMove, possibleCastles).contains(position)) {
+                            return checkingPosition;
+                        }
+                        else
+                            break;
+                    }
                 }
 
                 checkingPosition += i;

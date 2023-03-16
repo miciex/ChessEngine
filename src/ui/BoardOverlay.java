@@ -14,6 +14,7 @@ import java.util.HashMap;
 
 import static utils.Constants.Boards.TestBoards.*;
 import static utils.Constants.BoardInfo.BOARD_WIDTH;
+import static utils.Constants.Boards.classicBoard;
 import static utils.Constants.Colors.BLACK;
 import static utils.Constants.Colors.WHITE;
 import static utils.Constants.Field.FIELD_SIZE;
@@ -51,9 +52,9 @@ public class BoardOverlay extends UIElement {
         this.playing = playing;
         loadPiecesImgs();
         initClasses();
-        boardMap = boardToMap(FenToIntArray(playing.currentBoard, 64));
+        boardMap = boardToMap(FenToIntArray(testBoard2, 64));
         lastMoves = new ArrayList<>();
-        //System.out.println(MoveGenerationTest(4, true));
+        System.out.println(MoveGenerationTest(4, true));
     }
 
     private void initClasses(){
