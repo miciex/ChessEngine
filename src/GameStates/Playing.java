@@ -74,6 +74,7 @@ public class Playing extends State implements StateMethods{
     }
 
     public GameResults checkGameResult(Move move) {
+        GameResults result = GameResults.NONE;
         if (move.takenPiece != 0 || (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2))
             positions.clear();
         positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
