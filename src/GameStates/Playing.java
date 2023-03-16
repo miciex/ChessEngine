@@ -92,8 +92,6 @@ public class Playing extends State implements StateMethods{
         else if (CheckGameResults.isMate(Playing.ActivePieces, Playing.whitesMove, getLastMove(),
                 possibleCastles))
             result = GameResults.MATE;
-        if (result != GameResults.NONE)
-            System.out.println(gameResultToChessNotation(result, Playing.whitesMove));
         return result;
     }
 

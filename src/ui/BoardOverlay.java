@@ -283,7 +283,7 @@ public class BoardOverlay extends UIElement {
         setCastles(playing.castles, Playing.moves);
         Playing.whitesMove  = !Playing.whitesMove;
         playing.movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, playing.movesTo50MoveRule);
-        playing.checkGameResult(move);
+        playing.result = playing.checkGameResult(move);
     }
 
     private void movePiece(int col, int row) {
