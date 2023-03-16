@@ -55,7 +55,7 @@ public class Engine {
             int minEval = Integer.MAX_VALUE;
 
             for(Move move : moves){
-                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, lastMove);
+                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, lastMove);
                 minEval = Math.min(minEval, eval);
                 alpha = Math.min(alpha, eval);
                 if(beta <= alpha){
