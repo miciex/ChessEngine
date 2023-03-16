@@ -270,8 +270,9 @@ public class BoardOverlay extends UIElement {
     private void playComputerMove(){
         if(playing.result != GameResults.NONE) return;
         Move move = playing.engine.getRandomMove(Playing.ActivePieces, playing.castles, Playing.moves);
-        System.out.println("evaluation: " + playing.engine.minimax(Playing.ActivePieces, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove, playing.getLastMove()));
+
         playMoveOnBoard(move);
+        System.out.println("evaluation: " + playing.engine.minimax(Playing.ActivePieces, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, true, playing.getLastMove()));
     }
 
     private void playMoveOnBoard(Move move){
