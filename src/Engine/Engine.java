@@ -48,10 +48,8 @@ public class Engine {
             boolean maximizingPlayer,
             Move lastMove) {
         GameResults result = playing.checkGameResult(playing.getLastMove());
-
         if (depth == 0)
             return evaluate(position, lastMove);
-
         if (result != GameResults.NONE) {
             if (result == GameResults.MATE) {
                 return maximizingPlayer ? Integer.MAX_VALUE : Integer.MIN_VALUE;
@@ -65,7 +63,7 @@ public class Engine {
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
 
-            for (int i = 0; i<moves.size(); i++) {
+            for (int i = 0; i < moves.size(); i++) {
                 int index = findMaxIndex(order);
                 Move move = moves.get(index);
                 order[index] = Integer.MIN_VALUE;
@@ -84,7 +82,7 @@ public class Engine {
         } else {
             int minEval = Integer.MAX_VALUE;
 
-            for (int i = 0; i<moves.size(); i++) {
+            for (int i = 0; i < moves.size(); i++) {
                 int index = smallestIndex(order);
                 Move move = moves.get(index);
                 order[index] = Integer.MAX_VALUE;
@@ -110,20 +108,25 @@ public class Engine {
         int moved = move.movedPiece % 8;
 
         if (moved == King && Math.abs(move.endField - move.startField) == 2)
-            eval += 6 * multiplier;
+            eval += 600 * multiplier;
 
         if (playing.getMoves().size() <= 10) {
             if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
-                eval -= 1 * multiplier;
+                eval -= 100 * multiplier;
 
             if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
-                eval -= 1 * multiplier;
+                eval -= 100 * multiplier;
         }
+
+        if (multiplier == 1)
+            eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
+        else if (multiplier == -1)
+            eval += Constants.Heatmaps.Blacks[moved - 1][move.endField];
 
         return eval;
     }
 
-    private int evaluate(HashMap<Integer, Integer> pieces, Move move) {
+    public int evaluate(HashMap<Integer, Integer> pieces, Move move) {
         int eval = 0;
 
         for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
