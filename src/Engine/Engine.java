@@ -8,10 +8,7 @@ import utils.Constants;
 import utils.HelpMethods;
 import utils.Piece;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static utils.Constants.Pieces.*;
 import static utils.HelpMethods.getPieceValue;
@@ -42,11 +39,13 @@ public class Engine {
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer, Move lastMove) {
-        bestMoves.clear();
+        //bestMoves.clear();
+        newBestMoves(depth);
         int eval = 0;
-        for (int i = 1; i <= depth; i++) {
-            eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
-        }
+        eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove);
+//        for (int i = 1; i <= depth; i++) {
+//            eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
+//        }
 
         System.out.println(eval);
     }
@@ -64,10 +63,10 @@ public class Engine {
             }
             return 0;
         }
-        ArrayList<Move> moves = new ArrayList<>();
-        if (bestMoves.size() > 0)
-            moves.add(bestMoves.get(bestMoves.size()));
-        moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles));
+        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
+            //moves.add(bestMoves.get(bestMoves.size()));
+        //moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles));
+        //int[] moveOrder = OrderMoves(moves);
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
@@ -153,20 +152,50 @@ public class Engine {
         }
     }
 
-    public void OrderMoves(ArrayList<Move> moves) {
-        for (Move move : moves) {
-            int moveScoreGuess = 0;
-
+    public int[] OrderMoves(ArrayList<Move> moves) {
+        int[] guessScores = new int[moves.size()];
+            int m = 0;
+        if(moves.size() > 0)
+            m = moves.get(0).movedPiece < 16 ? 1 : -1;
+        for (int i = 0; i< moves.size(); i++) {
+            Move move = moves.get(i);
+            int guessScoreMove = 0;
             if (move.takenPiece != 0) {
-                moveScoreGuess = 10 * HelpMethods.getPieceValue(move.takenPiece)
+                guessScores[i] = 10 * HelpMethods.getPieceValue(move.takenPiece)
                         - HelpMethods.getPieceValue(move.movedPiece);
             }
 
             if(move.promotePiece != 0){
-                moveScoreGuess += HelpMethods.getPieceValue(move.promotePiece);
+                guessScores[i] += HelpMethods.getPieceValue(move.promotePiece);
             }
-
+            guessScores[i] *= m;
         }
+        return guessScores;
+    }
+    private int smallestIndex(int[] numbers) {
+        int smallest = Integer.MAX_VALUE;
+        int index = 0;
+
+        for (int i = 0; i < numbers.length; i++) {
+            if (smallest > numbers[i]) {
+                smallest = numbers[i];
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    private int findMaxIndex(int[] numbers){
+        int smallest = Integer.MIN_VALUE;
+        int index = 0;
+
+        for (int i = 0; i < numbers.length; i++) {
+            if (smallest < numbers[i]) {
+                smallest = numbers[i];
+                index = i;
+            }
+        }
+        return index;
     }
 
     public Move getBestMove() {
