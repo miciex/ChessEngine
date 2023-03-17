@@ -267,7 +267,6 @@ public class BoardOverlay extends UIElement {
     private void playComputerMove(){
         if(playing.result != GameResults.NONE) return;
         playing.engine.setBestMoves(Playing.ActivePieces, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove, playing.getLastMove());
-        //Move move = playing.engine.getRandomMove(Playing.ActivePieces, playing.castles, Playing.moves);
         Move move = playing.engine.getBestMove();
 
         playMoveOnBoard(move);
@@ -283,6 +282,7 @@ public class BoardOverlay extends UIElement {
         Playing.whitesMove  = !Playing.whitesMove;
         playing.movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, playing.movesTo50MoveRule);
         playing.result = playing.checkGameResult(move);
+        playing.engine.removeLastBestMove();
     }
 
     private void movePiece(int col, int row) {

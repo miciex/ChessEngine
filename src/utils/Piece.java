@@ -14,6 +14,14 @@ import static utils.Constants.Pieces.*;
 
 public class Piece {
 
+    public static int generateAmountOfMoves(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove,  int[] possibleCastles){
+        return 0;
+    }
+
+    public static int calcAmountOfMoves(){
+        return 0;
+    }
+
     public static ArrayList<Move> generateMoves(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove,  int[] possibleCastles){
         ArrayList<Move> moves = new ArrayList<>();
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){

@@ -38,8 +38,12 @@ public class Engine {
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer, Move lastMove) {
-        newBestMoves(depth);
-        int eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove);
+        bestMoves.clear();
+        int eval = 0;
+        for(int i = 1; i<=depth; i++){
+            eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
+        }
+
         System.out.println(eval);
     }
 
@@ -47,21 +51,24 @@ public class Engine {
             Move lastMove) {
         GameResults result = playing.checkGameResult(playing.getLastMove());
         if (depth == 0)
-            return evaluate(position);
+            return evaluate(position, lastMove);
         if (result != GameResults.NONE) {
             if (result == GameResults.MATE) {
                 return maximizingPlayer ? Integer.MAX_VALUE : Integer.MIN_VALUE;
             }
+            return 0;
         }
-
-        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
+        ArrayList<Move> moves = new ArrayList<>();
+        if(bestMoves.size()>0)
+            moves.add(bestMoves.get(bestMoves.size()));
+        moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles));
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
 
             for (Move move : moves) {
-                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, lastMove);
-                if (bestMoves.get(depth) == null || eval > maxEval) {
+                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, move);
+                if (!bestMoves.containsKey(depth)||bestMoves.get(depth) == null || eval > maxEval) {
                     bestMoves.put(depth, move);
                 }
                 maxEval = Math.max(maxEval, eval);
@@ -75,8 +82,8 @@ public class Engine {
             int minEval = Integer.MAX_VALUE;
 
             for (Move move : moves) {
-                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, lastMove);
-                if (bestMoves.get(depth) == null || eval < minEval) {
+                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move);
+                if (!bestMoves.containsKey(depth)||bestMoves.get(depth) == null || eval < minEval) {
                     bestMoves.put(depth, move);
                 }
                 minEval = Math.min(minEval, eval);
@@ -115,4 +122,7 @@ public class Engine {
         return bestMoves.get(bestMoves.size());
     }
 
+    public void removeLastBestMove(){
+        bestMoves.remove(bestMoves.size());
+    }
 }
