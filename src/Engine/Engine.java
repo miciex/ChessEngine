@@ -5,6 +5,7 @@ import GameStates.Move;
 import GameStates.Playing;
 import ui.BoardOverlay;
 import utils.Constants;
+import utils.HelpMethods;
 import utils.Piece;
 
 import java.util.ArrayList;
@@ -40,8 +41,12 @@ public class Engine {
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer, Move lastMove) {
-        newBestMoves(depth);
-        double eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove);
+        bestMoves.clear();
+        int eval = 0;
+        for (int i = 1; i <= depth; i++) {
+            eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
+        }
+
         System.out.println(eval);
     }
 
@@ -56,9 +61,12 @@ public class Engine {
             if (result == GameResults.MATE) {
                 return maximizingPlayer ? Integer.MAX_VALUE : Integer.MIN_VALUE;
             }
+            return 0;
         }
-
-        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
+        ArrayList<Move> moves = new ArrayList<>();
+        if (bestMoves.size() > 0)
+            moves.add(bestMoves.get(bestMoves.size()));
+        moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles));
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
@@ -84,7 +92,7 @@ public class Engine {
                     bestMoves.put(depth, move);
                 }
                 minEval = Math.min(minEval, eval);
-                alpha = Math.min(alpha, eval);
+                beta = Math.min(beta, eval);
                 if (beta <= alpha) {
                     break;
                 }
@@ -139,8 +147,27 @@ public class Engine {
         }
     }
 
+    public void OrderMoves(ArrayList<Move> moves) {
+        for (Move move : moves) {
+            int moveScoreGuess = 0;
+
+            if (move.takenPiece != 0) {
+                moveScoreGuess = 10 * HelpMethods.getPieceValue(move.takenPiece)
+                        - HelpMethods.getPieceValue(move.movedPiece);
+            }
+
+            if(move.promotePiece != 0){
+                moveScoreGuess += HelpMethods.getPieceValue(move.promotePiece);
+            }
+
+        }
+    }
+
     public Move getBestMove() {
         return bestMoves.get(bestMoves.size());
     }
 
+    public void removeLastBestMove() {
+        bestMoves.remove(bestMoves.size());
+    }
 }
