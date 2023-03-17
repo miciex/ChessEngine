@@ -82,9 +82,9 @@ public class Playing extends State implements StateMethods{
 
         //movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, movesTo50MoveRule);
 
-        if (CheckGameResults.isThreefold(positions))
-            result = GameResults.THREE_FOLD;
-        else if (CheckGameResults.draw50MoveRule(movesTo50MoveRule))
+        //if (CheckGameResults.isThreefold(positions))
+            //result = GameResults.THREE_FOLD;
+        if (CheckGameResults.draw50MoveRule(movesTo50MoveRule))
             result = GameResults.DRAW_50_MOVE_RULE;
         else if (CheckGameResults.isStalemate(Playing.ActivePieces, Playing.whitesMove, getLastMove(), castles))
             result = GameResults.STALEMATE;

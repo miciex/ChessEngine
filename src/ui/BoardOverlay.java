@@ -76,9 +76,7 @@ public class BoardOverlay extends UIElement {
 
     public void update(){
         if(Playing.whitesMove == playing.engine.isWhite){
-            //System.out.println("evaluation: " + playing.engine.minimax(Playing.ActivePieces, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove));
             playComputerMove();
-            //System.out.println("evaluation: " + playing.engine.minimax(Playing.ActivePieces, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove));
         }
     }
 
@@ -262,17 +260,18 @@ public class BoardOverlay extends UIElement {
             }
         }
         if(promotingPiece != -1)
-            //System.out.println("evaluation: " + playing.engine.minimax(Playing.ActivePieces, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove));
             currMove.promotePiece = promotingPiece;
-            playMoveOnBoard(currMove);
+        playMoveOnBoard(currMove);
     }
 
     private void playComputerMove(){
         if(playing.result != GameResults.NONE) return;
-        Move move = playing.engine.getRandomMove(Playing.ActivePieces, playing.castles, Playing.moves);
+        playing.engine.setBestMoves(Playing.ActivePieces, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove, playing.getLastMove());
+        //Move move = playing.engine.getRandomMove(Playing.ActivePieces, playing.castles, Playing.moves);
+        Move move = playing.engine.getBestMove();
 
         playMoveOnBoard(move);
-        System.out.println("evaluation: " + playing.engine.minimax(Playing.ActivePieces, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, true, playing.getLastMove()));
+
     }
 
     private void playMoveOnBoard(Move move){
