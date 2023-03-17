@@ -16,6 +16,7 @@ import java.util.Random;
 import static utils.Constants.Pieces.*;
 import static utils.HelpMethods.getPieceValue;
 import static utils.HelpMethods.getRandom;
+import static utils.Constants.Heatmaps;
 
 public class Engine {
 
@@ -109,16 +110,21 @@ public class Engine {
         int moved = move.movedPiece % 8;
 
         if(moved == King && Math.abs(move.endField - move.startField) == 2)
-            eval += 6 * multiplier;
+            eval += 600 * multiplier;
 
         if(playing.getMoves().size() <= 10)
         {
             if((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
-                eval -= 1 * multiplier;
+                eval -= 100 * multiplier;
 
             if(playing.piecesMovedDuringOpening.contains(move.movedPiece))
-                eval -= 1 * multiplier;
+                eval -= 100 * multiplier;
         }
+
+        if(multiplier == 1)
+            eval += Heatmaps.Whites[moved-1][move.endField];
+        else if(multiplier == -1)
+            eval += Heatmaps.Blacks[moved-1][move.endField];
 
         return eval;
     }
@@ -132,10 +138,10 @@ public class Engine {
 
         eval += evaluateBonus(move);
 
-        int mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size()
-                - Piece.generateMoves(pieces, false, move, playing.possibleCastles).size();
+        int mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size() * 10
+                - Piece.generateMoves(pieces, false, move, playing.possibleCastles).size() * 10;
 
-        eval += 0.1 * mobility;
+        eval += mobility;
 
         return eval;
     }
