@@ -112,7 +112,7 @@ public class Engine {
         int moved = move.movedPiece % 8;
 
         if(moved == King && Math.abs(move.endField - move.startField) == 2)
-            eval += 600 * multiplier;
+            eval += 100 * multiplier;
 
         if(playing.getMoves().size() <= 10)
         {
