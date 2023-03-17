@@ -10,6 +10,7 @@ import utils.Piece;
 
 import java.util.*;
 
+import static utils.Constants.Pieces.*;
 import static utils.HelpMethods.getPieceValue;
 import static utils.HelpMethods.getRandom;
 
@@ -36,13 +37,13 @@ public class Engine {
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer, Move lastMove) {
-        //bestMoves.clear();
+        // bestMoves.clear();
         newBestMoves(depth);
         int eval = 0;
         eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove);
-//        for (int i = 1; i <= depth; i++) {
-//            eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
-//        }
+        // for (int i = 1; i <= depth; i++) {
+        // eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
+        // }
 
         System.out.println(eval);
     }
@@ -51,8 +52,10 @@ public class Engine {
             boolean maximizingPlayer,
             Move lastMove) {
         GameResults result = playing.checkGameResult(playing.getLastMove());
+
         if (depth == 0)
             return evaluate(position, lastMove);
+
         if (result != GameResults.NONE) {
             if (result == GameResults.MATE) {
                 return maximizingPlayer ? Integer.MAX_VALUE : Integer.MIN_VALUE;
@@ -60,18 +63,17 @@ public class Engine {
             return 0;
         }
         ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
-            //moves.add(bestMoves.get(bestMoves.size()));
-        //moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles));
-        //int[] moveOrder = OrderMoves(moves);
+        // moves.add(bestMoves.get(bestMoves.size()));
+        // moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove,
+        // playing.possibleCastles));
+        // int[] moveOrder = OrderMoves(moves);
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
 
             for (Move move : moves) {
-//                int index = findMaxIndex(moveOrder);
-//                Move move = moves.get(index);
-//                moveOrder[i] = Integer.MIN_VALUE;
-                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, move);
+                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, move)
+                        + evaluateBonus(move);
                 if (bestMoves.get(depth) == null || eval > maxEval) {
                     bestMoves.put(depth, move);
                 }
@@ -86,10 +88,8 @@ public class Engine {
             int minEval = Integer.MAX_VALUE;
 
             for (Move move : moves) {
-//                int index = smallestIndex(moveOrder);
-//                Move move = moves.get(index);
-//                moveOrder[i] = Integer.MAX_VALUE;
-                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move);
+                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move)
+                        + evaluateBonus(move);
                 if (bestMoves.get(depth) == null || eval < minEval) {
                     bestMoves.put(depth, move);
                 }
@@ -103,14 +103,36 @@ public class Engine {
         }
     }
 
-    public int evaluate(HashMap<Integer, Integer> pieces, Move move) {
+    private int evaluateBonus(Move move) {
+        int eval = 0;
+
+        int multiplier = move.movedPiece < 16 ? 1 : -1;
+        int moved = move.movedPiece % 8;
+
+        if (moved == King && Math.abs(move.endField - move.startField) == 2)
+            eval += 6 * multiplier;
+
+        if (playing.getMoves().size() <= 10) {
+            if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
+                eval -= 1 * multiplier;
+
+            if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
+                eval -= 1 * multiplier;
+        }
+
+        return eval;
+    }
+
+    private int evaluate(HashMap<Integer, Integer> pieces, Move move) {
         int eval = 0;
 
         for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
             eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
         }
 
-        double mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size()
+        eval += evaluateBonus(move);
+
+        int mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size()
                 - Piece.generateMoves(pieces, false, move, playing.possibleCastles).size();
 
         eval += 0.1 * mobility;
@@ -127,10 +149,10 @@ public class Engine {
 
     public int[] OrderMoves(ArrayList<Move> moves) {
         int[] guessScores = new int[moves.size()];
-            int m = 0;
-        if(moves.size() > 0)
+        int m = 0;
+        if (moves.size() > 0)
             m = moves.get(0).movedPiece < 16 ? 1 : -1;
-        for (int i = 0; i< moves.size(); i++) {
+        for (int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
             int guessScoreMove = 0;
             if (move.takenPiece != 0) {
@@ -138,13 +160,14 @@ public class Engine {
                         - HelpMethods.getPieceValue(move.movedPiece);
             }
 
-            if(move.promotePiece != 0){
+            if (move.promotePiece != 0) {
                 guessScores[i] += HelpMethods.getPieceValue(move.promotePiece);
             }
             guessScores[i] *= m;
         }
         return guessScores;
     }
+
     private int smallestIndex(int[] numbers) {
         int smallest = Integer.MAX_VALUE;
         int index = 0;
@@ -158,7 +181,7 @@ public class Engine {
         return index;
     }
 
-    private int findMaxIndex(int[] numbers){
+    private int findMaxIndex(int[] numbers) {
         int smallest = Integer.MIN_VALUE;
         int index = 0;
 

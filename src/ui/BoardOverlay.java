@@ -282,8 +282,9 @@ public class BoardOverlay extends UIElement {
         playing.updateWholeBoard(mapToBoard(Playing.ActivePieces));
         updateFieldsValue(playing.getBoard());
         Playing.moves.add(move);
+        playing.addMovedPiece(move);
         setCastles(playing.castles, Playing.moves);
-        Playing.whitesMove  = !Playing.whitesMove;
+        Playing.whitesMove = !Playing.whitesMove;
         playing.movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, playing.movesTo50MoveRule);
         playing.result = playing.checkGameResult(move);
         playing.engine.removeLastBestMove();
