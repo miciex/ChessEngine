@@ -24,6 +24,7 @@ public class Playing extends State implements StateMethods{
 
     private int[] board;
     public String currentBoard = classicBoard;
+
     public static ArrayList<Move> moves;
     public int[] possibleCastles;
     public static boolean whitesMove = true;
@@ -32,15 +33,13 @@ public class Playing extends State implements StateMethods{
     public ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
     public GameResults result;
     public boolean playerWhite = true;
-
     public int castles[] = new int[] { 0,0,0,0 };
     public int movesTo50MoveRule = 0;
 
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
     public Engine engine;
-
-
+    public ArrayList<Integer> piecesMovedDuringOpening = new ArrayList<>();
     public static HashMap<Integer, Integer> ActivePieces = new HashMap<>();
 
     public Playing(Game game){
@@ -164,4 +163,9 @@ public class Playing extends State implements StateMethods{
 
     public void updateWholeBoard(int[] board){this.board = board;}
 
+    public void addMovedPiece(Move move)
+    {
+        if(piecesMovedDuringOpening.size() <= 10)
+            piecesMovedDuringOpening.add(move.movedPiece);
+    }
 }
