@@ -13,7 +13,6 @@ import java.util.*;
 import static utils.Constants.Pieces.*;
 import static utils.HelpMethods.getPieceValue;
 import static utils.HelpMethods.getRandom;
-import static utils.Constants.Heatmaps;
 
 public class Engine {
 
@@ -22,7 +21,6 @@ public class Engine {
     HashMap<Integer, Move> bestMoves;
 
     private Playing playing;
-
 
     public Engine(boolean isPlayerWhite, Playing playing) {
         this.playing = playing;
@@ -38,7 +36,7 @@ public class Engine {
     }
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
-            boolean maximizingPlayer, Move lastMove) {
+                             boolean maximizingPlayer, Move lastMove) {
         //bestMoves.clear();
         newBestMoves(depth);
         int eval = 0;
@@ -50,13 +48,12 @@ public class Engine {
         System.out.println(eval);
     }
 
-    public int minimax(HashMap<Integer, Integer> position, int depth, double alpha, double beta, boolean maximizingPlayer,
-            Move lastMove) {
+    public int minimax(HashMap<Integer, Integer> position, int depth, double alpha, double beta,
+                       boolean maximizingPlayer,
+                       Move lastMove) {
         GameResults result = playing.checkGameResult(playing.getLastMove());
-
         if (depth == 0)
             return evaluate(position, lastMove);
-
         if (result != GameResults.NONE) {
             if (result == GameResults.MATE) {
                 return maximizingPlayer ? Integer.MAX_VALUE : Integer.MIN_VALUE;
@@ -64,7 +61,7 @@ public class Engine {
             return 0;
         }
         ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
-            //moves.add(bestMoves.get(bestMoves.size()));
+        //moves.add(bestMoves.get(bestMoves.size()));
         //moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles));
         //int[] moveOrder = OrderMoves(moves);
 
@@ -72,6 +69,9 @@ public class Engine {
             int maxEval = Integer.MIN_VALUE;
 
             for (Move move : moves) {
+//                int index = findMaxIndex(moveOrder);
+//                Move move = moves.get(index);
+//                moveOrder[i] = Integer.MIN_VALUE;
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, move) + evaluateBonus(move);
                 if (bestMoves.get(depth) == null || eval > maxEval) {
                     bestMoves.put(depth, move);
@@ -87,6 +87,9 @@ public class Engine {
             int minEval = Integer.MAX_VALUE;
 
             for (Move move : moves) {
+//                int index = smallestIndex(moveOrder);
+//                Move move = moves.get(index);
+//                moveOrder[i] = Integer.MAX_VALUE;
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move) + evaluateBonus(move);
                 if (bestMoves.get(depth) == null || eval < minEval) {
                     bestMoves.put(depth, move);
@@ -121,14 +124,14 @@ public class Engine {
         }
 
         if(multiplier == 1)
-            eval += Heatmaps.Whites[moved-1][move.endField];
+            eval += Constants.Heatmaps.Whites[moved-1][move.endField];
         else if(multiplier == -1)
-            eval += Heatmaps.Blacks[moved-1][move.endField];
+            eval += Constants.Heatmaps.Blacks[moved-1][move.endField];
 
         return eval;
     }
 
-    private int evaluate(HashMap<Integer, Integer> pieces, Move move) {
+    public int evaluate(HashMap<Integer, Integer> pieces, Move move) {
         int eval = 0;
 
         for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
@@ -136,11 +139,6 @@ public class Engine {
         }
 
         eval += evaluateBonus(move);
-
-        int mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size() * 10
-                - Piece.generateMoves(pieces, false, move, playing.possibleCastles).size() * 10;
-
-        eval += mobility;
 
         return eval;
     }
@@ -154,7 +152,7 @@ public class Engine {
 
     public int[] OrderMoves(ArrayList<Move> moves) {
         int[] guessScores = new int[moves.size()];
-            int m = 0;
+        int m = 0;
         if(moves.size() > 0)
             m = moves.get(0).movedPiece < 16 ? 1 : -1;
         for (int i = 0; i< moves.size(); i++) {
