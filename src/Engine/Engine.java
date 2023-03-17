@@ -108,20 +108,15 @@ public class Engine {
         int moved = move.movedPiece % 8;
 
         if(moved == King && Math.abs(move.endField - move.startField) == 2)
-            eval += 100 * multiplier;
+            eval += 1 * multiplier;
 
         if (playing.getMoves().size() <= 10) {
             if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
-                eval -= 100 * multiplier;
+                eval -= 1 * multiplier;
 
             if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
-                eval -= 100 * multiplier;
+                eval -= 1 * multiplier;
         }
-
-        if (multiplier == 1)
-            eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
-        else if (multiplier == -1)
-            eval += Constants.Heatmaps.Blacks[moved - 1][move.endField];
 
         return eval;
     }
