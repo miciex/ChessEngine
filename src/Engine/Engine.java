@@ -35,7 +35,7 @@ public class Engine {
 
     public int minimax(HashMap<Integer, Integer> position, int depth, int alpha, int beta, boolean maximizingPlayer,  Move lastMove){
         if(depth == 0 || playing.checkGameResult(playing.getLastMove()) != GameResults.NONE)
-            return evaluate(position);
+            return evaluate(position, lastMove);
 
         ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
 
@@ -66,11 +66,17 @@ public class Engine {
         }
     }
 
-    public int evaluate(HashMap<Integer, Integer> pieces){
+    public int evaluate(HashMap<Integer, Integer> pieces, Move lastMove){
         int eval = 0;
+
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
                 eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
         }
+
+        int mobility = Piece.generateMoves(pieces, true, lastMove, playing.possibleCastles).size() - Piece.generateMoves(pieces, false, lastMove, playing.possibleCastles).size();
+
+        eval += 0.1 * mobility;
+
         return eval;
     }
 

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static utils.Constants.Boards.*;
+import static utils.Constants.Boards.TestBoards.testBoard2;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Game_Info.*;
 import static utils.Constants.BoardInfo.*;
@@ -44,7 +45,7 @@ public class Playing extends State implements StateMethods{
 
     public Playing(Game game){
         super(game);
-        board = FenToIntArray(TestBoards.promotionTestingBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         possibleCastles = new int[]{0,0,0,0};
         initClasses();
@@ -55,7 +56,7 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
-        board = FenToIntArray(TestBoards.promotionTestingBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
         ActivePieces = boardToMap(board);
         moves = new ArrayList<>();
         boardOverlay.createFields();
