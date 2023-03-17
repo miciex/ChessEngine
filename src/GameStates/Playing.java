@@ -44,7 +44,7 @@ public class Playing extends State implements StateMethods{
 
     public Playing(Game game){
         super(game);
-        board = FenToIntArray(TestBoards.promotionTestingBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         possibleCastles = new int[]{0,0,0,0};
         initClasses();
@@ -55,7 +55,7 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
-        board = FenToIntArray(TestBoards.promotionTestingBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
         ActivePieces = boardToMap(board);
         moves = new ArrayList<>();
         boardOverlay.createFields();
@@ -81,9 +81,9 @@ public class Playing extends State implements StateMethods{
 
         //movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, movesTo50MoveRule);
 
-        if (CheckGameResults.isThreefold(positions))
-            result = GameResults.THREE_FOLD;
-        else if (CheckGameResults.draw50MoveRule(movesTo50MoveRule))
+        //if (CheckGameResults.isThreefold(positions))
+            //result = GameResults.THREE_FOLD;
+        if (CheckGameResults.draw50MoveRule(movesTo50MoveRule))
             result = GameResults.DRAW_50_MOVE_RULE;
         else if (CheckGameResults.isStalemate(Playing.ActivePieces, Playing.whitesMove, getLastMove(), castles))
             result = GameResults.STALEMATE;
