@@ -37,13 +37,9 @@ public class Engine {
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer, Move lastMove) {
-        // bestMoves.clear();
         newBestMoves(depth);
         int eval = 0;
         eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove);
-        // for (int i = 1; i <= depth; i++) {
-        // eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
-        // }
 
         System.out.println(eval);
     }
@@ -63,15 +59,16 @@ public class Engine {
             return 0;
         }
         ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
-        // moves.add(bestMoves.get(bestMoves.size()));
-        // moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove,
-        // playing.possibleCastles));
-        // int[] moveOrder = OrderMoves(moves);
+
+        int[] order = OrderMoves(moves);
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
 
-            for (Move move : moves) {
+            for (int i = 0; i<moves.size(); i++) {
+                int index = findMaxIndex(order);
+                Move move = moves.get(index);
+                order[index] = Integer.MIN_VALUE;
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, move)
                         + evaluateBonus(move);
                 if (bestMoves.get(depth) == null || eval > maxEval) {
@@ -87,7 +84,10 @@ public class Engine {
         } else {
             int minEval = Integer.MAX_VALUE;
 
-            for (Move move : moves) {
+            for (int i = 0; i<moves.size(); i++) {
+                int index = smallestIndex(order);
+                Move move = moves.get(index);
+                order[index] = Integer.MAX_VALUE;
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move)
                         + evaluateBonus(move);
                 if (bestMoves.get(depth) == null || eval < minEval) {
@@ -131,11 +131,6 @@ public class Engine {
         }
 
         eval += evaluateBonus(move);
-
-        int mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size()
-                - Piece.generateMoves(pieces, false, move, playing.possibleCastles).size();
-
-        eval += 0.1 * mobility;
 
         return eval;
     }
