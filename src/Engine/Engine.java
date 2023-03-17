@@ -5,6 +5,7 @@ import GameStates.Move;
 import GameStates.Playing;
 import ui.BoardOverlay;
 import utils.Constants;
+import utils.HelpMethods;
 import utils.Piece;
 
 import java.util.ArrayList;
@@ -115,6 +116,16 @@ public class Engine {
         this.bestMoves.clear();
         for (int i = 1; i <= depth; i++) {
             bestMoves.put(i, null);
+        }
+    }
+
+    public void OrderMoves(ArrayList<Move> moves){
+        for(Move move : moves){
+            double moveScoreGuess = 0;
+
+            if(move.takenPiece != 0){
+                moveScoreGuess = 0.1 * HelpMethods.getPieceValue(move.takenPiece) - HelpMethods.getPieceValue(move.movedPiece);
+            }
         }
     }
 
