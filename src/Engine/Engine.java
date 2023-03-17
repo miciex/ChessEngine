@@ -108,20 +108,29 @@ public class Engine {
         int moved = move.movedPiece % 8;
 
         if(moved == King && Math.abs(move.endField - move.startField) == 2)
-            eval += 1 * multiplier;
+            eval += (100 * multiplier);
 
         if (playing.getMoves().size() <= 10) {
             if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
-                eval -= 1 * multiplier;
+                eval -= (100 * multiplier);
 
             if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
-                eval -= 1 * multiplier;
+                eval -= (100 * multiplier);
         }
 
-        int mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size()
+        /*int mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size()
                 - Piece.generateMoves(pieces, false, move, playing.possibleCastles).size();
 
-        eval += 0.1 * mobility;
+        eval += (10 * mobility);*/
+
+        if(multiplier == 1)
+        {
+            eval += Constants.Heatmaps.Whites[moved][move.endField];
+        }
+        else if(multiplier == -1)
+        {
+            eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+        }
 
         return eval;
     }
