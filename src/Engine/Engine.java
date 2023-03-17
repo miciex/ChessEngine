@@ -41,14 +41,15 @@ public class Engine {
             boolean maximizingPlayer, Move lastMove) {
         bestMoves.clear();
         int eval = 0;
-        for(int i = 1; i<=depth; i++){
+        for (int i = 1; i <= depth; i++) {
             eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
         }
 
         System.out.println(eval);
     }
 
-    public int minimax(HashMap<Integer, Integer> position, int depth, int alpha, int beta, boolean maximizingPlayer,
+    public int minimax(HashMap<Integer, Integer> position, int depth, double alpha, double beta,
+            boolean maximizingPlayer,
             Move lastMove) {
         GameResults result = playing.checkGameResult(playing.getLastMove());
         if (depth == 0)
@@ -60,7 +61,7 @@ public class Engine {
             return 0;
         }
         ArrayList<Move> moves = new ArrayList<>();
-        if(bestMoves.size()>0)
+        if (bestMoves.size() > 0)
             moves.add(bestMoves.get(bestMoves.size()));
         moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles));
 
@@ -69,7 +70,7 @@ public class Engine {
 
             for (Move move : moves) {
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, move);
-                if (!bestMoves.containsKey(depth)||bestMoves.get(depth) == null || eval > maxEval) {
+                if (!bestMoves.containsKey(depth) || bestMoves.get(depth) == null || eval > maxEval) {
                     bestMoves.put(depth, move);
                 }
                 maxEval = Math.max(maxEval, eval);
@@ -84,11 +85,11 @@ public class Engine {
 
             for (Move move : moves) {
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move);
-                if (!bestMoves.containsKey(depth)||bestMoves.get(depth) == null || eval < minEval) {
+                if (!bestMoves.containsKey(depth) || bestMoves.get(depth) == null || eval < minEval) {
                     bestMoves.put(depth, move);
                 }
                 minEval = Math.min(minEval, eval);
-                alpha = Math.min(alpha, eval);
+                beta = Math.min(beta, eval);
                 if (beta <= alpha) {
                     break;
                 }
@@ -97,15 +98,15 @@ public class Engine {
         }
     }
 
-    public int evaluate(HashMap<Integer, Integer> pieces, Move lastMove) {
+    public int evaluate(HashMap<Integer, Integer> pieces, Move move) {
         int eval = 0;
 
         for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
             eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
         }
 
-        int mobility = Piece.generateMoves(pieces, true, lastMove, playing.possibleCastles).size()
-                - Piece.generateMoves(pieces, false, lastMove, playing.possibleCastles).size();
+        double mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size()
+                - Piece.generateMoves(pieces, false, move, playing.possibleCastles).size();
 
         eval += 0.1 * mobility;
 
@@ -119,13 +120,19 @@ public class Engine {
         }
     }
 
-    public void OrderMoves(ArrayList<Move> moves){
-        for(Move move : moves){
-            double moveScoreGuess = 0;
+    public void OrderMoves(ArrayList<Move> moves) {
+        for (Move move : moves) {
+            int moveScoreGuess = 0;
 
-            if(move.takenPiece != 0){
-                moveScoreGuess = 0.1 * HelpMethods.getPieceValue(move.takenPiece) - HelpMethods.getPieceValue(move.movedPiece);
+            if (move.takenPiece != 0) {
+                moveScoreGuess = 10 * HelpMethods.getPieceValue(move.takenPiece)
+                        - HelpMethods.getPieceValue(move.movedPiece);
             }
+
+            if(move.promotePiece != 0){
+                moveScoreGuess += HelpMethods.getPieceValue(move.promotePiece);
+            }
+
         }
     }
 
@@ -133,7 +140,7 @@ public class Engine {
         return bestMoves.get(bestMoves.size());
     }
 
-    public void removeLastBestMove(){
+    public void removeLastBestMove() {
         bestMoves.remove(bestMoves.size());
     }
 }
