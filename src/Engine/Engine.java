@@ -71,6 +71,7 @@ public class Engine {
                 if (bestMoves.get(depth) == null || eval > maxEval) {
                     bestMoves.put(depth, move);
                 }
+
                 checkedMoves.remove(checkedMoves.size()-1);
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);

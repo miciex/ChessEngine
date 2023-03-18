@@ -35,7 +35,8 @@ public class CheckGameResults {
 
         f: for(HashMap<Integer, Integer> board : boards){
             for(Map.Entry<Integer, Integer> entry : board.entrySet()){
-                if(!currentPos.containsKey(entry.getKey()) || currentPos.get(entry.getKey()) != entry.getValue()) continue f;
+                if(!currentPos.containsKey(entry.getKey()) || currentPos.get(entry.getKey()) != entry.getValue())
+                    continue f;
             }
             repetitions++;
             if(repetitions == 3){
