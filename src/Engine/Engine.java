@@ -64,7 +64,7 @@ public class Engine {
                 order[index] = Integer.MIN_VALUE;
                 checkedMoves.add(move);
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
-                playing.positions.add(brd);
+                playing.positions.add((HashMap<Integer, Integer>) brd.clone());
                 int eval = minimax(brd, depth - 1, alpha, beta, false, move);
                 playing.positions.remove(playing.positions.size()-1);
 
@@ -89,9 +89,10 @@ public class Engine {
                 Move move = moves.get(index);
                 order[index] = Integer.MIN_VALUE;
                 checkedMoves.add(move);
-
+                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+                playing.positions.add((HashMap<Integer, Integer>) brd.clone());
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move);
-                        //+ evaluateBonus(position, move);
+                playing.positions.remove(playing.positions.size()-1);
 
                 if (bestMoves.get(depth) == null || eval < minEval) {
                     bestMoves.put(depth, move);
