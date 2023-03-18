@@ -123,13 +123,19 @@ public class Engine {
 
         eval += (10 * mobility);*/
 
-        if(multiplier == 1)
+        if(moved == King && Playing.isEndgame)
         {
-            eval += Constants.Heatmaps.Whites[moved][move.endField];
+            if(multiplier == 1)
+                eval += Constants.Heatmaps.kingEndgame[0][move.endField];
+            else if(multiplier == -1)
+                eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
         }
-        else if(multiplier == -1)
+        else
         {
-            eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+            if(multiplier == 1)
+                eval += Constants.Heatmaps.Whites[moved][move.endField];
+            else if(multiplier == -1)
+                eval -= Constants.Heatmaps.Blacks[moved][move.endField];
         }
 
         return eval;
