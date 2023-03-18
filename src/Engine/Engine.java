@@ -63,8 +63,10 @@ public class Engine {
                 Move move = moves.get(index);
                 order[index] = Integer.MIN_VALUE;
                 checkedMoves.add(move);
-                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, move);
-                        //+ evaluateBonus(position, move);
+                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+                playing.positions.add(brd);
+                int eval = minimax(brd, depth - 1, alpha, beta, false, move);
+                playing.positions.remove(playing.positions.size()-1);
 
                 if (bestMoves.get(depth) == null || eval > maxEval) {
                     bestMoves.put(depth, move);
