@@ -5,13 +5,12 @@ import GameStates.Move;
 import GameStates.Playing;
 import ui.BoardOverlay;
 import utils.Constants;
+import utils.HelpMethods;
 import utils.Piece;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
+import static utils.Constants.Pieces.*;
 import static utils.HelpMethods.getPieceValue;
 import static utils.HelpMethods.getRandom;
 
@@ -20,6 +19,7 @@ public class Engine {
     public boolean isWhite;
     public Move lastMove;
     HashMap<Integer, Move> bestMoves;
+    ArrayList<Move>  checkedMoves;
 
     private Playing playing;
 
@@ -27,27 +27,20 @@ public class Engine {
         this.playing = playing;
         this.isWhite = !isPlayerWhite;
         this.bestMoves = new HashMap<>();
-    }
-
-    public Move getRandomMove(HashMap<Integer, Integer> pieces, int[] castles, ArrayList<Move> lastMoves) {
-
-        ArrayList<Move> moves = Piece.generateMoves(pieces, isWhite,
-                lastMoves.size() != 0 ? lastMoves.get(lastMoves.size() - 1) : new Move(), castles);
-        return getRandom(moves);
+        this.checkedMoves = new ArrayList<>();
     }
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer, Move lastMove) {
-        bestMoves.clear();
+        newBestMoves(depth);
         int eval = 0;
-        for(int i = 1; i<=depth; i++){
-            eval = minimax(position, i, alpha, beta, maximizingPlayer, lastMove);
-        }
+        eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove);
 
         System.out.println(eval);
     }
 
-    public int minimax(HashMap<Integer, Integer> position, int depth, int alpha, int beta, boolean maximizingPlayer,
+    public int minimax(HashMap<Integer, Integer> position, int depth, double alpha, double beta,
+            boolean maximizingPlayer,
             Move lastMove) {
         GameResults result = playing.checkGameResult(playing.getLastMove());
         if (depth == 0)
@@ -58,19 +51,25 @@ public class Engine {
             }
             return 0;
         }
-        ArrayList<Move> moves = new ArrayList<>();
-        if(bestMoves.size()>0)
-            moves.add(bestMoves.get(bestMoves.size()));
-        moves.addAll(Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles));
+        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
+
+        int[] order = OrderMoves(moves);
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
 
-            for (Move move : moves) {
+            for (int i = 0; i < moves.size(); i++) {
+                int index = findMaxIndex(order);
+                Move move = moves.get(index);
+                order[index] = Integer.MIN_VALUE;
+                checkedMoves.add(move);
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, false, move);
-                if (!bestMoves.containsKey(depth)||bestMoves.get(depth) == null || eval > maxEval) {
+                        //+ evaluateBonus(position, move);
+
+                if (bestMoves.get(depth) == null || eval > maxEval) {
                     bestMoves.put(depth, move);
                 }
+                checkedMoves.remove(checkedMoves.size()-1);
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
                 if (beta <= alpha) {
@@ -78,16 +77,26 @@ public class Engine {
                 }
             }
             return maxEval;
-        } else {
+        }
+
+        else {
             int minEval = Integer.MAX_VALUE;
 
-            for (Move move : moves) {
+            for (int i = 0; i < moves.size(); i++) {
+                int index = findMaxIndex(order);
+                Move move = moves.get(index);
+                order[index] = Integer.MIN_VALUE;
+                checkedMoves.add(move);
+
                 int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move);
-                if (!bestMoves.containsKey(depth)||bestMoves.get(depth) == null || eval < minEval) {
+                        //+ evaluateBonus(position, move);
+
+                if (bestMoves.get(depth) == null || eval < minEval) {
                     bestMoves.put(depth, move);
                 }
+                checkedMoves.remove(checkedMoves.size()-1);
                 minEval = Math.min(minEval, eval);
-                alpha = Math.min(alpha, eval);
+                beta = Math.min(beta, eval);
                 if (beta <= alpha) {
                     break;
                 }
@@ -96,17 +105,45 @@ public class Engine {
         }
     }
 
-    public int evaluate(HashMap<Integer, Integer> pieces, Move lastMove) {
+    private int evaluateBonus() {
+        int eval = 0;
+
+
+
+        for(Move move : checkedMoves) {
+
+            int multiplier = move.movedPiece < 16 ? 1 : -1;
+            int moved = move.movedPiece % 8;
+
+            if (moved == King && Math.abs(move.endField - move.startField) == 2)
+                eval += (100 * multiplier);
+
+            if (playing.getMoves().size() <= 10) {
+                if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
+                    eval -= (100 * multiplier);
+
+                if (playing.piecesMovedDuringOpening.contains(move.movedPiece) && Playing.moves.size() < 10)
+                    eval -= (50 * multiplier);
+            }
+
+            if (multiplier == 1) {
+                eval += Constants.Heatmaps.Whites[moved][move.endField];
+            } else if (multiplier == -1) {
+                eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+            }
+        }
+
+        return eval;
+    }
+
+    public int evaluate(HashMap<Integer, Integer> pieces, Move move) {
         int eval = 0;
 
         for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
             eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
         }
 
-        int mobility = Piece.generateMoves(pieces, true, lastMove, playing.possibleCastles).size()
-                - Piece.generateMoves(pieces, false, lastMove, playing.possibleCastles).size();
-
-        eval += 0.1 * mobility;
+        eval += evaluateBonus();
 
         return eval;
     }
@@ -118,11 +155,58 @@ public class Engine {
         }
     }
 
+    public int[] OrderMoves(ArrayList<Move> moves) {
+        int[] guessScores = new int[moves.size()];
+        if (moves.size() > 0)
+        for (int i = 0; i < moves.size(); i++) {
+            Move move = moves.get(i);
+
+            if(move.takenPiece!=0){
+                guessScores[i] += 100000;
+            }
+
+            if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField) == 2){
+                guessScores[i] += 10000;
+            }
+
+//            if(move.gaveCheck){
+//                guessScores[i] += 1000;
+//            }
+
+            if(Playing.moves.size() < 10 && !playing.piecesMovedDuringOpening.contains(move.movedPiece)){
+                guessScores[i] += 100;
+            }
+
+
+            if (move.takenPiece != 0) {
+                guessScores[i] = 10 * (HelpMethods.getPieceValue(move.takenPiece) - HelpMethods.getPieceValue(move.movedPiece));
+            }
+
+            if (move.promotePiece > 0) {
+                guessScores[i] += HelpMethods.getPieceValue(move.promotePiece);
+            }
+        }
+        return guessScores;
+    }
+
+    private int findMaxIndex(int[] numbers) {
+        int smallest = Integer.MIN_VALUE;
+        int index = 0;
+
+        for (int i = 0; i < numbers.length; i++) {
+            if (smallest < numbers[i]) {
+                smallest = numbers[i];
+                index = i;
+            }
+        }
+        return index;
+    }
+
     public Move getBestMove() {
         return bestMoves.get(bestMoves.size());
     }
 
-    public void removeLastBestMove(){
+    public void removeLastBestMove() {
         bestMoves.remove(bestMoves.size());
     }
 }

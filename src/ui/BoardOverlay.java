@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static java.lang.System.currentTimeMillis;
 import static utils.Constants.Boards.TestBoards.*;
 import static utils.Constants.BoardInfo.BOARD_WIDTH;
 import static utils.Constants.Colors.BLACK;
@@ -266,7 +267,10 @@ public class BoardOverlay extends UIElement {
 
     private void playComputerMove(){
         if(playing.result != GameResults.NONE) return;
-        playing.engine.setBestMoves(Playing.ActivePieces, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove, playing.getLastMove());
+        long milis = -currentTimeMillis();
+        playing.engine.setBestMoves(Playing.ActivePieces, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove, playing.getLastMove());
+        milis += currentTimeMillis();
+        System.out.println("miliseconds" + milis);
         Move move = playing.engine.getBestMove();
 
         playMoveOnBoard(move);
@@ -278,8 +282,9 @@ public class BoardOverlay extends UIElement {
         playing.updateWholeBoard(mapToBoard(Playing.ActivePieces));
         updateFieldsValue(playing.getBoard());
         Playing.moves.add(move);
+        playing.addMovedPiece(move);
         setCastles(playing.castles, Playing.moves);
-        Playing.whitesMove  = !Playing.whitesMove;
+        Playing.whitesMove = !Playing.whitesMove;
         playing.movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, playing.movesTo50MoveRule);
         playing.result = playing.checkGameResult(move);
         playing.engine.removeLastBestMove();

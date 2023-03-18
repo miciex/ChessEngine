@@ -43,6 +43,9 @@ public class Piece {
             }else
                 moves.add(new Move(activePieces, activeField, endSquare));
         }
+//        for(Move move : moves){
+//                move.gaveCheck = isChecked(activePieces, move.movedPiece > 16, move, possibleCastles)!=-1;
+//        }
         return moves;
     }
 
@@ -145,8 +148,59 @@ public class Piece {
 
     public static int isChecked(HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
         int position = HelpMethods.findKing(whitesMove, activePieces);
+        int king = activePieces.get(position);
         int positionChecking = -1;
         int checkingPosition;
+//        ArrayList<Integer> RookDir = Constants.Directions.get(Rook);
+//        ArrayList<Integer> KnightDir = Constants.Directions.get(Knight);
+//        ArrayList<Integer> BishodDir = Constants.Directions.get(Bishop);
+//        ArrayList<Integer> KingDir = Constants.Directions.get(King);
+        //see if horizontal pieces are cheking the king
+//        for(int i = 0; i<RookDir.size(); i++){
+//            checkingPosition = position;
+//            while(IsCorrect(checkingPosition, RookDir.get(i))){
+//                checkingPosition += RookDir.get(i);
+//                if(!activePieces.containsKey(checkingPosition)) continue;
+//                int piece = activePieces.get(checkingPosition);
+//                if(piece < 16 == king < 16) break;
+//                if((piece%8 == Rook || piece%8 == Queen) && piece < 16 != king < 16)
+//                    return 1;
+//            }
+//        }
+//        //see if diagonal pieces are cheking the king
+//        for(int i = 0; i<BishodDir.size(); i++){
+//            checkingPosition = position;
+//            while(IsCorrect(checkingPosition, BishodDir.get(i))){
+//                checkingPosition += BishodDir.get(i);
+//                if(!activePieces.containsKey(checkingPosition)) continue;
+//                int piece = activePieces.get(checkingPosition);
+//                if(piece < 16 == king < 16) break;
+//                if((piece%8 == Bishop || piece%8 == Queen) && piece < 16 != king < 16)
+//                    return 1;
+//            }
+//        }
+//        //see if Knights are cheking the king
+//        for(int i = 0; i<KnightDir.size(); i++){
+//            checkingPosition = position + KnightDir.get(i);
+//            if(!IsCorrect(position, i)) continue;
+//            if(!activePieces.containsKey(checkingPosition)) continue;
+//            int piece = activePieces.get(checkingPosition);
+//            if(piece%8 == Knight && piece < 16 != king < 16)
+//                return 1;
+//        }
+//        //see if kings aren't to close
+//        for(int i = 0; i<KingDir.size(); i++){
+//            checkingPosition = position + KingDir.get(i);
+//            if(!IsCorrect(position, i)) continue;
+//            if(!activePieces.containsKey(checkingPosition)) continue;
+//            int piece = activePieces.get(checkingPosition);
+//            if(piece%8 == King)
+//                return 1;
+//        }
+//        int m = king < 16? -1 : 1;
+//        if(( activePieces.containsValue(position +9*m) && activePieces.get(position +9*m)%8 == Pawn)||(activePieces.containsValue(position +9*m)&&activePieces.get(position +9*m)%8 == Pawn )){
+//
+//        }
 
         for (int i : Constants.Directions.get(2137)) {
             checkingPosition = position + i;
@@ -181,7 +235,7 @@ public class Piece {
             }
         }
 
-        return positionChecking;
+        return -1;
     }
 
     public static int isChecked(int position, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
@@ -351,6 +405,9 @@ public class Piece {
         }
         boardMap.put(move.endField, move.promotePiece==0? move.movedPiece : move.promotePiece + move.movedPiece - Pawn);
         boardMap.remove(move.startField);
+        if(!board.containsValue(17)){
+            System.out.println("Problem");
+        }
         return boardMap;
     }
 
@@ -364,6 +421,9 @@ public class Piece {
         boardMap.remove(move.endField);
         if(move.takenPiece>0)
             boardMap.put(move.takenPieceField, move.takenPiece);
+        if(!board.containsValue(17)){
+            System.out.println("Problem");
+        }
         return boardMap;
     }
 

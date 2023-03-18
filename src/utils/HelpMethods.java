@@ -18,7 +18,7 @@ public class HelpMethods {
 
 
     public static int getPieceValue(int piece){
-        switch (piece %8){
+        switch (piece % 8){
             case Pawn: return PawnValue;
             case Knight: return KnightValue;
             case Bishop: return BishopValue;
