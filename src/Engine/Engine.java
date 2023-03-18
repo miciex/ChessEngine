@@ -47,15 +47,19 @@ public class Engine {
     public int minimax(HashMap<Integer, Integer> position, int depth, double alpha, double beta,
             boolean maximizingPlayer,
             Move lastMove) {
+
         GameResults result = playing.checkGameResult(playing.getLastMove());
+
         if (depth == 0)
             return evaluate(position, lastMove);
+
         if (result != GameResults.NONE) {
             if (result == GameResults.MATE) {
-                return maximizingPlayer ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+                return maximizingPlayer ? Integer.MAX_VALUE: Integer.MIN_VALUE;
             }
             return 0;
         }
+
         ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
 
         int[] order = OrderMoves(moves);
@@ -101,6 +105,34 @@ public class Engine {
         }
     }
 
+    private int endgameEval(HashMap<Integer, Integer> pieces, int multiplier)
+    {
+        boolean isWhite = multiplier == 1 ? true : false;
+
+        int opponentKing = HelpMethods.findKing(!isWhite, pieces);
+        int king = HelpMethods.findKing(isWhite ? true : false, pieces);
+
+        int eval = 0;
+
+        int opponentKingRow = (int)Math.ceil((double)(opponentKing + 1) / 8);
+        int opponentKingColumn = opponentKing % 8;
+
+        int kingRow = (int)Math.ceil((double)(king + 1) / 8);
+        int kingColumn = king % 8;
+
+        int opponentDistanceToCentreColumn = Math.max(3 - opponentKingColumn, opponentKingColumn - 4);
+        int opponentDistanceToCentreRow = Math.max(3 - opponentKingColumn, opponentKingColumn - 4);
+        int opponentDistanceFromCentre = opponentDistanceToCentreColumn + opponentDistanceToCentreRow;
+        eval += opponentDistanceFromCentre * 100 * multiplier;
+
+        int distanceBetweenColumns = Math.abs(kingColumn - opponentKingColumn);
+        int distanceBetweenRows = Math.abs(kingRow - opponentKingRow);
+        int distanceBetweenKings = distanceBetweenColumns + distanceBetweenRows;
+        eval += -distanceBetweenKings * 40 * multiplier;
+
+        return eval;
+    }
+
     private int evaluateBonus(HashMap<Integer, Integer> pieces, Move move) {
         int eval = 0;
 
@@ -116,6 +148,9 @@ public class Engine {
 
             if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
                 eval -= (100 * multiplier);
+
+            if(playing.getMoves().size() <= 1 && moved == Knight)
+                eval -= (100 * multiplier);
         }
 
         /*int mobility = Piece.generateMoves(pieces, true, move, playing.possibleCastles).size()
@@ -123,12 +158,24 @@ public class Engine {
 
         eval += (10 * mobility);*/
 
-        if(moved == King && Playing.isEndgame)
+        if(Playing.isEndgame)
         {
-            if(multiplier == 1)
-                eval += Constants.Heatmaps.kingEndgame[0][move.endField];
-            else if(multiplier == -1)
-                eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
+            if(moved == King)
+            {
+                if(multiplier == 1)
+                    eval += Constants.Heatmaps.kingEndgame[0][move.endField];
+                else if(multiplier == -1)
+                    eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
+            }
+            else
+            {
+                if(multiplier == 1)
+                    eval += Constants.Heatmaps.Whites[moved][move.endField];
+                else if(multiplier == -1)
+                    eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+            }
+
+            eval += endgameEval(pieces, multiplier);
         }
         else
         {

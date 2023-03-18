@@ -56,7 +56,7 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
-        board = FenToIntArray(endgameBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(classicBoard, BOARD_HEIGHT * BOARD_WIDTH);
         ActivePieces = boardToMap(board);
         moves = new ArrayList<>();
         boardOverlay.createFields();
