@@ -64,6 +64,7 @@ public class Playing extends State implements StateMethods{
         possibleCastles = new int[]{0,0,0,0};
         positions.clear();
         positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
+        piecesMovedDuringOpening = new ArrayList<>();
         result = GameResults.NONE;
     }
 
@@ -74,11 +75,13 @@ public class Playing extends State implements StateMethods{
 
     }
 
-    public GameResults checkGameResult(Move move) {
+    public GameResults checkGameResult(Move move, ArrayList<HashMap<Integer, Integer>> positions, HashMap<Integer, Integer> pieces, boolean whitesMove) {
         GameResults result = GameResults.NONE;
-        if (move.takenPiece != 0 || (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2))
-            positions.clear();
-        positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
+
+        //Do the same in engine
+        //if (move.takenPiece != 0 || (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2))
+            //positions.clear();
+        //positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
 
         //movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, movesTo50MoveRule);
 
@@ -86,11 +89,11 @@ public class Playing extends State implements StateMethods{
             result = GameResults.THREE_FOLD;
         if (CheckGameResults.draw50MoveRule(movesTo50MoveRule))
             result = GameResults.DRAW_50_MOVE_RULE;
-        else if (CheckGameResults.isStalemate(Playing.ActivePieces, Playing.whitesMove, getLastMove(), castles))
+        else if (CheckGameResults.isStalemate(pieces, whitesMove, move, castles))
             result = GameResults.STALEMATE;
-        else if (CheckGameResults.insufficientMaterial(Playing.ActivePieces))
+        else if (CheckGameResults.insufficientMaterial(pieces))
             result = GameResults.INSUFFICIENT_MATERIAL;
-        else if (CheckGameResults.isMate(Playing.ActivePieces, Playing.whitesMove, getLastMove(),
+        else if (CheckGameResults.isMate(pieces, whitesMove, move,
                 possibleCastles))
             result = GameResults.MATE;
         return result;
