@@ -42,15 +42,19 @@ public class Engine {
     public int minimax(HashMap<Integer, Integer> position, int depth, double alpha, double beta,
             boolean maximizingPlayer,
             Move lastMove) {
-        GameResults result = playing.checkGameResult(playing.getLastMove());
-        if (depth == 0)
-            return evaluate(position, lastMove);
+
+        GameResults result = playing.checkGameResult(lastMove);
+
         if (result != GameResults.NONE) {
             if (result == GameResults.MATE) {
                 return maximizingPlayer ? Integer.MAX_VALUE : Integer.MIN_VALUE;
             }
             return 0;
         }
+
+        if (depth == 0)
+            return evaluate(position, lastMove);
+
         ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
 
         int[] order = OrderMoves(moves);
@@ -105,10 +109,36 @@ public class Engine {
         }
     }
 
-    private int evaluateBonus() {
+    private int endgameEval(HashMap<Integer, Integer> pieces, int multiplier)
+    {
+        boolean isWhite = multiplier == 1 ? true : false;
+
+        int opponentKing = HelpMethods.findKing(!isWhite, pieces);
+        int king = HelpMethods.findKing(isWhite ? true : false, pieces);
+
         int eval = 0;
 
+        int opponentKingRow = (int)Math.ceil((double)(opponentKing + 1) / 8);
+        int opponentKingColumn = opponentKing % 8;
 
+        int kingRow = (int)Math.ceil((double)(king + 1) / 8);
+        int kingColumn = king % 8;
+
+        int opponentDistanceToCentreColumn = Math.max(3 - opponentKingColumn, opponentKingColumn - 4);
+        int opponentDistanceToCentreRow = Math.max(3 - opponentKingColumn, opponentKingColumn - 4);
+        int opponentDistanceFromCentre = opponentDistanceToCentreColumn + opponentDistanceToCentreRow;
+        eval += opponentDistanceFromCentre * 100 * multiplier;
+
+        int distanceBetweenColumns = Math.abs(kingColumn - opponentKingColumn);
+        int distanceBetweenRows = Math.abs(kingRow - opponentKingRow);
+        int distanceBetweenKings = distanceBetweenColumns + distanceBetweenRows;
+        eval += -distanceBetweenKings * 40 * multiplier;
+
+        return eval;
+    }
+
+    private int evaluateBonus(HashMap<Integer, Integer> pieces) {
+        int eval = 0;
 
         for(Move move : checkedMoves) {
 
@@ -124,13 +154,38 @@ public class Engine {
 
                 if (playing.piecesMovedDuringOpening.contains(move.movedPiece) && Playing.moves.size() < 10)
                     eval -= (50 * multiplier);
+
+                if(playing.getMoves().size() <= 1 && moved == Knight)
+                    eval -= (100 * multiplier);
             }
 
-            if (multiplier == 1) {
-                eval += Constants.Heatmaps.Whites[moved][move.endField];
-            } else if (multiplier == -1) {
-                eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+            if(Playing.isEndgame)
+            {
+                if(moved == King)
+                {
+                    if(multiplier == 1)
+                        eval += Constants.Heatmaps.kingEndgame[0][move.endField];
+                    else if(multiplier == -1)
+                        eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
+                }
+                else
+                {
+                    if(multiplier == 1)
+                        eval += Constants.Heatmaps.Whites[moved][move.endField];
+                    else if(multiplier == -1)
+                        eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+                }
+
+                //eval += endgameEval(pieces, multiplier);
             }
+            else
+            {
+                if(multiplier == 1)
+                    eval += Constants.Heatmaps.Whites[moved][move.endField];
+                else if(multiplier == -1)
+                    eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+            }
+
         }
 
         return eval;
@@ -143,7 +198,7 @@ public class Engine {
             eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
         }
 
-        eval += evaluateBonus();
+        eval += evaluateBonus(pieces);
 
         return eval;
     }
