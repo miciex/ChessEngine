@@ -28,7 +28,7 @@ public class CheckGameResults {
     }
 
     public static boolean isThreefold(ArrayList<HashMap<Integer, Integer>> boards){
-
+        if(boards.size() < 5) return false;
         HashMap<Integer, Integer> currentPos = boards.get(boards.size()-1);
 
         int repetitions = 0;

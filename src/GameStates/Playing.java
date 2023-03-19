@@ -53,6 +53,7 @@ public class Playing extends State implements StateMethods{
         result = GameResults.NONE;
         positions.clear();
         positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
+        castles = new int[] { 0,0,0,0 };
     }
 
     public void resetGame(){
@@ -65,7 +66,11 @@ public class Playing extends State implements StateMethods{
         positions.clear();
         positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
         piecesMovedDuringOpening = new ArrayList<>();
+        piecesMovedDuringOpening.clear();
         result = GameResults.NONE;
+        castles = new int[] { 0,0,0,0 };
+        positions.clear();
+        engine.clearPosition();
     }
 
     private void initClasses(){
