@@ -67,7 +67,7 @@ public class Engine {
         }
 
         if (depth == 0)
-            return evaluate(position, lastMove);
+            return evaluate(position);
 
         ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
 
@@ -225,6 +225,17 @@ public class Engine {
         return eval;
     }
 
+    private int pawnStructureBonus(HashMap<Integer, Integer> pieces, Move move, int multiplier)
+    {
+        if(move.movedPiece % 8 == Pawn)
+        {
+
+
+        }
+
+        return 0;
+    }
+
     private int evaluateBonus(HashMap<Integer, Integer> pieces) {
         int eval = 0;
 
@@ -240,7 +251,7 @@ public class Engine {
                 if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
                     eval -= (100 * multiplier);
 
-                if (playing.piecesMovedDuringOpening.contains(move.movedPiece) && Playing.moves.size() < 10)
+                if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
                     eval -= (50 * multiplier);
 
                 if(playing.getMoves().size() <= 1 && moved == Knight)
@@ -259,19 +270,19 @@ public class Engine {
                 else
                 {
                     if(multiplier == 1)
-                        eval += Constants.Heatmaps.Whites[moved][move.endField];
+                        eval += Constants.Heatmaps.Whites[moved-1][move.endField];
                     else if(multiplier == -1)
-                        eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+                        eval -= Constants.Heatmaps.Blacks[moved-1][move.endField];
                 }
 
-                //eval += endgameEval(pieces, multiplier);
+                eval += endgameEval(pieces, multiplier);
             }
             else
             {
                 if(multiplier == 1)
-                    eval += Constants.Heatmaps.Whites[moved][move.endField];
+                    eval += Constants.Heatmaps.Whites[moved-1][move.endField];
                 else if(multiplier == -1)
-                    eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+                    eval -= Constants.Heatmaps.Blacks[moved-1][move.endField];
             }
 
         }
@@ -281,7 +292,7 @@ public class Engine {
         return eval;
     }
 
-    public int evaluate(HashMap<Integer, Integer> pieces, Move move) {
+    public int evaluate(HashMap<Integer, Integer> pieces) {
         int eval = 0;
 
         for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
