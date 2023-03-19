@@ -20,7 +20,7 @@ public class Engine {
     public Move lastMove;
     Move bestMove;
     int bestMovesEval;
-    ArrayList<Move>  checkedMoves;
+    ArrayList<Move> checkedMoves;
     ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
     private Playing playing;
 
@@ -93,7 +93,7 @@ public class Engine {
                 checkedMoves.add(move);
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
                 positions.add((HashMap<Integer, Integer>) brd.clone());
-                int eval = minimax(brd, depth - 1, alpha, beta, false, move, originalDepth);
+                int eval = minimax(brd, depth - 1, alpha, beta, false, move, originalDepth) + evaluateBonus(position, move);
 
                 positions.remove(positions.size()-1);
 
@@ -132,7 +132,7 @@ public class Engine {
                 checkedMoves.add(move);
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
                 positions.add((HashMap<Integer, Integer>) brd.clone());
-                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move, originalDepth);
+                int eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move, originalDepth) + evaluateBonus(position, move);
 
                 positions.remove(positions.size()-1);
 
@@ -182,15 +182,15 @@ public class Engine {
         int distanceBetweenColumns = Math.abs(kingColumn - opponentKingColumn);
         int distanceBetweenRows = Math.abs(kingRow - opponentKingRow);
         int distanceBetweenKings = distanceBetweenColumns + distanceBetweenRows;
-        eval += (14 - distanceBetweenKings) * 10 * multiplier;
+        eval += (14 - distanceBetweenKings) * 40 * multiplier;
 
         return eval;
     }
 
-    private int evaluateBonus(HashMap<Integer, Integer> pieces) {
+    private int evaluateBonus(HashMap<Integer, Integer> pieces, Move move) {
         int eval = 0;
 
-        for(Move move : checkedMoves) {
+        //for(Move move : checkedMoves) {
 
             int multiplier = move.movedPiece < 16 ? 1 : -1;
             int moved = move.movedPiece % 8;
@@ -221,22 +221,22 @@ public class Engine {
                 else
                 {
                     if(multiplier == 1)
-                        eval += Constants.Heatmaps.Whites[moved][move.endField];
+                        eval += Constants.Heatmaps.Whites[moved-1][move.endField];
                     else if(multiplier == -1)
-                        eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+                        eval -= Constants.Heatmaps.Blacks[moved-1][move.endField];
                 }
 
-                //eval += endgameEval(pieces, multiplier);
+                eval += endgameEval(pieces, multiplier);
             }
             else
             {
                 if(multiplier == 1)
-                    eval += Constants.Heatmaps.Whites[moved][move.endField];
+                    eval += Constants.Heatmaps.Whites[moved-1][move.endField];
                 else if(multiplier == -1)
-                    eval -= Constants.Heatmaps.Blacks[moved][move.endField];
+                    eval -= Constants.Heatmaps.Blacks[moved-1][move.endField];
             }
 
-        }
+        //}
 
         return eval;
     }
@@ -248,7 +248,7 @@ public class Engine {
             eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
         }
 
-        eval += evaluateBonus(pieces);
+        eval += evaluateBonus(pieces, move);
 
         return eval;
     }
@@ -262,6 +262,8 @@ public class Engine {
         for (int i = 1; i <= depth; i++) {
             bestMovesEval.put(i, ((i % 2 != 0) != maximizingPlayer) ? Integer.MIN_VALUE : Integer.MAX_VALUE);
         }*/
+        bestMove = null;
+        bestMovesEval = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
     }
 
     public int[] OrderMoves(ArrayList<Move> moves, int depth, int originalDepth) {
