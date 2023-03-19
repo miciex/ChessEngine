@@ -47,6 +47,8 @@ public class Engine {
         bestMovesEval = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove, depth);
         System.out.println("Transpositions: "+transpositions);
+        System.out.println("Cut offs: " + cutoffs);
+        System.out.println("Moves searched" +movesSearched);
     }
 
     public int minimax(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
@@ -93,6 +95,9 @@ public class Engine {
             int maxEval = Integer.MIN_VALUE;
 
             for (int i = 0; i < moves.size(); i++) {
+
+                movesSearched++;
+
                 int index = findMaxIndex(order);
                 Move move = moves.get(index);
                 order[index] = Integer.MIN_VALUE;
@@ -115,7 +120,9 @@ public class Engine {
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
                 if (beta <= alpha) {
+                    cutoffs++;
                     break;
+
                 }
             }
             if(originalDepth + 1 - depth == 1)
@@ -140,7 +147,7 @@ public class Engine {
 
             for (int i = 0; i < moves.size(); i++) {
 
-
+                movesSearched++;
 
                 int index = findMaxIndex(order);
                 Move move = moves.get(index);
@@ -177,6 +184,7 @@ public class Engine {
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
                 if (beta <= alpha) {
+                    cutoffs++;
                     break;
                 }
 
