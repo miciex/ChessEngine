@@ -277,12 +277,15 @@ public class Engine {
 
                 eval += endgameEval(pieces, multiplier);
             }
-            else
+            else if(moved != King)
             {
                 if(multiplier == 1)
                     eval += Constants.Heatmaps.Whites[moved-1][move.endField];
                 else if(multiplier == -1)
                     eval -= Constants.Heatmaps.Blacks[moved-1][move.endField];
+
+                //if(moved == King)
+                    //eval += 100 * multiplier;
             }
 
         }
