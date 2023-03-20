@@ -8,6 +8,7 @@ import utils.Constants;
 import utils.HelpMethods;
 import utils.Piece;
 
+import java.sql.Array;
 import java.util.*;
 
 import static utils.Constants.Pieces.*;
@@ -24,7 +25,7 @@ public class Engine {
     ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
     private Playing playing;
     private ZobristHash zobristHash;
-    private HashMap<Long, PositionInfo> positionsTable;
+    private ArrayList<HashMap<Long, PositionInfo>>  positionsTable;
     int transpositions;
     int cutoffs;
     int movesSearched;
@@ -35,12 +36,13 @@ public class Engine {
         this.checkedMoves = new ArrayList<>();
         this.zobristHash = new ZobristHash();
         this.zobristHash.initTable();
-        this.positionsTable = new HashMap<>();
+        this.positionsTable = new ArrayList<>();
     }
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer, Move lastMove) {
         newBestMoves(depth, maximizingPlayer);
+        resetTranspositions(depth);
         int eval = 0;
         transpositions = 0;
         bestMove = null;
@@ -49,6 +51,8 @@ public class Engine {
         System.out.println("Transpositions: "+transpositions);
         System.out.println("Cut offs: " + cutoffs);
         System.out.println("Moves searched" +movesSearched);
+        System.out.println("Evaluation: " + eval);
+        positionsTable.clear();
     }
 
     public int minimax(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
@@ -83,67 +87,7 @@ public class Engine {
 
             long positionHash = zobristHash.computeHash(position);
 
-            if(positionsTable.containsKey(positionHash)){
-                if(originalDepth + 1 - depth == 1){
-                    bestMovesEval = positionsTable.get(positionHash).eval;
-                    bestMove = positionsTable.get(positionHash).bestMove;
-                }
-                transpositions++;
-                return positionsTable.get(positionHash).eval;
-            }
-
             int maxEval = Integer.MIN_VALUE;
-
-            for (int i = 0; i < moves.size(); i++) {
-
-                movesSearched++;
-
-                int index = findMaxIndex(order);
-                Move move = moves.get(index);
-                order[index] = Integer.MIN_VALUE;
-                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
-
-                checkedMoves.add(move);
-                positions.add((HashMap<Integer, Integer>) brd.clone());
-                int eval = minimax(brd, depth - 1, alpha, beta, false, move, originalDepth);
-
-                positions.remove(positions.size()-1);
-
-                if(eval > bestMovesEval && originalDepth + 1 - depth == 1)
-                {
-                    bestMovesEval = eval;
-                    bestMove = move;
-                    currBestMove = move;
-                }
-
-                checkedMoves.remove(checkedMoves.size()-1);
-                maxEval = Math.max(maxEval, eval);
-                alpha = Math.max(alpha, eval);
-                if (beta <= alpha) {
-                    cutoffs++;
-                    break;
-
-                }
-            }
-            if(originalDepth + 1 - depth == 1)
-                positionsTable.put(zobristHash.computeHash(position), new PositionInfo(currBestMove, maxEval, alpha, beta, true));
-
-            return maxEval;
-        }
-
-        else {
-            int minEval = Integer.MAX_VALUE;
-
-            long positionHash = zobristHash.computeHash(position);
-
-            if(positionsTable.containsKey(positionHash)){
-                if(originalDepth + 1 - depth == 1){
-                    bestMovesEval = positionsTable.get(positionHash).eval;
-                    bestMove = positionsTable.get(positionHash).bestMove;
-                }
-                transpositions++;
-                return positionsTable.get(positionHash).eval;
-            }
 
             for (int i = 0; i < moves.size(); i++) {
 
@@ -158,8 +102,64 @@ public class Engine {
 
                 int eval;
 
-                if(positionsTable.containsKey(hash) && positionsTable.get(hash).whitesMove == false){
-                    PositionInfo info = positionsTable.get(hash);
+                checkedMoves.add(move);
+                positions.add((HashMap<Integer, Integer>) brd.clone());
+              if(positionsTable.get(originalDepth-depth).containsKey(hash)){
+                   // break;
+                    PositionInfo info = positionsTable.get(originalDepth-depth).get(hash);
+                    eval = info.eval;
+                    beta = info.beta;
+                    alpha = info.alpha;
+                    transpositions++;
+             }else {
+                    eval = minimax(brd, depth - 1, alpha, beta, false, move, originalDepth);
+                }
+
+                positions.remove(positions.size()-1);
+
+                if(eval > bestMovesEval && originalDepth + 1 - depth == 1)
+                {
+                    bestMovesEval = eval;
+                    bestMove = move;
+                    currBestMove = move;
+                }
+
+                checkedMoves.remove(checkedMoves.size()-1);
+                maxEval = Math.max(maxEval, eval);
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha) {
+                    cutoffs +=moves.size()-i-1;
+                    break;
+
+                }
+            }
+            //if(originalDepth + 1 - depth == 1)
+            positionsTable.get(originalDepth - depth).put(positionHash, new PositionInfo(currBestMove, maxEval, alpha, beta, true));
+
+            return maxEval;
+        }
+
+        else {
+            int minEval = Integer.MAX_VALUE;
+
+            long positionHash = zobristHash.computeHash(position);
+
+            for (int i = 0; i < moves.size(); i++) {
+
+                movesSearched++;
+
+                int index = findMaxIndex(order);
+                Move move = moves.get(index);
+                order[index] = Integer.MIN_VALUE;
+                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+
+                long hash = zobristHash.computeHash(brd);
+
+                int eval;
+
+                if(positionsTable.get(originalDepth-depth).containsKey(hash)){
+
+                    PositionInfo info = positionsTable.get(originalDepth-depth).get(hash);
                     eval = info.eval;
                     beta = info.beta;
                     alpha = info.alpha;
@@ -184,14 +184,14 @@ public class Engine {
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
                 if (beta <= alpha) {
-                    cutoffs++;
+                    cutoffs+=moves.size()-i-1;
                     break;
                 }
 
 
             }
-            if(originalDepth + 1 - depth == 1)
-                positionsTable.put(positionHash, new PositionInfo(currBestMove, minEval, alpha, beta, false));
+
+            positionsTable.get(originalDepth - depth).put(positionHash, new PositionInfo(currBestMove, minEval, alpha, beta, false));
 
             return minEval;
         }
@@ -252,7 +252,7 @@ public class Engine {
                     eval -= (100 * multiplier);
 
                 if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
-                    eval -= (50 * multiplier);
+                    eval -= (20 * multiplier);
 
                 if(playing.getMoves().size() <= 1 && moved == Knight)
                     eval -= (100 * multiplier);
@@ -283,14 +283,9 @@ public class Engine {
                     eval += Constants.Heatmaps.Whites[moved-1][move.endField];
                 else if(multiplier == -1)
                     eval -= Constants.Heatmaps.Blacks[moved-1][move.endField];
-
-                //if(moved == King)
-                    //eval += 100 * multiplier;
             }
 
         }
-
-        //eval += endgameEval(pieces,(checkedMoves.get(checkedMoves.size()-1).movedPiece < 16 ? 1 : -1)) ;
 
         return eval;
     }
@@ -305,6 +300,12 @@ public class Engine {
         eval += evaluateBonus(pieces);
 
         return eval;
+    }
+
+    private void resetTranspositions(int depth){
+        for(int i = 0; i<depth; i++){
+            positionsTable.add(new HashMap<Long, PositionInfo>());
+        }
     }
 
     private void newBestMoves(int depth, boolean maximizingPlayer) {
