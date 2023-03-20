@@ -30,6 +30,8 @@ public class Engine {
     int cutoffs;
     int movesSearched;
     int[] possibleCastles;
+    ArrayList<Integer> piecesMovedDuringOpening;
+    ArrayList<Integer> originalPiecesMovedDuringOpening;
 
     public Engine(boolean isPlayerWhite, Playing playing) {
         this.playing = playing;
@@ -41,8 +43,10 @@ public class Engine {
     }
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
-            boolean maximizingPlayer, Move lastMove, int[] possibleCastles) {
-        this.possibleCastles = possibleCastles;
+            boolean maximizingPlayer, Move lastMove, int[] possibleCastles, ArrayList<Integer> piecesMovedDuringOpening) {
+        this.possibleCastles = possibleCastles.clone();
+        this.originalPiecesMovedDuringOpening = (ArrayList<Integer>) piecesMovedDuringOpening.clone();
+        this.piecesMovedDuringOpening = this.originalPiecesMovedDuringOpening;
         newBestMoves(depth, maximizingPlayer);
         resetTranspositions(depth);
         int eval = 0;
@@ -108,6 +112,8 @@ public class Engine {
                     addAll(checkedMoves);
                 }});
 
+                addMovedPiece(move);
+
                 positions.add((HashMap<Integer, Integer>) brd.clone());
               if(positionsTable.get(originalDepth-depth).containsKey(hash)){
                    // break;
@@ -134,6 +140,9 @@ public class Engine {
                     addAll(playing.getMoves());
                     addAll(checkedMoves);
                 }});
+
+                piecesMovedDuringOpening = originalPiecesMovedDuringOpening;
+
 
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
@@ -176,12 +185,26 @@ public class Engine {
                     transpositions++;
                 }else{
                     checkedMoves.add(move);
+
+                    possibleCastles = Piece.setCastles(possibleCastles, new ArrayList<>() {{
+                        addAll(playing.getMoves());
+                        addAll(checkedMoves);
+                    }});
+
+                    addMovedPiece(move);
+
                     positions.add((HashMap<Integer, Integer>) brd.clone());
                     eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move, originalDepth);
 
                     positions.remove(positions.size()-1);
                     checkedMoves.remove(checkedMoves.size()-1);
 
+                    possibleCastles = Piece.unsetCastles(possibleCastles, new ArrayList<>() {{
+                        addAll(playing.getMoves());
+                        addAll(checkedMoves);
+                    }});
+
+                    piecesMovedDuringOpening = originalPiecesMovedDuringOpening;
                 }
 
                 if(eval < bestMovesEval && originalDepth + 1 - depth == 1)
@@ -261,7 +284,7 @@ public class Engine {
                 if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
                     eval -= (100 * multiplier);
 
-                if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
+                if (playing.getMovedPieces().contains(move.startField))
                     eval -= (20 * multiplier);
 
                 if(playing.getMoves().size() <= 1 && moved == Knight)
@@ -354,7 +377,7 @@ public class Engine {
 //                guessScores[i] += 1000;
 //            }
 
-            if(Playing.moves.size() < 10 && !playing.piecesMovedDuringOpening.contains(move.movedPiece)){
+            if(playing.getMovedPieces().contains(move.startField)){
                 guessScores[i] += 100;
             }
 
@@ -395,5 +418,21 @@ public class Engine {
 
     public void clearPosition(){
         positions.clear();
+    }
+
+    private void addMovedPiece(Move move)
+    {
+        if(this.piecesMovedDuringOpening.size() <= 10)
+            if(this.piecesMovedDuringOpening.contains(move.endField))
+            {
+                //piecesMovedDuringOpening.remove(move.startField);
+                //piecesMovedDuringOpening.add(0);
+            }
+            else
+            {
+                this.piecesMovedDuringOpening.add(move.endField);
+                //piecesMovedDuringOpening.remove(move.startField);
+                //piecesMovedDuringOpening.add(0);
+            }
     }
 }

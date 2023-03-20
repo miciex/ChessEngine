@@ -268,7 +268,7 @@ public class BoardOverlay extends UIElement {
     private void playComputerMove(){
         if(playing.result != GameResults.NONE) return;
         long milis = -currentTimeMillis();
-        playing.engine.setBestMoves(Playing.ActivePieces, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove, playing.getLastMove(), playing.possibleCastles);
+        playing.engine.setBestMoves(Playing.ActivePieces, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, Playing.whitesMove, playing.getLastMove(), playing.possibleCastles, playing.getMovedPieces());
         milis += currentTimeMillis();
         System.out.println("miliseconds" + milis);
         Move move = playing.engine.getBestMove();
@@ -289,6 +289,7 @@ public class BoardOverlay extends UIElement {
         playing.result = playing.checkGameResult(move, playing.positions, Playing.ActivePieces, Playing.whitesMove);
         playing.engine.removeLastBestMove();
         Playing.isEndgame = Piece.isEndgame(Playing.ActivePieces);
+        System.out.println(playing.getMovedPieces());
     }
 
     private void movePiece(int col, int row) {

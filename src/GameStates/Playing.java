@@ -36,11 +36,10 @@ public class Playing extends State implements StateMethods{
     public int castles[] = new int[] { 0,0,0,0 };
     public int movesTo50MoveRule = 0;
     public static boolean isEndgame = false;
-
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
     public Engine engine;
-    public ArrayList<Integer> piecesMovedDuringOpening = new ArrayList<>();
+    private ArrayList<Integer> piecesMovedDuringOpening = new ArrayList<>();
     public static HashMap<Integer, Integer> ActivePieces = new HashMap<>();
 
     public Playing(Game game){
@@ -66,7 +65,6 @@ public class Playing extends State implements StateMethods{
         positions.clear();
         positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
         piecesMovedDuringOpening = new ArrayList<>();
-        piecesMovedDuringOpening.clear();
         result = GameResults.NONE;
         castles = new int[] { 0,0,0,0 };
         positions.clear();
@@ -172,9 +170,24 @@ public class Playing extends State implements StateMethods{
 
     public void updateWholeBoard(int[] board){this.board = board;}
 
+    public ArrayList<Integer> getMovedPieces()
+    {
+        return piecesMovedDuringOpening;
+    }
+
     public void addMovedPiece(Move move)
     {
         if(piecesMovedDuringOpening.size() <= 10)
-            piecesMovedDuringOpening.add(move.movedPiece);
+            if(piecesMovedDuringOpening.contains(move.endField))
+            {
+                //piecesMovedDuringOpening.remove(move.startField);
+                //piecesMovedDuringOpening.add(0);
+            }
+        else
+            {
+                piecesMovedDuringOpening.add(move.endField);
+                //piecesMovedDuringOpening.remove(move.startField);
+                //piecesMovedDuringOpening.add(0);
+            }
     }
 }
