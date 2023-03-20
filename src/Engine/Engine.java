@@ -81,7 +81,7 @@ public class Engine {
         }
 
         if (depth == 0) {
-            return searchAllCaptures(Integer.MIN_VALUE, Integer.MAX_VALUE, position, maximizingPlayer);// evaluate(position);
+            return evaluate(position);//searchAllCaptures(Integer.MIN_VALUE, Integer.MAX_VALUE, position, maximizingPlayer);
         }
 
         long positionHash = zobristHash.computeHash(position);
