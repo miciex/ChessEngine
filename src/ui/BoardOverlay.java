@@ -289,7 +289,6 @@ public class BoardOverlay extends UIElement {
         playing.result = playing.checkGameResult(move, playing.positions, Playing.ActivePieces, Playing.whitesMove);
         playing.engine.removeLastBestMove();
         Playing.isEndgame = Piece.isEndgame(Playing.ActivePieces);
-        System.out.println(playing.getMovedPieces());
     }
 
     private void movePiece(int col, int row) {

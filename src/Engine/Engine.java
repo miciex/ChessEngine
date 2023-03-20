@@ -277,7 +277,9 @@ public class Engine {
             int multiplier = move.movedPiece < 16 ? 1 : -1;
             int moved = move.movedPiece % 8;
 
-            if (moved == King && Math.abs(move.endField - move.startField) == 2)
+            if (moved == King && Math.abs(move.endField - move.startField) != 2)
+                eval -= (100 * multiplier);
+            else if(moved == King && Math.abs(move.endField - move.startField) == 2)
                 eval += (100 * multiplier);
 
             if (playing.getMoves().size() <= 10) {
@@ -295,10 +297,10 @@ public class Engine {
             {
                 if(moved == King)
                 {
-                    if(multiplier == 1)
-                        eval += Constants.Heatmaps.kingEndgame[0][move.endField];
-                    else if(multiplier == -1)
-                        eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
+                    //if(multiplier == 1)
+                        //eval += Constants.Heatmaps.kingEndgame[0][move.endField];
+                   //else if(multiplier == -1)
+                        //eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
                 }
                 else
                 {
