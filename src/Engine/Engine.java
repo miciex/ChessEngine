@@ -29,6 +29,7 @@ public class Engine {
     int transpositions;
     int cutoffs;
     int movesSearched;
+    int[] possibleCastles;
 
     public Engine(boolean isPlayerWhite, Playing playing) {
         this.playing = playing;
@@ -40,7 +41,8 @@ public class Engine {
     }
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
-            boolean maximizingPlayer, Move lastMove) {
+            boolean maximizingPlayer, Move lastMove, int[] possibleCastles) {
+        this.possibleCastles = possibleCastles;
         newBestMoves(depth, maximizingPlayer);
         resetTranspositions(depth);
         int eval = 0;
@@ -73,7 +75,7 @@ public class Engine {
         if (depth == 0)
             return evaluate(position);
 
-        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
+        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, possibleCastles);
 
         if(bestMove != null && originalDepth + 1 - depth == 1)
             moves.add(bestMove);
@@ -90,19 +92,22 @@ public class Engine {
             int maxEval = Integer.MIN_VALUE;
 
             for (int i = 0; i < moves.size(); i++) {
-
                 movesSearched++;
 
                 int index = findMaxIndex(order);
                 Move move = moves.get(index);
                 order[index] = Integer.MIN_VALUE;
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
-
                 long hash = zobristHash.computeHash(brd);
 
                 int eval;
 
                 checkedMoves.add(move);
+                possibleCastles = Piece.setCastles(possibleCastles, new ArrayList<>() {{
+                    addAll(playing.getMoves());
+                    addAll(checkedMoves);
+                }});
+
                 positions.add((HashMap<Integer, Integer>) brd.clone());
               if(positionsTable.get(originalDepth-depth).containsKey(hash)){
                    // break;
@@ -125,6 +130,11 @@ public class Engine {
                 }
 
                 checkedMoves.remove(checkedMoves.size()-1);
+                possibleCastles = Piece.unsetCastles(possibleCastles, new ArrayList<>() {{
+                    addAll(playing.getMoves());
+                    addAll(checkedMoves);
+                }});
+
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
                 if (beta <= alpha) {
