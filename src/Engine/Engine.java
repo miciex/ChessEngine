@@ -21,14 +21,17 @@ public class Engine {
     public Move lastMove;
     Move bestMove;
     int bestMovesEval;
-    ArrayList<Move>  checkedMoves;
+    ArrayList<Move> checkedMoves;
     ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
     private Playing playing;
     private ZobristHash zobristHash;
-    private ArrayList<HashMap<Long, PositionInfo>>  positionsTable;
+    private ArrayList<HashMap<Long, PositionInfo>> positionsTable;
     int transpositions;
     int cutoffs;
     int movesSearched;
+    int[] possibleCastles;
+    ArrayList<Integer> piecesMovedDuringOpening;
+    ArrayList<Integer> originalPiecesMovedDuringOpening;
 
     public Engine(boolean isPlayerWhite, Playing playing) {
         this.playing = playing;
@@ -40,16 +43,21 @@ public class Engine {
     }
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
-            boolean maximizingPlayer, Move lastMove) {
+            boolean maximizingPlayer, Move lastMove, int[] possibleCastles,
+            ArrayList<Integer> piecesMovedDuringOpening) {
+        this.possibleCastles = possibleCastles.clone();
+        this.originalPiecesMovedDuringOpening = (ArrayList<Integer>) piecesMovedDuringOpening.clone();
+        this.piecesMovedDuringOpening = this.originalPiecesMovedDuringOpening;
+        newBestMoves(depth, maximizingPlayer);
         resetTranspositions(depth);
         int eval = 0;
         transpositions = 0;
         bestMove = null;
         bestMovesEval = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove, depth);
-        System.out.println("Transpositions: "+transpositions);
+        System.out.println("Transpositions: " + transpositions);
         System.out.println("Cut offs: " + cutoffs);
-        System.out.println("Moves searched" +movesSearched);
+        System.out.println("Moves searched" + movesSearched);
         System.out.println("Evaluation: " + eval);
         positionsTable.clear();
     }
@@ -57,25 +65,29 @@ public class Engine {
     public int minimax(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer,
             Move lastMove, int originalDepth) {
-        GameResults result = playing.checkGameResult(lastMove, new ArrayList<>() {{
-            addAll(playing.positions);
-            addAll(positions);
-        }}, position, maximizingPlayer);
+        GameResults result = playing.checkGameResult(lastMove, new ArrayList<>() {
+            {
+                addAll(playing.positions);
+                addAll(positions);
+            }
+        }, position, maximizingPlayer);
 
         if (result != GameResults.NONE) {
             if (result == GameResults.MATE) {
-                return maximizingPlayer ? Integer.MIN_VALUE + 100 - originalDepth - depth : Integer.MAX_VALUE - 100 + originalDepth - depth;
+                return maximizingPlayer ? Integer.MIN_VALUE + 100 - originalDepth - depth
+                        : Integer.MAX_VALUE - 100 + originalDepth - depth;
             }
             return 0;
         }
 
         if (depth == 0) {
-            return searchAllCaptures(Integer.MIN_VALUE, Integer.MAX_VALUE, position, maximizingPlayer);//evaluate(position);
+            return searchAllCaptures(Integer.MIN_VALUE, Integer.MAX_VALUE, position, maximizingPlayer);// evaluate(position);
         }
 
         long positionHash = zobristHash.computeHash(position);
 
-        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles, false);
+        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles,
+                false);
 
         Move currBestMove;
         currBestMove = moves.get(0);
@@ -89,10 +101,9 @@ public class Engine {
             int maxEval = Integer.MIN_VALUE;
 
             for (int i = 0; i < moves.size(); i++) {
-
                 movesSearched++;
 
-                Move move =  moves.get(i);
+                Move move = moves.get(i);
 
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
 
@@ -100,17 +111,58 @@ public class Engine {
 
                 setBestMove(eval, move, depth, originalDepth, true);
 
+                checkedMoves.add(move);
+                possibleCastles = Piece.setCastles(possibleCastles, new ArrayList<>() {
+                    {
+                        addAll(playing.getMoves());
+                        addAll(checkedMoves);
+                    }
+                });
+
+                addMovedPiece(move);
+
+                positions.add((HashMap<Integer, Integer>) brd.clone());
+                if (positionsTable.get(originalDepth - depth).containsKey(hash)) {
+                    // break;
+                    PositionInfo info = positionsTable.get(originalDepth - depth).get(hash);
+                    eval = info.eval;
+                    beta = info.beta;
+                    alpha = info.alpha;
+                    transpositions++;
+                } else {
+                    eval = minimax(brd, depth - 1, alpha, beta, false, move, originalDepth);
+                }
+
+                positions.remove(positions.size() - 1);
+
+                if (eval > bestMovesEval && originalDepth + 1 - depth == 1) {
+                    bestMovesEval = eval;
+                    bestMove = move;
+                    currBestMove = move;
+                }
+
+                checkedMoves.remove(checkedMoves.size() - 1);
+                possibleCastles = Piece.unsetCastles(possibleCastles, new ArrayList<>() {
+                    {
+                        addAll(playing.getMoves());
+                        addAll(checkedMoves);
+                    }
+                });
+
+                piecesMovedDuringOpening = originalPiecesMovedDuringOpening;
+
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
 
                 if (beta <= alpha) {
-                    cutoffs +=moves.size()-i-1;
+                    cutoffs += moves.size() - i - 1;
                     break;
 
                 }
             }
 
-            positionsTable.get(originalDepth - depth).put(positionHash, new PositionInfo(currBestMove, maxEval, alpha, beta, true));
+            positionsTable.get(originalDepth - depth).put(positionHash,
+                    new PositionInfo(currBestMove, maxEval, alpha, beta, true));
 
             return maxEval;
         }
@@ -122,62 +174,102 @@ public class Engine {
 
                 movesSearched++;
 
-                Move move =  moves.get(i);
+                Move move = moves.get(i);
 
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
 
                 int eval = setEval(brd, depth, alpha, beta, true, move, originalDepth);
 
-                setBestMove(eval, move, depth, originalDepth, false);
+                // int eval;
+
+                if (positionsTable.get(originalDepth - depth).containsKey(hash)) {
+
+                    PositionInfo info = positionsTable.get(originalDepth - depth).get(hash);
+                    eval = info.eval;
+                    beta = info.beta;
+                    alpha = info.alpha;
+                    transpositions++;
+                } else {
+                    checkedMoves.add(move);
+
+                    possibleCastles = Piece.setCastles(possibleCastles, new ArrayList<>() {
+                        {
+                            addAll(playing.getMoves());
+                            addAll(checkedMoves);
+                        }
+                    });
+
+                    addMovedPiece(move);
+
+                    positions.add((HashMap<Integer, Integer>) brd.clone());
+                    eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move, originalDepth);
+
+                    positions.remove(positions.size() - 1);
+                    checkedMoves.remove(checkedMoves.size() - 1);
+
+                    possibleCastles = Piece.unsetCastles(possibleCastles, new ArrayList<>() {
+                        {
+                            addAll(playing.getMoves());
+                            addAll(checkedMoves);
+                        }
+                    });
+
+                    piecesMovedDuringOpening = originalPiecesMovedDuringOpening;
+                }
+
+                if (eval < bestMovesEval && originalDepth + 1 - depth == 1) {
+                    bestMovesEval = eval;
+                    bestMove = move;
+                    currBestMove = move;
+                }
 
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
 
                 if (beta <= alpha) {
-                    cutoffs+=moves.size()-i-1;
+                    cutoffs += moves.size() - i - 1;
                     break;
                 }
 
-
             }
 
-            positionsTable.get(originalDepth - depth).put(positionHash, new PositionInfo(currBestMove, minEval, alpha, beta, false));
+            positionsTable.get(originalDepth - depth).put(positionHash,
+                    new PositionInfo(currBestMove, minEval, alpha, beta, false));
 
             return minEval;
         }
     }
 
-    private int setEval(HashMap<Integer,Integer> brd, int depth, int alpha, int beta, boolean maximizingPlayer,Move move, int originalDepth){
+    private int setEval(HashMap<Integer, Integer> brd, int depth, int alpha, int beta, boolean maximizingPlayer,
+            Move move, int originalDepth) {
         long hash = zobristHash.computeHash(brd);
 
         int eval;
 
-        if(positionsTable.get(originalDepth-depth).containsKey(hash)){
-            PositionInfo info = positionsTable.get(originalDepth-depth).get(hash);
+        if (positionsTable.get(originalDepth - depth).containsKey(hash)) {
+            PositionInfo info = positionsTable.get(originalDepth - depth).get(hash);
             eval = info.eval;
             transpositions++;
-        }else {
+        } else {
             checkedMoves.add(move);
             positions.add((HashMap<Integer, Integer>) brd.clone());
-            eval = minimax((HashMap<Integer, Integer>) brd.clone(), depth - 1, alpha, beta, maximizingPlayer, move, originalDepth);
-            positions.remove(positions.size()-1);
-            checkedMoves.remove(checkedMoves.size()-1);
+            eval = minimax((HashMap<Integer, Integer>) brd.clone(), depth - 1, alpha, beta, maximizingPlayer, move,
+                    originalDepth);
+            positions.remove(positions.size() - 1);
+            checkedMoves.remove(checkedMoves.size() - 1);
         }
         return eval;
     }
 
-    private void setBestMove(int eval, Move move, int depth, int originalDepth, boolean maximizingPlayer){
-        if(((maximizingPlayer && eval > bestMovesEval) || (!maximizingPlayer && eval<bestMovesEval)) && originalDepth == depth)
-        {
+    private void setBestMove(int eval, Move move, int depth, int originalDepth, boolean maximizingPlayer) {
+        if (((maximizingPlayer && eval > bestMovesEval) || (!maximizingPlayer && eval < bestMovesEval))
+                && originalDepth == depth) {
             bestMovesEval = eval;
             bestMove = move;
         }
     }
 
-
-
-    private int endgameEval(HashMap<Integer, Integer> pieces, int multiplier)
-    {
+    private int endgameEval(HashMap<Integer, Integer> pieces, int multiplier) {
         boolean isWhite = multiplier == 1 ? true : false;
 
         int opponentKing = HelpMethods.findKing(!isWhite, pieces);
@@ -185,10 +277,10 @@ public class Engine {
 
         int eval = 0;
 
-        int opponentKingRow = (int)Math.ceil((double)(opponentKing + 1) / 8);
+        int opponentKingRow = (int) Math.ceil((double) (opponentKing + 1) / 8);
         int opponentKingColumn = opponentKing % 8;
 
-        int kingRow = (int)Math.ceil((double)(king + 1) / 8);
+        int kingRow = (int) Math.ceil((double) (king + 1) / 8);
         int kingColumn = king % 8;
 
         int opponentDistanceToCentreColumn = Math.max(3 - opponentKingColumn, opponentKingColumn - 4);
@@ -204,11 +296,8 @@ public class Engine {
         return eval;
     }
 
-    private int pawnStructureBonus(HashMap<Integer, Integer> pieces, Move move, int multiplier)
-    {
-        if(move.movedPiece % 8 == Pawn)
-        {
-
+    private int pawnStructureBonus(HashMap<Integer, Integer> pieces, Move move, int multiplier) {
+        if (move.movedPiece % 8 == Pawn) {
 
         }
 
@@ -218,50 +307,47 @@ public class Engine {
     private int evaluateBonus(HashMap<Integer, Integer> pieces) {
         int eval = 0;
 
-        for(Move move : checkedMoves) {
+        for (Move move : checkedMoves) {
 
             int multiplier = move.movedPiece < 16 ? 1 : -1;
             int moved = move.movedPiece % 8;
 
-            if (moved == King && Math.abs(move.endField - move.startField) == 2)
+            if (moved == King && Math.abs(move.endField - move.startField) != 2)
+                eval -= (100 * multiplier);
+            else if (moved == King && Math.abs(move.endField - move.startField) == 2)
                 eval += (100 * multiplier);
 
             if (playing.getMoves().size() <= 10) {
-                if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
+                if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook
+                        || moved == Queen)
                     eval -= (100 * multiplier);
 
-                if (playing.piecesMovedDuringOpening.contains(move.movedPiece))
+                if (playing.getMovedPieces().contains(move.startField))
                     eval -= (20 * multiplier);
 
-                if(playing.getMoves().size() <= 1 && moved == Knight)
+                if (playing.getMoves().size() <= 1 && moved == Knight)
                     eval -= (100 * multiplier);
             }
 
-            if(Playing.isEndgame)
-            {
-                if(moved == King)
-                {
-                    if(multiplier == 1)
-                        eval += Constants.Heatmaps.kingEndgame[0][move.endField];
-                    else if(multiplier == -1)
-                        eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
-                }
-                else
-                {
-                    if(multiplier == 1)
-                        eval += Constants.Heatmaps.Whites[moved-1][move.endField];
-                    else if(multiplier == -1)
-                        eval -= Constants.Heatmaps.Blacks[moved-1][move.endField];
+            if (Playing.isEndgame) {
+                if (moved == King) {
+                    // if(multiplier == 1)
+                    // eval += Constants.Heatmaps.kingEndgame[0][move.endField];
+                    // else if(multiplier == -1)
+                    // eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
+                } else {
+                    if (multiplier == 1)
+                        eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
+                    else if (multiplier == -1)
+                        eval -= Constants.Heatmaps.Blacks[moved - 1][move.endField];
                 }
 
                 eval += endgameEval(pieces, multiplier);
-            }
-            else if(moved != King)
-            {
-                if(multiplier == 1)
-                    eval += Constants.Heatmaps.Whites[moved-1][move.endField];
-                else if(multiplier == -1)
-                    eval -= Constants.Heatmaps.Blacks[moved-1][move.endField];
+            } else if (moved != King) {
+                if (multiplier == 1)
+                    eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
+                else if (multiplier == -1)
+                    eval -= Constants.Heatmaps.Blacks[moved - 1][move.endField];
             }
 
         }
@@ -281,8 +367,8 @@ public class Engine {
         return eval;
     }
 
-    private void resetTranspositions(int depth){
-        for(int i = 0; i<depth; i++){
+    private void resetTranspositions(int depth) {
+        for (int i = 0; i < depth; i++) {
             positionsTable.add(new HashMap<Long, PositionInfo>());
         }
     }
@@ -291,27 +377,31 @@ public class Engine {
 
         int[] guessScores = new int[moves.size()];
 
-        if(moves.size() == 0)
+        if (moves.size() == 0)
             return guessScores;
 
-        for (int i = 0; i < moves.size()-1; i++) {
+        for (int i = 0; i < moves.size() - 1; i++) {
             Move move = moves.get(i);
 
-            if(move.takenPiece!=0){
+            if (move.takenPiece != 0) {
                 guessScores[i] += 100000;
             }
 
-            if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField) == 2){
+            if (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2) {
                 guessScores[i] += 10000;
             }
 
-            if(Playing.moves.size() < 10 && !playing.piecesMovedDuringOpening.contains(move.movedPiece)){
+            // if(move.gaveCheck){
+            // guessScores[i] += 1000;
+            // }
+
+            if (playing.getMovedPieces().contains(move.startField)) {
                 guessScores[i] += 100;
             }
 
-
             if (move.takenPiece != 0) {
-                guessScores[i] = 10 * (HelpMethods.getPieceValue(move.takenPiece) - HelpMethods.getPieceValue(move.movedPiece));
+                guessScores[i] = 10
+                        * (HelpMethods.getPieceValue(move.takenPiece) - HelpMethods.getPieceValue(move.movedPiece));
             }
 
             if (move.promotePiece > 0) {
@@ -322,15 +412,15 @@ public class Engine {
         return guessScores;
     }
 
-    private ArrayList<Move> sortMoves(ArrayList<Move> moves, int[] moveOrder){
-        for(int i = 0; i<moveOrder.length; i++){
-            for(int j = 0; j<moveOrder.length-1; j++){
-                if(moveOrder[j] < moveOrder[j+1]){
-                    int buff = moveOrder[j+1];
-                    Move moveBuff = new Move(moves.get(j+1));
-                    moveOrder[j+1] = moveOrder[j];
+    private ArrayList<Move> sortMoves(ArrayList<Move> moves, int[] moveOrder) {
+        for (int i = 0; i < moveOrder.length; i++) {
+            for (int j = 0; j < moveOrder.length - 1; j++) {
+                if (moveOrder[j] < moveOrder[j + 1]) {
+                    int buff = moveOrder[j + 1];
+                    Move moveBuff = new Move(moves.get(j + 1));
+                    moveOrder[j + 1] = moveOrder[j];
                     moveOrder[j] = buff;
-                    moves.set(j+1, new Move(moves.get(i)));
+                    moves.set(j + 1, new Move(moves.get(i)));
                     moves.set(j, moveBuff);
                 }
             }
@@ -354,13 +444,14 @@ public class Engine {
     private int searchAllCaptures(int alpha, int beta, HashMap<Integer, Integer> position, boolean maximizingPlayer) {
         int evaluation = evaluate(position);
 
-        if(evaluation>=beta){
+        if (evaluation >= beta) {
             return beta;
         }
 
         alpha = Math.max(evaluation, alpha);
 
-        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles, true);
+        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles,
+                true);
 
         if (maximizingPlayer) {
 
@@ -374,7 +465,7 @@ public class Engine {
 
                 int eval = searchAllCaptures(alpha, beta, brd, false);
 
-                if(evaluation >= beta){
+                if (evaluation >= beta) {
                     return beta;
                 }
 
@@ -396,7 +487,7 @@ public class Engine {
 
                 beta = Math.min(beta, eval);
 
-                if(evaluation >= beta){
+                if (evaluation >= beta) {
                     return alpha;
                 }
 
@@ -407,15 +498,27 @@ public class Engine {
     }
 
     public Move getBestMove() {
-        //return bestMoves.get(1);
+        // return bestMoves.get(1);
         return bestMove;
     }
 
     public void removeLastBestMove() {
-        //bestMoves.remove(bestMoves.size());
+        // bestMoves.remove(bestMoves.size());
     }
 
-    public void clearPosition(){
+    public void clearPosition() {
         positions.clear();
+    }
+
+    private void addMovedPiece(Move move) {
+        if (this.piecesMovedDuringOpening.size() <= 10)
+            if (this.piecesMovedDuringOpening.contains(move.endField)) {
+                // piecesMovedDuringOpening.remove(move.startField);
+                // piecesMovedDuringOpening.add(0);
+            } else {
+                this.piecesMovedDuringOpening.add(move.endField);
+                // piecesMovedDuringOpening.remove(move.startField);
+                // piecesMovedDuringOpening.add(0);
+            }
     }
 }
