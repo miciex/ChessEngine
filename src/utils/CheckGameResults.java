@@ -12,19 +12,21 @@ import static utils.HelpMethods.findKing;
 public class CheckGameResults {
 
     public static boolean isMate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles){
+        if(Piece.isChecked(pieces, whitesMove, lastMove, possibleCastles) == -1) return false;
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
             if(entry.getValue() > 16 && !whitesMove || entry.getValue() < 16 && whitesMove)
                 if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces, lastMove, whitesMove, possibleCastles),pieces, whitesMove, lastMove, possibleCastles).size() > 0) return false;
         }
-      return Piece.isChecked(pieces, whitesMove, lastMove, possibleCastles) != -1;
+      return true;
     }
 
     public static boolean isStalemate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles){
+        if(Piece.isChecked(pieces, whitesMove, lastMove, possibleCastles) != -1) return false;
         for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
             if(entry.getValue() > 16 && !whitesMove || entry.getValue() < 16 && whitesMove)
                 if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces, lastMove, whitesMove, possibleCastles),pieces, whitesMove, lastMove, possibleCastles).size() > 0) return false;
         }
-        return Piece.isChecked(pieces, whitesMove, lastMove, possibleCastles) == -1;
+        return true;
     }
 
     public static boolean isThreefold(ArrayList<HashMap<Integer, Integer>> boards){
@@ -59,17 +61,17 @@ public class CheckGameResults {
     public static boolean insufficientMaterial(HashMap<Integer, Integer> pieces){
         if(pieces.size()>4) return false;
         if(pieces.size() == 2) return true;
-        if(pieces.containsValue(Pawn + White) || pieces.containsValue(Pawn + Black) ) return false;
+        if(pieces.containsValue(Pawn | White) || pieces.containsValue(Pawn | Black) ) return false;
         int blackKnights = 0;
         int whiteKnights = 0;
         ArrayList<Integer> blackBishops = new ArrayList<>();
         ArrayList<Integer> whiteBishops = new ArrayList<>();
             for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
                 switch (entry.getValue()){
-                    case Knight + White: whiteKnights++; break;
-                    case Knight + Black: blackKnights++; break;
-                    case Bishop + White: whiteBishops.add(entry.getKey()); break;
-                    case Bishop + Black: blackBishops.add(entry.getKey()); break;
+                    case Knight | White: whiteKnights++; break;
+                    case Knight | Black: blackKnights++; break;
+                    case Bishop | White: whiteBishops.add(entry.getKey()); break;
+                    case Bishop | Black: blackBishops.add(entry.getKey()); break;
                     default: return false;
                 }
             }

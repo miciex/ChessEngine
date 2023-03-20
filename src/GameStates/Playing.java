@@ -14,6 +14,7 @@ import java.util.HashMap;
 
 import static utils.Constants.Boards.*;
 import static utils.Constants.Boards.TestBoards.endgameBoard;
+import static utils.Constants.Boards.TestBoards.endgameHeathMapTest;
 import static utils.Constants.Field.FIELD_SIZE;
 import static utils.Constants.Game_Info.*;
 import static utils.Constants.BoardInfo.*;
@@ -33,7 +34,7 @@ public class Playing extends State implements StateMethods{
     public ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
     public GameResults result;
     public boolean playerWhite = true;
-    public int castles[] = new int[] { 0,0,0,0 };
+    public int castles[];
     public int movesTo50MoveRule = 0;
     public static boolean isEndgame = false;
 
@@ -45,7 +46,7 @@ public class Playing extends State implements StateMethods{
 
     public Playing(Game game){
         super(game);
-        board = FenToIntArray(endgameBoard, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(endgameHeathMapTest, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         possibleCastles = new int[]{0,0,0,0};
         initClasses();

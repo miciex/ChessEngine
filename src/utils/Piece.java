@@ -11,19 +11,14 @@ import static utils.Constants.Pieces.*;
 
 public class Piece {
 
-    public static int generateAmountOfMoves(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
-        return 0;
-    }
-
-    public static int calcAmountOfMoves() {
-        return 0;
-    }
-
-    public static ArrayList<Move> generateMoves(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles) {
+    public static ArrayList<Move> generateMoves(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles, boolean capturesOnly) {
         ArrayList<Move> moves = new ArrayList<>();
         for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
             if (entry.getValue() > 16 != whitesMove)
-                moves.addAll(Piece.calcMoves(entry.getKey(), pieces, whitesMove, lastMove, possibleCastles));
+                if(capturesOnly)
+                    moves.addAll(calcCaptures(entry.getKey(), pieces, whitesMove, lastMove, possibleCastles));
+                else
+                    moves.addAll(Piece.calcMoves(entry.getKey(), pieces, whitesMove, lastMove, possibleCastles));
         }
         return moves;
     }
@@ -32,10 +27,12 @@ public class Piece {
         ArrayList<Integer> endingSquares = deleteImpossibleMoves(activeField, PossibleMoves(activeField, activePieces, lastMove, whitesMove, possibleCastles), activePieces, whitesMove, lastMove, possibleCastles);
         ArrayList<Move> moves = new ArrayList<>();
 
-        for (int endSquare : endingSquares) {
+        for (int i = 0; i< endingSquares.size(); i++) {
+            int endSquare = endingSquares.get(i);
             if (activePieces.get(activeField) % 8 == Pawn && (endSquare / 8 == 7 || endSquare / 8 == 0)) {
-                for (int i : PROMOTE_PIECES) {
-                    moves.add(new Move(activePieces, activeField, endSquare, i));
+                for (int j =0 ; j<PROMOTE_PIECES.length; j++) {
+                    int piece = PROMOTE_PIECES[j];
+                    moves.add(new Move(activePieces, activeField, endSquare, piece));
                 }
             } else
                 moves.add(new Move(activePieces, activeField, endSquare));
@@ -45,6 +42,40 @@ public class Piece {
 //        }
         return moves;
     }
+
+    public static ArrayList<Move> calcCaptures(int activeField, HashMap<Integer, Integer> activePieces, boolean whitesMove, Move lastMove, int[] possibleCastles){
+        ArrayList<Integer> allEndingSquares = PossibleMoves(activeField, activePieces, lastMove, whitesMove, possibleCastles);
+        ArrayList<Integer> captureEndingSquares = new ArrayList<>();
+
+        ArrayList<Move> moves = new ArrayList<>();
+
+        for(int i = 0; i< allEndingSquares.size(); i++){
+            if(activePieces.containsKey(allEndingSquares.get(i)) && activePieces.get(allEndingSquares.get(i)) < 16 != whitesMove){
+                captureEndingSquares.add(allEndingSquares.get(i));
+            }
+        }
+
+        captureEndingSquares = deleteImpossibleMoves(activeField, captureEndingSquares, activePieces, whitesMove, lastMove, possibleCastles);
+
+        for (int i = 0; i< captureEndingSquares.size(); i++) {
+            int endSquare = captureEndingSquares.get(i);
+            if (activePieces.get(activeField) % 8 == Pawn && (endSquare / 8 == 7 || endSquare / 8 == 0)) {
+                for (int j =0 ; j<PROMOTE_PIECES.length; j++) {
+
+                    int piece = PROMOTE_PIECES[j];
+                    moves.add(new Move(activePieces, activeField, endSquare, piece));
+                }
+            }
+            else
+                moves.add(new Move(activePieces, activeField, endSquare));
+        }
+//        for(Move move : moves){
+//                move.gaveCheck = isChecked(activePieces, move.movedPiece > 16, move, possibleCastles)!=-1;
+//        }
+        return moves;
+    }
+
+
 
     public static ArrayList<Integer> PossibleMoves(int position, HashMap<Integer, Integer> activePieces, Move lastMove, boolean whitesMove, int[] possibleCastles) {
         switch (activePieces.get(position) % 8) {

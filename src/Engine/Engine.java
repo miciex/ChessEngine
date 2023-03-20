@@ -41,7 +41,6 @@ public class Engine {
 
     public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
             boolean maximizingPlayer, Move lastMove) {
-        newBestMoves(depth, maximizingPlayer);
         resetTranspositions(depth);
         int eval = 0;
         transpositions = 0;
@@ -70,22 +69,22 @@ public class Engine {
             return 0;
         }
 
-        if (depth == 0)
-            return evaluate(position);
+        if (depth == 0) {
+            return searchAllCaptures(Integer.MIN_VALUE, Integer.MAX_VALUE, position, maximizingPlayer);//evaluate(position);
+        }
 
-        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles);
+        long positionHash = zobristHash.computeHash(position);
 
-        if(bestMove != null && originalDepth + 1 - depth == 1)
-            moves.add(bestMove);
+        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles, false);
 
         Move currBestMove;
         currBestMove = moves.get(0);
 
-        int[] order = OrderMoves(moves, depth, originalDepth);
+        int[] order = OrderMoves(moves);
+
+        moves = sortMoves(moves, order);
 
         if (maximizingPlayer) {
-
-            long positionHash = zobristHash.computeHash(position);
 
             int maxEval = Integer.MIN_VALUE;
 
@@ -93,47 +92,24 @@ public class Engine {
 
                 movesSearched++;
 
-                int index = findMaxIndex(order);
-                Move move = moves.get(index);
-                order[index] = Integer.MIN_VALUE;
+                Move move =  moves.get(i);
+
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
 
-                long hash = zobristHash.computeHash(brd);
+                int eval = setEval(brd, depth, alpha, beta, false, move, originalDepth);
 
-                int eval;
+                setBestMove(eval, move, depth, originalDepth, true);
 
-                checkedMoves.add(move);
-                positions.add((HashMap<Integer, Integer>) brd.clone());
-              if(positionsTable.get(originalDepth-depth).containsKey(hash)){
-                   // break;
-                    PositionInfo info = positionsTable.get(originalDepth-depth).get(hash);
-                    eval = info.eval;
-                    beta = info.beta;
-                    alpha = info.alpha;
-                    transpositions++;
-             }else {
-                    eval = minimax(brd, depth - 1, alpha, beta, false, move, originalDepth);
-                }
-
-                positions.remove(positions.size()-1);
-
-                if(eval > bestMovesEval && originalDepth + 1 - depth == 1)
-                {
-                    bestMovesEval = eval;
-                    bestMove = move;
-                    currBestMove = move;
-                }
-
-                checkedMoves.remove(checkedMoves.size()-1);
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
+
                 if (beta <= alpha) {
                     cutoffs +=moves.size()-i-1;
                     break;
 
                 }
             }
-            //if(originalDepth + 1 - depth == 1)
+
             positionsTable.get(originalDepth - depth).put(positionHash, new PositionInfo(currBestMove, maxEval, alpha, beta, true));
 
             return maxEval;
@@ -142,47 +118,21 @@ public class Engine {
         else {
             int minEval = Integer.MAX_VALUE;
 
-            long positionHash = zobristHash.computeHash(position);
-
             for (int i = 0; i < moves.size(); i++) {
 
                 movesSearched++;
 
-                int index = findMaxIndex(order);
-                Move move = moves.get(index);
-                order[index] = Integer.MIN_VALUE;
+                Move move =  moves.get(i);
+
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
 
-                long hash = zobristHash.computeHash(brd);
+                int eval = setEval(brd, depth, alpha, beta, true, move, originalDepth);
 
-                int eval;
-
-                if(positionsTable.get(originalDepth-depth).containsKey(hash)){
-
-                    PositionInfo info = positionsTable.get(originalDepth-depth).get(hash);
-                    eval = info.eval;
-                    beta = info.beta;
-                    alpha = info.alpha;
-                    transpositions++;
-                }else{
-                    checkedMoves.add(move);
-                    positions.add((HashMap<Integer, Integer>) brd.clone());
-                    eval = minimax(Piece.makeMove(move, position), depth - 1, alpha, beta, true, move, originalDepth);
-
-                    positions.remove(positions.size()-1);
-                    checkedMoves.remove(checkedMoves.size()-1);
-
-                }
-
-                if(eval < bestMovesEval && originalDepth + 1 - depth == 1)
-                {
-                    bestMovesEval = eval;
-                    bestMove = move;
-                    currBestMove = move;
-                }
+                setBestMove(eval, move, depth, originalDepth, false);
 
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
+
                 if (beta <= alpha) {
                     cutoffs+=moves.size()-i-1;
                     break;
@@ -196,6 +146,35 @@ public class Engine {
             return minEval;
         }
     }
+
+    private int setEval(HashMap<Integer,Integer> brd, int depth, int alpha, int beta, boolean maximizingPlayer,Move move, int originalDepth){
+        long hash = zobristHash.computeHash(brd);
+
+        int eval;
+
+        if(positionsTable.get(originalDepth-depth).containsKey(hash)){
+            PositionInfo info = positionsTable.get(originalDepth-depth).get(hash);
+            eval = info.eval;
+            transpositions++;
+        }else {
+            checkedMoves.add(move);
+            positions.add((HashMap<Integer, Integer>) brd.clone());
+            eval = minimax((HashMap<Integer, Integer>) brd.clone(), depth - 1, alpha, beta, maximizingPlayer, move, originalDepth);
+            positions.remove(positions.size()-1);
+            checkedMoves.remove(checkedMoves.size()-1);
+        }
+        return eval;
+    }
+
+    private void setBestMove(int eval, Move move, int depth, int originalDepth, boolean maximizingPlayer){
+        if(((maximizingPlayer && eval > bestMovesEval) || (!maximizingPlayer && eval<bestMovesEval)) && originalDepth == depth)
+        {
+            bestMovesEval = eval;
+            bestMove = move;
+        }
+    }
+
+
 
     private int endgameEval(HashMap<Integer, Integer> pieces, int multiplier)
     {
@@ -308,26 +287,12 @@ public class Engine {
         }
     }
 
-    private void newBestMoves(int depth, boolean maximizingPlayer) {
-        /*this.bestMoves.clear();
-        this.bestMovesEval.clear();
-        /*for (int i = 1; i <= depth; i++) {
-            bestMoves.put(i, null);
-        }
-        for (int i = 1; i <= depth; i++) {
-            bestMovesEval.put(i, ((i % 2 != 0) != maximizingPlayer) ? Integer.MIN_VALUE : Integer.MAX_VALUE);
-        }*/
-    }
-
-    public int[] OrderMoves(ArrayList<Move> moves, int depth, int originalDepth) {
+    public int[] OrderMoves(ArrayList<Move> moves) {
 
         int[] guessScores = new int[moves.size()];
 
         if(moves.size() == 0)
             return guessScores;
-
-        //if(bestMoves.size() > 0 && bestMoves.get(originalDepth + 1 - depth) != null)
-            //guessScores[guessScores.length - 1] = Integer.MAX_VALUE;
 
         for (int i = 0; i < moves.size()-1; i++) {
             Move move = moves.get(i);
@@ -339,10 +304,6 @@ public class Engine {
             if(move.movedPiece%8 == King && Math.abs(move.startField - move.endField) == 2){
                 guessScores[i] += 10000;
             }
-
-//            if(move.gaveCheck){
-//                guessScores[i] += 1000;
-//            }
 
             if(Playing.moves.size() < 10 && !playing.piecesMovedDuringOpening.contains(move.movedPiece)){
                 guessScores[i] += 100;
@@ -361,6 +322,22 @@ public class Engine {
         return guessScores;
     }
 
+    private ArrayList<Move> sortMoves(ArrayList<Move> moves, int[] moveOrder){
+        for(int i = 0; i<moveOrder.length; i++){
+            for(int j = 0; j<moveOrder.length-1; j++){
+                if(moveOrder[j] < moveOrder[j+1]){
+                    int buff = moveOrder[j+1];
+                    Move moveBuff = new Move(moves.get(j+1));
+                    moveOrder[j+1] = moveOrder[j];
+                    moveOrder[j] = buff;
+                    moves.set(j+1, new Move(moves.get(i)));
+                    moves.set(j, moveBuff);
+                }
+            }
+        }
+        return moves;
+    }
+
     private int findMaxIndex(int[] numbers) {
         int smallest = Integer.MIN_VALUE;
         int index = 0;
@@ -372,6 +349,61 @@ public class Engine {
             }
         }
         return index;
+    }
+
+    private int searchAllCaptures(int alpha, int beta, HashMap<Integer, Integer> position, boolean maximizingPlayer) {
+        int evaluation = evaluate(position);
+
+        if(evaluation>=beta){
+            return beta;
+        }
+
+        alpha = Math.max(evaluation, alpha);
+
+        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles, true);
+
+        if (maximizingPlayer) {
+
+            for (int i = 0; i < moves.size(); i++) {
+
+                movesSearched++;
+
+                Move move = moves.get(i);
+
+                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+
+                int eval = searchAllCaptures(alpha, beta, brd, false);
+
+                if(evaluation >= beta){
+                    return beta;
+                }
+
+                alpha = Math.max(alpha, eval);
+            }
+
+            return alpha;
+        } else {
+
+            for (int i = 0; i < moves.size(); i++) {
+
+                movesSearched++;
+
+                Move move = moves.get(i);
+
+                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+
+                int eval = searchAllCaptures(alpha, beta, brd, true);
+
+                beta = Math.min(beta, eval);
+
+                if(evaluation >= beta){
+                    return alpha;
+                }
+
+                beta = Math.min(beta, eval);
+            }
+            return beta;
+        }
     }
 
     public Move getBestMove() {

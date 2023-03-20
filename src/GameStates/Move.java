@@ -46,6 +46,15 @@ public class Move {
         this.takenPieceField = calcTakenPieceField(this.movedPiece, pieces.containsKey(endField) ? pieces.get(endField) : 0, startField, endField);
     }
 
+    public Move(Move move){
+        this.startField = move.startField;
+        this.endField = move.endField;
+        this.movedPiece = move.movedPiece;
+        this.takenPiece = move.takenPiece;
+        this.takenPieceField = move.takenPieceField;
+        this.promotePiece = move.promotePiece;
+    }
+
     private int calcTakenPiece(int piece, int pieceOnNewField,int startPos, int endPos){
         if(piece%8 == Pawn && pieceOnNewField == None && startPos%8 != endPos%8)
             return Pawn + (piece>16 ? 8: 16);

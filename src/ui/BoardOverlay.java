@@ -76,49 +76,49 @@ public class BoardOverlay extends UIElement {
     }
 
     public void update(){
-        if(Playing.whitesMove == playing.engine.isWhite){
+        if(Playing.whitesMove == playing.engine.isWhite && playing.result == GameResults.NONE){
             playComputerMove();
         }
     }
 
-    void moves(int depth, boolean isWhite){
-        int all = 0;
-        ArrayList<Move> moves = Piece.generateMoves(boardMap, isWhite,
-                lastMoves.size() != 0 ? lastMoves.get(lastMoves.size() - 1) : new Move(), playing.castles);
-        for(Move move : moves){
-            boardMap = makeMove(move, boardMap);
-            lastMoves.add(move);
-            playing.castles = Piece.setCastles(playing.castles, lastMoves);
-            int b = MoveGenerationTest(depth - 1, !isWhite);
-            boardMap = unMakeMove(move, boardMap);
-            lastMoves.remove(lastMoves.size() - 1);
-            playing.castles = Piece.setCastles(playing.castles, lastMoves);
-            String a = moveToChessNotation(move, mapToBoard(boardMap)) + "  " + b;
-            System.out.println(a);
-            all+=b;
-        }
-        System.out.println("All: "+all);
-    }
+//    void moves(int depth, boolean isWhite){
+//        int all = 0;
+//        ArrayList<Move> moves = Piece.generateMoves(boardMap, isWhite,
+//                lastMoves.size() != 0 ? lastMoves.get(lastMoves.size() - 1) : new Move(), playing.castles);
+//        for(Move move : moves){
+//            boardMap = makeMove(move, boardMap);
+//            lastMoves.add(move);
+//            playing.castles = Piece.setCastles(playing.castles, lastMoves);
+//            int b = MoveGenerationTest(depth - 1, !isWhite);
+//            boardMap = unMakeMove(move, boardMap);
+//            lastMoves.remove(lastMoves.size() - 1);
+//            playing.castles = Piece.setCastles(playing.castles, lastMoves);
+//            String a = moveToChessNotation(move, mapToBoard(boardMap)) + "  " + b;
+//            System.out.println(a);
+//            all+=b;
+//        }
+//        System.out.println("All: "+all);
+//    }
 
-    int MoveGenerationTest(int depth, boolean isWhite) {
-        if (depth == 0) {
-            return 1;
-        }
-
-        ArrayList<Move> moves = Piece.generateMoves(boardMap, isWhite,
-                lastMoves.size() != 0 ? lastMoves.get(lastMoves.size() - 1) : new Move(), playing.castles);
-        int numPosition = 0;
-        for (Move move : moves) {
-            boardMap = makeMove(move, boardMap);
-            lastMoves.add(move);
-            playing.castles = Piece.setCastles(playing.castles, lastMoves);
-            numPosition += MoveGenerationTest(depth - 1, !isWhite);
-            boardMap = unMakeMove(move, boardMap);
-            lastMoves.remove(lastMoves.size() - 1);
-            playing.castles = Piece.unsetCastles(playing.castles, lastMoves);
-        }
-        return numPosition;
-    }
+//    int MoveGenerationTest(int depth, boolean isWhite) {
+//        if (depth == 0) {
+//            return 1;
+//        }
+//
+//        ArrayList<Move> moves = Piece.generateMoves(boardMap, isWhite,
+//                lastMoves.size() != 0 ? lastMoves.get(lastMoves.size() - 1) : new Move(), playing.castles);
+//        int numPosition = 0;
+//        for (Move move : moves) {
+//            boardMap = makeMove(move, boardMap);
+//            lastMoves.add(move);
+//            playing.castles = Piece.setCastles(playing.castles, lastMoves);
+//            numPosition += MoveGenerationTest(depth - 1, !isWhite);
+//            boardMap = unMakeMove(move, boardMap);
+//            lastMoves.remove(lastMoves.size() - 1);
+//            playing.castles = Piece.unsetCastles(playing.castles, lastMoves);
+//        }
+//        return numPosition;
+//    }
 
     public void mouseDragged(MouseEvent e) {
         if(promoting) return;
