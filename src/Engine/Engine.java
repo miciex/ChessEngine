@@ -89,12 +89,9 @@ public class Engine {
         ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles,
                 false);
 
-        Move currBestMove;
-        currBestMove = moves.get(0);
+
 
         int[] order = OrderMoves(moves);
-
-        moves = sortMoves(moves, order);
 
         if (maximizingPlayer) {
 
@@ -123,7 +120,7 @@ public class Engine {
             }
 
             positionsTable.get(originalDepth - depth).put(positionHash,
-                    new PositionInfo(currBestMove, maxEval, alpha, beta, true));
+                    new PositionInfo(null, maxEval, alpha, beta, true));
 
             return maxEval;
         }
@@ -140,25 +137,23 @@ public class Engine {
                 HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
 
                 int eval = setEval(brd, depth, alpha, beta, true, move, originalDepth);
-
-                if (eval < bestMovesEval && originalDepth + 1 - depth == 1) {
-                    bestMovesEval = eval;
-                    bestMove = move;
-                    currBestMove = move;
-                }
+                setBestMove(eval, move, depth, originalDepth, false);
 
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
-
+                positionsTable.get(originalDepth - depth).put(zobristHash.computeHash(brd),
+                        new PositionInfo(move, minEval, alpha, beta, false));
                 if (beta <= alpha) {
                     cutoffs += moves.size() - i - 1;
                     break;
                 }
 
+
+
             }
 
             positionsTable.get(originalDepth - depth).put(positionHash,
-                    new PositionInfo(currBestMove, minEval, alpha, beta, false));
+                    new PositionInfo(null, minEval, alpha, beta, false));
 
             return minEval;
         }
@@ -327,7 +322,7 @@ public class Engine {
             }
 
             if (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2) {
-                guessScores[i] += 10000;
+                guessScores[i] += 1000;
             }
 
             // if(move.gaveCheck){

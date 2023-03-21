@@ -45,7 +45,7 @@ public class Playing extends State implements StateMethods{
 
     public Playing(Game game){
         super(game);
-        board = FenToIntArray(endgameHeathMapTest, BOARD_HEIGHT * BOARD_WIDTH);
+        board = FenToIntArray(endgameBoard, BOARD_HEIGHT * BOARD_WIDTH);
         moves = new ArrayList<>();
         possibleCastles = new int[]{0,0,0,0};
         initClasses();
