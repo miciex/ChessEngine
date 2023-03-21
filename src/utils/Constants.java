@@ -36,6 +36,8 @@ public class Constants {
         public static final int White = 8;
         public static final int Black = 16;
 
+        public static final int[] PIECES_ARRAY = new int[]{King, Pawn, Rook, Knight, Bishop, Queen};
+
         public static final int KingValue = Integer.MAX_VALUE;
         public static final int PawnValue = 100;
         public static final int RookValue = 500;
@@ -70,6 +72,7 @@ public class Constants {
             public final static String testBoard8 = "1k6/8/8/8/8/4p3/8/R3K2R";
             public final static String endgameBoard = "4r3/4r3/4k3/8/8/4K3/8/8";
             public final static String endgameHeathMapTest = "8/8/KQ6/8/8/8/8/7k";
+            public final static String testMate = "8/8/8/8/K7/R7/1R6/7k";
         }
     }
 

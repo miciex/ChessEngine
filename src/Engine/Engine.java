@@ -1,5 +1,6 @@
 package Engine;
 
+import Board.Board;
 import GameStates.GameResults;
 import GameStates.Move;
 import GameStates.Playing;
@@ -21,40 +22,42 @@ public class Engine {
     public Move lastMove;
     Move bestMove;
     int bestMovesEval;
-    ArrayList<Move> checkedMoves;
-    ArrayList<HashMap<Integer, Integer>> positions = new ArrayList<>();
     private Playing playing;
     private ZobristHash zobristHash;
     private ArrayList<HashMap<Long, PositionInfo>> positionsTable;
     int transpositions;
     int cutoffs;
     int movesSearched;
-    int[] possibleCastles;
     ArrayList<Integer> piecesMovedDuringOpening;
     ArrayList<Integer> originalPiecesMovedDuringOpening;
+    Board board;
+    ArrayList<Move> checkedMoves;
 
     public Engine(boolean isPlayerWhite, Playing playing) {
         this.playing = playing;
         this.isWhite = !isPlayerWhite;
         this.checkedMoves = new ArrayList<>();
+        initClasses();
+    }
+
+    private void initClasses(){
         this.zobristHash = new ZobristHash();
         this.zobristHash.initTable();
         this.positionsTable = new ArrayList<>();
+        this.board = new Board(playing.board);
     }
 
-    public void setBestMoves(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
-            boolean maximizingPlayer, Move lastMove, int[] possibleCastles,
-            ArrayList<Integer> piecesMovedDuringOpening) {
-        this.possibleCastles = possibleCastles.clone();
+    public void setBestMoves( int depth, int alpha, int beta, ArrayList<Integer> piecesMovedDuringOpening) {
         this.originalPiecesMovedDuringOpening = (ArrayList<Integer>) piecesMovedDuringOpening.clone();
         this.piecesMovedDuringOpening = this.originalPiecesMovedDuringOpening;
-        //newBestMoves(depth, maximizingPlayer);
+        board = new Board(playing.board);
+        checkedMoves.clear();
         resetTranspositions(depth);
-        int eval = 0;
+        int eval;
         transpositions = 0;
         bestMove = null;
-        bestMovesEval = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        eval = minimax(position, depth, alpha, beta, maximizingPlayer, lastMove, depth);
+        bestMovesEval = board.whiteToMove ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        eval = minimax(depth, alpha, beta, board.whiteToMove, depth);
         System.out.println("Transpositions: " + transpositions);
         System.out.println("Cut offs: " + cutoffs);
         System.out.println("Moves searched" + movesSearched);
@@ -62,15 +65,9 @@ public class Engine {
         positionsTable.clear();
     }
 
-    public int minimax(HashMap<Integer, Integer> position, int depth, int alpha, int beta,
-            boolean maximizingPlayer,
-            Move lastMove, int originalDepth) {
-        GameResults result = playing.checkGameResult(lastMove, new ArrayList<>() {
-            {
-                addAll(playing.positions);
-                addAll(positions);
-            }
-        }, position, maximizingPlayer);
+    public int minimax(int depth, int alpha, int beta, boolean maximizingPlayer ,int originalDepth) {
+        //board.whiteToMove = maximizingPlayer;
+        GameResults result = playing.checkGameResult(board);
 
         if (result != GameResults.NONE) {
             if (result == GameResults.MATE) {
@@ -79,35 +76,40 @@ public class Engine {
             }
             return 0;
         }
-
         if (depth == 0) {
-            return evaluate(position);//searchAllCaptures(Integer.MIN_VALUE, Integer.MAX_VALUE, position, maximizingPlayer);
+            return evaluate();
         }
+        long positionHash = zobristHash.computeHash(board.position);
 
-        long positionHash = zobristHash.computeHash(position);
+        board.whiteToMove = maximizingPlayer;
 
-        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles,
-                false);
-
-
+        ArrayList<Move> moves = Piece.generateMoves(board, false);
 
         int[] order = OrderMoves(moves);
+
+        sortMoves(moves, order);
 
         if (maximizingPlayer) {
 
             int maxEval = Integer.MIN_VALUE;
 
             for (int i = 0; i < moves.size(); i++) {
+                board.whiteToMove = maximizingPlayer;
                 movesSearched++;
 
                 Move move = moves.get(i);
 
-                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+                board.moves.add(move);
+                board.position = Piece.makeMove(board, move);
+                board.availableCastles = Piece.setCastles(board);
 
                 addMovedPiece(move);
 
-                int eval = setEval(brd, depth, alpha, beta, false, move, originalDepth);
+                int eval = setEval(depth, alpha, beta, move, false, originalDepth);
                 setBestMove(eval, move, depth, originalDepth, true);
+
+                board.position = Piece.unMakeMove(board, move);
+                board.availableCastles = Piece.unsetCastles(board);
 
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
@@ -118,7 +120,6 @@ public class Engine {
 
                 }
             }
-
             positionsTable.get(originalDepth - depth).put(positionHash,
                     new PositionInfo(null, maxEval, alpha, beta, true));
 
@@ -129,26 +130,28 @@ public class Engine {
             int minEval = Integer.MAX_VALUE;
 
             for (int i = 0; i < moves.size(); i++) {
-
+                board.whiteToMove = maximizingPlayer;
                 movesSearched++;
-
                 Move move = moves.get(i);
 
-                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+                board.position = Piece.makeMove(board, move);
+                board.availableCastles = Piece.setCastles(board);
 
-                int eval = setEval(brd, depth, alpha, beta, true, move, originalDepth);
+                int eval = setEval(depth, alpha, beta,move, true,originalDepth);
                 setBestMove(eval, move, depth, originalDepth, false);
+
+                board.moves.remove(board.moves.size()-1);
+                board.position = Piece.unMakeMove(board, move);
+                board.availableCastles = Piece.unsetCastles(board);
 
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
-                positionsTable.get(originalDepth - depth).put(zobristHash.computeHash(brd),
-                        new PositionInfo(move, minEval, alpha, beta, false));
+
+
                 if (beta <= alpha) {
                     cutoffs += moves.size() - i - 1;
                     break;
                 }
-
-
 
             }
 
@@ -159,9 +162,9 @@ public class Engine {
         }
     }
 
-    private int setEval(HashMap<Integer, Integer> brd, int depth, int alpha, int beta, boolean maximizingPlayer,
-            Move move, int originalDepth) {
-        long hash = zobristHash.computeHash(brd);
+    private int setEval(int depth, int alpha, int beta, Move move, boolean maximizingPlayer,int originalDepth) {
+
+        long hash = zobristHash.computeHash(board.position);
 
         int eval;
 
@@ -170,44 +173,43 @@ public class Engine {
             eval = info.eval;
             transpositions++;
         } else {
-            possibleCastles = Piece.setCastles(possibleCastles, new ArrayList<>() {
-                {
-                    addAll(playing.getMoves());
-                    addAll(checkedMoves);
-                }
-            });
+
+            board.moves.add(move);
+
+            board.availableCastles = Piece.setCastles(board);
 
             checkedMoves.add(move);
-            positions.add((HashMap<Integer, Integer>) brd.clone());
-            eval = minimax((HashMap<Integer, Integer>) brd.clone(), depth - 1, alpha, beta, maximizingPlayer, move,
-                    originalDepth);
-            positions.remove(positions.size() - 1);
+            board.positions.add((HashMap<Integer, Integer>) board.position.clone());
+
+            eval = minimax( depth - 1, alpha, beta, maximizingPlayer,originalDepth);
+
+            board.moves.remove(board.moves.size()-1);
+            board.positions.remove(board.positions.size() - 1);
             checkedMoves.remove(checkedMoves.size() - 1);
 
-            possibleCastles = Piece.unsetCastles(possibleCastles, new ArrayList<>() {
-                {
-                    addAll(playing.getMoves());
-                    addAll(checkedMoves);
-                }
-            });
+            board.availableCastles = Piece.unsetCastles(board);
             piecesMovedDuringOpening = originalPiecesMovedDuringOpening;
+
         }
         return eval;
     }
 
     private void setBestMove(int eval, Move move, int depth, int originalDepth, boolean maximizingPlayer) {
-        if (((maximizingPlayer && eval > bestMovesEval) || (!maximizingPlayer && eval < bestMovesEval))
-                && originalDepth == depth) {
+        if(depth != originalDepth) return;
+        if(maximizingPlayer && eval > bestMovesEval){
+            bestMovesEval = eval;
+            bestMove = move;
+        }else if(!maximizingPlayer && eval < bestMovesEval){
             bestMovesEval = eval;
             bestMove = move;
         }
     }
 
-    private int endgameEval(HashMap<Integer, Integer> pieces, int multiplier) {
-        boolean isWhite = multiplier == 1 ? true : false;
+    private int endgameEval(int multiplier) {
+        boolean isWhite = multiplier == 1;
 
-        int opponentKing = HelpMethods.findKing(!isWhite, pieces);
-        int king = HelpMethods.findKing(isWhite ? true : false, pieces);
+        int opponentKing = HelpMethods.findKing(board.position, !isWhite);
+        int king = HelpMethods.findKing(board.position, isWhite);
 
         int eval = 0;
 
@@ -238,7 +240,7 @@ public class Engine {
         return 0;
     }
 
-    private int evaluateBonus(HashMap<Integer, Integer> pieces) {
+    private int evaluateBonus() {
         int eval = 0;
 
         for (Move move : checkedMoves) {
@@ -251,7 +253,7 @@ public class Engine {
             else if (moved == King && Math.abs(move.endField - move.startField) == 2)
                 eval += (100 * multiplier);
 
-            if (playing.getMoves().size() <= 10) {
+            if (board.moves.size() <= 10) {
                 if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook
                         || moved == Queen)
                     eval -= (100 * multiplier);
@@ -259,7 +261,7 @@ public class Engine {
                 if (playing.getMovedPieces().contains(move.startField))
                     eval -= (20 * multiplier);
 
-                if (playing.getMoves().size() <= 1 && moved == Knight)
+                if (board.moves.size() <= 1 && moved == Knight)
                     eval -= (100 * multiplier);
             }
 
@@ -276,7 +278,7 @@ public class Engine {
                         eval -= Constants.Heatmaps.Blacks[moved - 1][move.endField];
                 }
 
-                eval += endgameEval(pieces, multiplier);
+                eval += endgameEval(multiplier);
             } else if (moved != King) {
                 if (multiplier == 1)
                     eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
@@ -289,14 +291,14 @@ public class Engine {
         return eval;
     }
 
-    public int evaluate(HashMap<Integer, Integer> pieces) {
+    public int evaluate() {
         int eval = 0;
 
-        for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
+        for (Map.Entry<Integer, Integer> entry : board.position.entrySet()) {
             eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
         }
 
-        eval += evaluateBonus(pieces);
+        eval += evaluateBonus();
 
         return eval;
     }
@@ -376,7 +378,7 @@ public class Engine {
     }
 
     private int searchAllCaptures(int alpha, int beta, HashMap<Integer, Integer> position, boolean maximizingPlayer) {
-        int evaluation = evaluate(position);
+        int evaluation = evaluate();
 
         if (evaluation >= beta) {
             return beta;
@@ -384,8 +386,7 @@ public class Engine {
 
         alpha = Math.max(evaluation, alpha);
 
-        ArrayList<Move> moves = Piece.generateMoves(position, maximizingPlayer, lastMove, playing.possibleCastles,
-                true);
+        ArrayList<Move> moves = Piece.generateMoves(board, true);
 
         if (maximizingPlayer) {
 
@@ -395,7 +396,7 @@ public class Engine {
 
                 Move move = moves.get(i);
 
-                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+                HashMap<Integer, Integer> brd = Piece.makeMove(board, move);
 
                 int eval = searchAllCaptures(alpha, beta, brd, false);
 
@@ -415,7 +416,7 @@ public class Engine {
 
                 Move move = moves.get(i);
 
-                HashMap<Integer, Integer> brd = Piece.makeMove(move, position);
+                HashMap<Integer, Integer> brd = Piece.makeMove(board, move);
 
                 int eval = searchAllCaptures(alpha, beta, brd, true);
 
@@ -439,11 +440,6 @@ public class Engine {
     public void removeLastBestMove() {
         // bestMoves.remove(bestMoves.size());
     }
-
-    public void clearPosition() {
-        positions.clear();
-    }
-
     private void addMovedPiece(Move move) {
         if (this.piecesMovedDuringOpening.size() <= 10)
             if (this.piecesMovedDuringOpening.contains(move.endField)) {
