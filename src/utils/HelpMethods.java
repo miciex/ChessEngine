@@ -54,7 +54,7 @@ public class HelpMethods {
         }
 
         if (move.movedPiece%8 != Pawn && move.movedPiece%8 != King) {
-            ArrayList<Integer> fromWhereCouldMove = Piece.canMoveToSquare(board, move.startField, move.endField, move.movedPiece);
+            ArrayList<Integer> fromWhereCouldMove = board.canMoveToSquare(move.startField, move.endField, move.movedPiece);
             if(fromWhereCouldMove.size()>1) {
                 boolean row = false;
                 boolean col = false;
@@ -109,7 +109,7 @@ public class HelpMethods {
             if(move.movedPiece%8 == King){
                 move.startField = findKing(board);
             }else{
-                moves = Piece.canMoveToSquare(board, move.endField, move.movedPiece);
+                moves = board.canMoveToSquare(move.endField, move.movedPiece);
             }
             if(moves.size()>1){
                 if(isNumeric(Character.toString(notationArr[2]))){

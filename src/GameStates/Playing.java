@@ -1,6 +1,7 @@
 package GameStates;
 
 import Board.Board;
+import Board.MoveGenerator;
 import Engine.Engine;
 import main.Game;
 import ui.BoardOverlay;
@@ -24,6 +25,7 @@ import static utils.HelpMethods.*;
 public class Playing extends State implements StateMethods{
 
     public Board board;
+    public MoveGenerator moveGenerator;
     public String currentBoard = classicBoard;
     public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
     public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
@@ -44,41 +46,22 @@ public class Playing extends State implements StateMethods{
     }
 
     public void resetGame(){
+        board.resetBoard();
         boardOverlay.createFields();
         piecesMovedDuringOpening = new ArrayList<>();
         result = GameResults.NONE;
     }
 
     private void initClasses(){
-        board = new Board(testMate);
+        board = new Board(classicBoard);
+        moveGenerator = new MoveGenerator(board);
         engine = new Engine(playerWhite, this);
         boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
         buttonOverlay = new ButtonOverlay((BOARD_X + BOARD_WIDTH * FIELD_SIZE), 0, 0,0, this);
 
     }
 
-    public GameResults checkGameResult(Board board) {
-        GameResults result = GameResults.NONE;
 
-        //Do the same in engine
-        //if (move.takenPiece != 0 || (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2))
-            //positions.clear();
-        //positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
-
-        //movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, movesTo50MoveRule);
-
-        if (CheckGameResults.isThreefold(board))
-            result = GameResults.THREE_FOLD;
-        if (CheckGameResults.draw50MoveRule(movesTo50MoveRule))
-            result = GameResults.DRAW_50_MOVE_RULE;
-        else if (CheckGameResults.isStalemate(board))
-            result = GameResults.STALEMATE;
-        else if (CheckGameResults.insufficientMaterial(board))
-            result = GameResults.INSUFFICIENT_MATERIAL;
-        else if (CheckGameResults.isMate(board))
-            result = GameResults.MATE;
-        return result;
-    }
 
     @Override
     public void update() {

@@ -14,26 +14,25 @@ public class CheckGameResults {
 
     public static boolean isMate(Board board){
 
-        for(Map.Entry<Integer, Integer> entry : board.position.entrySet()){
+        for(Map.Entry<Integer, Integer> entry : board.getPositionCopy().entrySet()){
             if(entry.getValue() < 16 == board.whiteToMove) {
-                ArrayList<Integer> squares = Piece.PossibleMoves(board, entry.getKey());
-                squares = Piece.deleteImpossibleMoves(board, squares, entry.getKey());
+                ArrayList<Integer> squares = board.PossibleMoves(entry.getKey());
+                squares = board.deleteImpossibleMoves(squares, entry.getKey());
                 if (squares.size() > 0)
                     return false;
             }
         }
-        if(Piece.isChecked(board) == -1)
+        if(board.isChecked() == -1)
             return false;
       return true;
     }
 
     public static boolean isStalemate(Board board){
-
-        for(Map.Entry<Integer, Integer> entry : board.position.entrySet()){
+        for(Map.Entry<Integer, Integer> entry : board.getPositionCopy().entrySet()){
             if(entry.getValue() > 16 && !board.whiteToMove || entry.getValue() < 16 && board.whiteToMove)
-                if(Piece.deleteImpossibleMoves(board,Piece.PossibleMoves(board,entry.getKey()), entry.getKey()).size() > 0) return false;
+                if(board.deleteImpossibleMoves(board.PossibleMoves(entry.getKey()), entry.getKey()).size() > 0) return false;
         }
-        if(Piece.isChecked(board) != -1) return false;
+        if(board.isChecked() != -1) return false;
         return true;
     }
 
