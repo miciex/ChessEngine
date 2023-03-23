@@ -92,6 +92,16 @@ public class Board {
         return result;
     }
 
+    public boolean isDraw(){
+        if (CheckGameResults.insufficientMaterial(this))
+            return true;
+        if (CheckGameResults.isThreefold(this))
+            return true;
+        if (CheckGameResults.draw50MoveRule(movesTo50MoveRule))
+            return true;
+        return false;
+    }
+
     public  ArrayList<Integer> PossibleMoves(int position) {
         switch (this.position.get(position) % 8) {
             case Pawn:
@@ -441,6 +451,7 @@ public class Board {
         setCastles();
         moves.add(move);
         positions.add((HashMap<Integer, Integer>) position.clone());
+        //whiteToMove = !whiteToMove;
         //draw50MoveRuleCheck(move, movesTo50MoveRule);
     }
 
@@ -449,6 +460,7 @@ public class Board {
         unsetCastles();
         removeLastMove();
         positions.remove(positions.size()-1);
+        //whiteToMove = !whiteToMove;
     }
 
     public  boolean isEndgame() {

@@ -70,27 +70,29 @@ public class Engine {
 
     public int minimax(int depth, int alpha, int beta, boolean maximizingPlayer ,int originalDepth) {
         //board.whiteToMove = maximizingPlayer;
-        GameResults result = board.checkGameResult();
+        GameResults gameResult = board.checkGameResult();
 
-        if (result != GameResults.NONE) {
-            if (result == GameResults.MATE) {
-                return maximizingPlayer ? Integer.MIN_VALUE + 100 - originalDepth - depth
-                        : Integer.MAX_VALUE - 100 + originalDepth - depth;
+        if (gameResult != GameResults.NONE) {
+            if(gameResult==GameResults.MATE){
+                return maximizingPlayer ? Integer.MIN_VALUE + 100 - originalDepth + depth : Integer.MAX_VALUE - 100 + originalDepth - depth;
             }
             return 0;
         }
+
         if (depth == 0) {
-            return evaluate();
+            return Evaluate.evaluate(board, checkedMoves);//searchAllCaptures(alpha, beta, maximizingPlayer);
         }
+
+
+
         long positionHash = zobristHash.computeHash(board.position);
 
         board.whiteToMove = maximizingPlayer;
 
+        //Is game finished
         ArrayList<Move> moves = moveGenerator.generateMoves(false);
 
-        int[] order = OrderMoves(moves);
-
-        sortMoves(moves, order);
+        sortMoves(moves);
 
         if (maximizingPlayer) {
 
@@ -153,6 +155,65 @@ public class Engine {
         }
     }
 
+//    private int searchAllCaptures(int alpha, int beta, boolean maximizingPlayer) {
+//        board.whiteToMove = maximizingPlayer;
+//        int evaluation = Evaluate.evaluate(board, checkedMoves);
+//
+//        if(maximizingPlayer)
+//
+//        ArrayList<Move> moves = moveGenerator.generateMoves(true);
+//        if(moves.size() == 0){
+//            return evaluation;
+//        }
+//
+//        if (maximizingPlayer) {
+//
+//            for (int i = 0; i < moves.size(); i++) {
+//
+//                movesSearched++;
+//
+//                Move move = moves.get(i);
+//                checkedMoves.add(move);
+//                board.makeMove(move);
+//
+//                int eval = searchAllCaptures(alpha, beta, false);
+//                checkedMoves.remove(checkedMoves.size()-1);
+//                board.unMakeMove(move);
+//
+//                alpha = Math.max(alpha, eval);
+//
+//                if (beta <= alpha) {
+//                    return beta;
+//                }
+//
+//
+//            }
+//
+//            return alpha;
+//        } else {
+//            for (int i = 0; i < moves.size(); i++) {
+//
+//                movesSearched++;
+//
+//                Move move = moves.get(i);
+//
+//                board.makeMove(move);
+//                checkedMoves.add(move);
+//                int eval = searchAllCaptures(alpha, beta, true);
+//                checkedMoves.remove(checkedMoves.size()-1);
+//                board.unMakeMove(move);
+//
+//                beta = Math.min(beta, eval);
+//
+//                if (beta <= alpha) {
+//                    return alpha;
+//                }
+//            }
+//            return beta;
+//        }
+//    }
+
+
     private int setEval(int depth, int alpha, int beta, Move move, boolean maximizingPlayer,int originalDepth) {
         board.makeMove(move);
         long hash = zobristHash.computeHash(board.position);
@@ -193,32 +254,7 @@ public class Engine {
         }
     }
 
-    private int endgameEval(int multiplier) {
-        boolean isWhite = multiplier == 1;
 
-        int opponentKing = HelpMethods.findKing(board.position, !isWhite);
-        int king = HelpMethods.findKing(board.position, isWhite);
-
-        int eval = 0;
-
-        int opponentKingRow = (int) Math.ceil((double) (opponentKing + 1) / 8);
-        int opponentKingColumn = opponentKing % 8;
-
-        int kingRow = (int) Math.ceil((double) (king + 1) / 8);
-        int kingColumn = king % 8;
-
-        int opponentDistanceToCentreColumn = Math.max(3 - opponentKingColumn, opponentKingColumn - 4);
-        int opponentDistanceToCentreRow = Math.max(3 - opponentKingColumn, opponentKingColumn - 4);
-        int opponentDistanceFromCentre = opponentDistanceToCentreColumn + opponentDistanceToCentreRow;
-        eval += opponentDistanceFromCentre * 100 * multiplier;
-
-        int distanceBetweenColumns = Math.abs(kingColumn - opponentKingColumn);
-        int distanceBetweenRows = Math.abs(kingRow - opponentKingRow);
-        int distanceBetweenKings = distanceBetweenColumns + distanceBetweenRows;
-        eval += (14 - distanceBetweenKings) * 10 * multiplier;
-
-        return eval;
-    }
 
     private int pawnStructureBonus(HashMap<Integer, Integer> pieces, Move move, int multiplier) {
         if (move.movedPiece % 8 == Pawn) {
@@ -228,72 +264,11 @@ public class Engine {
         return 0;
     }
 
-    private int evaluateBonus() {
-        int eval = 0;
 
-        for (Move move : checkedMoves) {
-
-            int multiplier = move.movedPiece < 16 ? 1 : -1;
-            int moved = move.movedPiece % 8;
-
-            if (moved == King && Math.abs(move.endField - move.startField) != 2)
-                eval -= (100 * multiplier);
-            else if (moved == King && Math.abs(move.endField - move.startField) == 2)
-                eval += (100 * multiplier);
-
-            if (board.moves.size() <= 10) {
-                if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook
-                        || moved == Queen)
-                    eval -= (100 * multiplier);
-
-                if (playing.getMovedPieces().contains(move.startField))
-                    eval -= (20 * multiplier);
-
-                if (board.moves.size() <= 1 && moved == Knight)
-                    eval -= (100 * multiplier);
-            }
-
-            if (Playing.isEndgame) {
-                if (moved == King) {
-                    // if(multiplier == 1)
-                    // eval += Constants.Heatmaps.kingEndgame[0][move.endField];
-                    // else if(multiplier == -1)
-                    // eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
-                } else {
-                    if (multiplier == 1)
-                        eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
-                    else if (multiplier == -1)
-                        eval -= Constants.Heatmaps.Blacks[moved - 1][move.endField];
-                }
-
-                eval += endgameEval(multiplier);
-            } else if (moved != King) {
-                if (multiplier == 1)
-                    eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
-                else if (multiplier == -1)
-                    eval -= Constants.Heatmaps.Blacks[moved - 1][move.endField];
-            }
-
-        }
-
-        return eval;
-    }
-
-    public int evaluate() {
-        int eval = 0;
-
-        for (Map.Entry<Integer, Integer> entry : board.position.entrySet()) {
-            eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
-        }
-
-        eval += evaluateBonus();
-
-        return eval;
-    }
 
     private void resetTranspositions(int depth) {
         for (int i = 0; i < depth; i++) {
-            positionsTable.add(new HashMap<Long, PositionInfo>());
+            positionsTable.add(new HashMap<>());
         }
     }
 
@@ -336,7 +311,8 @@ public class Engine {
         return guessScores;
     }
 
-    private ArrayList<Move> sortMoves(ArrayList<Move> moves, int[] moveOrder) {
+    private ArrayList<Move> sortMoves(ArrayList<Move> moves) {
+        int[] moveOrder = OrderMoves(moves);
         for (int i = 0; i < moveOrder.length; i++) {
             for (int j = 0; j < moveOrder.length - 1; j++) {
                 if (moveOrder[j] < moveOrder[j + 1]) {
@@ -352,81 +328,18 @@ public class Engine {
         return moves;
     }
 
-    private int findMaxIndex(int[] numbers) {
-        int smallest = Integer.MIN_VALUE;
-        int index = 0;
+//    private int searchAllCaptures(int alpha, int beta, boolean maximizingPlayer){
+//
+//        board.whiteToMove = maximizingPlayer;
+//        int evaluation = Evaluate.evaluate(board, checkedMoves);
+//        if(evaluation >= beta){
+//            return beta;
+//        }
+//
+//
+//    }
 
-        for (int i = 0; i < numbers.length; i++) {
-            if (smallest < numbers[i]) {
-                smallest = numbers[i];
-                index = i;
-            }
-        }
-        return index;
-    }
 
-    private int searchAllCaptures(int alpha, int beta, boolean maximizingPlayer) {
-        int evaluation = evaluate();
-
-        if (evaluation >= beta) {
-            return beta;
-        }
-
-        alpha = Math.max(evaluation, alpha);
-
-        ArrayList<Move> moves = moveGenerator.generateMoves(true);
-
-        if (maximizingPlayer) {
-
-            for (int i = 0; i < moves.size(); i++) {
-
-                movesSearched++;
-
-                Move move = moves.get(i);
-
-                board.makeMove(move);
-                board.moves.add(move);
-
-                int eval = searchAllCaptures(alpha, beta, false);
-
-                board.unMakeMove(move);
-                board.removeLastMove();
-
-                if (evaluation >= beta) {
-                    return beta;
-                }
-
-                alpha = Math.max(alpha, eval);
-            }
-
-            return alpha;
-        } else {
-
-            for (int i = 0; i < moves.size(); i++) {
-
-                movesSearched++;
-
-                Move move = moves.get(i);
-
-                board.makeMove(move);
-                board.moves.add(move);
-
-                int eval = searchAllCaptures(alpha, beta, true);
-
-                board.unMakeMove(move);
-                board.removeLastMove();
-
-                beta = Math.min(beta, eval);
-
-                if (evaluation >= beta) {
-                    return alpha;
-                }
-
-                beta = Math.min(beta, eval);
-            }
-            return beta;
-        }
-    }
 
     public Move getBestMove() {
         // return bestMoves.get(1);
