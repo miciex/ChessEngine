@@ -16,10 +16,17 @@ import static utils.HelpMethods.getPieceValue;
 public class Evaluate {
 
     public static int evaluate(Board board, ArrayList<Move> moves) {
-        int eval = 0;
+        int eval = 0, multiplier = 1;
 
         for (Map.Entry<Integer, Integer> entry : board.position.entrySet()) {
             eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
+        }
+
+        for(int i : board.position.keySet())
+        {
+            multiplier = board.position.get(i) < 16 ? 1 : -1;
+            if(board.position.get(i) == Pawn && board.position.containsKey(i + 8 * -multiplier) && board.position.get(i + 8 * -multiplier) == (Pawn + (multiplier == 1 ? White : Black)))
+                eval -= 50 * multiplier;
         }
 
         eval += evaluateBonus(board, moves);
@@ -32,9 +39,6 @@ public class Evaluate {
 
 
         for (Move move : moves) {
-
-
-
             int multiplier = move.movedPiece < 16 ? 1 : -1;
             int moved = move.movedPiece % 8;
 
