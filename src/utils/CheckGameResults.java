@@ -1,5 +1,6 @@
 package utils;
 
+import Board.Board;
 import GameStates.Move;
 
 import java.util.ArrayList;
@@ -11,32 +12,38 @@ import static utils.HelpMethods.findKing;
 
 public class CheckGameResults {
 
-    public static boolean isMate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles){
-        if(Piece.isChecked(pieces, whitesMove, lastMove, possibleCastles) == -1) return false;
-        for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
-            if(entry.getValue() > 16 && !whitesMove || entry.getValue() < 16 && whitesMove)
-                if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces, lastMove, whitesMove, possibleCastles),pieces, whitesMove, lastMove, possibleCastles).size() > 0) return false;
+    public static boolean isMate(Board board){
+
+        for(Map.Entry<Integer, Integer> entry : board.getPositionCopy().entrySet()){
+            if(entry.getValue() < 16 == board.whiteToMove) {
+                ArrayList<Integer> squares = board.PossibleMoves(entry.getKey());
+                squares = board.deleteImpossibleMoves(squares, entry.getKey());
+                if (squares.size() > 0)
+                    return false;
+            }
         }
+        if(board.isChecked() == -1)
+            return false;
       return true;
     }
 
-    public static boolean isStalemate(HashMap<Integer, Integer> pieces, boolean whitesMove, Move lastMove, int[] possibleCastles){
-        if(Piece.isChecked(pieces, whitesMove, lastMove, possibleCastles) != -1) return false;
-        for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
-            if(entry.getValue() > 16 && !whitesMove || entry.getValue() < 16 && whitesMove)
-                if(Piece.deleteImpossibleMoves(entry.getKey(),Piece.PossibleMoves(entry.getKey(), pieces, lastMove, whitesMove, possibleCastles),pieces, whitesMove, lastMove, possibleCastles).size() > 0) return false;
+    public static boolean isStalemate(Board board){
+        for(Map.Entry<Integer, Integer> entry : board.getPositionCopy().entrySet()){
+            if(entry.getValue() > 16 && !board.whiteToMove || entry.getValue() < 16 && board.whiteToMove)
+                if(board.deleteImpossibleMoves(board.PossibleMoves(entry.getKey()), entry.getKey()).size() > 0) return false;
         }
+        if(board.isChecked() != -1) return false;
         return true;
     }
 
-    public static boolean isThreefold(ArrayList<HashMap<Integer, Integer>> boards){
-        if(boards.size() < 5) return false;
-        HashMap<Integer, Integer> currentPos = boards.get(boards.size()-1);
+    public static boolean isThreefold(Board board){
+        if(board.positions.size() < 5) return false;
+        HashMap<Integer, Integer> currentPos = board.position;
 
         int repetitions = 0;
 
-        f: for(HashMap<Integer, Integer> board : boards){
-            for(Map.Entry<Integer, Integer> entry : board.entrySet()){
+        f: for(HashMap<Integer, Integer> position : board.positions){
+            for(Map.Entry<Integer, Integer> entry : position.entrySet()){
                 if(!currentPos.containsKey(entry.getKey()) || currentPos.get(entry.getKey()) != entry.getValue()) continue f;
             }
             repetitions++;
@@ -58,15 +65,15 @@ public class CheckGameResults {
         return false;
     }
 
-    public static boolean insufficientMaterial(HashMap<Integer, Integer> pieces){
-        if(pieces.size()>4) return false;
-        if(pieces.size() == 2) return true;
-        if(pieces.containsValue(Pawn | White) || pieces.containsValue(Pawn | Black) ) return false;
+    public static boolean insufficientMaterial(Board board){
+        if(board.position.size()>4) return false;
+        if(board.position.size() == 2) return true;
+        if(board.position.containsValue(Pawn | White) || board.position.containsValue(Pawn | Black) ) return false;
         int blackKnights = 0;
         int whiteKnights = 0;
         ArrayList<Integer> blackBishops = new ArrayList<>();
         ArrayList<Integer> whiteBishops = new ArrayList<>();
-            for(Map.Entry<Integer, Integer> entry : pieces.entrySet()){
+            for(Map.Entry<Integer, Integer> entry : board.position.entrySet()){
                 switch (entry.getValue()){
                     case Knight | White: whiteKnights++; break;
                     case Knight | Black: blackKnights++; break;
@@ -76,14 +83,12 @@ public class CheckGameResults {
                 }
             }
 
-            if(pieces.size() == 3 || whiteKnights == 2 || blackKnights == 2 ) return false;
+            if(board.position.size() == 3 || whiteKnights == 2 || blackKnights == 2 ) return false;
 
             if(whiteBishops.size() == blackBishops.size()||blackKnights==whiteKnights )return true;
             if(blackBishops.size()==2 && (blackBishops.get(0) % 2 == (blackBishops.get(0) / 8) % 2) == (blackBishops.get(1) % 2 == (blackBishops.get(1) / 8) % 2)) return true;
             if(whiteBishops.size()==2 && (whiteBishops.get(0) % 2 == (whiteBishops.get(0) / 8) % 2) == (whiteBishops.get(1) % 2 == (whiteBishops.get(1) / 8) % 2)) return true;
             return false;
     }
-
-
 
 }
