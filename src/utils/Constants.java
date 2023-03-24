@@ -68,7 +68,7 @@ public class Constants {
             public final static String testBoard7 = "r1Qq1k1r/pp2bppp/n1p5/8/2B5/8/PPP1NnPP/RNBQK2R";
             public final static String testBoard6 = "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1";
             public final static String testBoard8 = "1k6/8/8/8/8/4p3/8/R3K2R";
-            public final static String endgameBoard = "4r3/4r3/4k3/8/8/4K3/8/8";
+            public final static String endgameBoard = "8/1k2p3/8/4p3/8/8/2K5/8";
             public final static String endgameHeathMapTest = "8/8/KQ6/8/8/8/8/7k";
         }
     }

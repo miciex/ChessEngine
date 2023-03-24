@@ -277,6 +277,7 @@ public class Engine {
                 }
 
                 eval += endgameEval(pieces, multiplier);
+
             } else if (moved != King) {
                 if (multiplier == 1)
                     eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
@@ -290,10 +291,17 @@ public class Engine {
     }
 
     public int evaluate(HashMap<Integer, Integer> pieces) {
-        int eval = 0;
+        int eval = 0, multiplier = 1;
 
         for (Map.Entry<Integer, Integer> entry : pieces.entrySet()) {
             eval += entry.getValue() < 16 ? getPieceValue(entry.getValue()) : -getPieceValue(entry.getValue());
+        }
+
+        for(int i : pieces.keySet())
+        {
+            multiplier = pieces.get(i) < 16 ? 1 : -1;
+            if(pieces.get(i) == Pawn && pieces.containsKey(i + 8 * -multiplier) && pieces.get(i + 8 * -multiplier) == (Pawn + (multiplier == 1 ? White : Black)))
+                eval -= 50 * multiplier;
         }
 
         eval += evaluateBonus(pieces);
