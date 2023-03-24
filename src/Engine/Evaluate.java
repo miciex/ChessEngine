@@ -43,15 +43,15 @@ public class Evaluate {
             int moved = move.movedPiece % 8;
 
             if (moved == King && Math.abs(move.endField - move.startField) != 2)
-                eval -= (100 * multiplier);
+                eval -= (50 * multiplier);
             else if (moved == King && Math.abs(move.endField - move.startField) == 2)
-                eval += (100 * multiplier);
+                eval += (50 * multiplier);
 
             if (board.moves.size() <= 10) {
                 if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook||moved == Queen)
-                    eval -= (30 * multiplier);
+                    eval -= (50 * multiplier);
 
-                if (board.movedPieces[move.startField] == 0)
+                if (board.movedPieces[move.startField] != 0)
                    eval -= (20 * multiplier);
 
                 if (board.moves.size() - moves.size() <= 2 && moved == Knight)

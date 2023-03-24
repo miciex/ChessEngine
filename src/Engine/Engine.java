@@ -69,7 +69,7 @@ public class Engine {
     }
 
     public int minimax(int depth, int alpha, int beta, boolean maximizingPlayer ,int originalDepth) {
-        //board.whiteToMove = maximizingPlayer;
+        board.whiteToMove = maximizingPlayer;
         GameResults gameResult = board.checkGameResult();
 
         if (gameResult != GameResults.NONE) {

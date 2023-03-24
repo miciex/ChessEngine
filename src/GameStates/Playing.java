@@ -53,7 +53,7 @@ public class Playing extends State implements StateMethods{
     }
 
     private void initClasses(){
-        board = new Board(classicBoard);
+        board = new Board(testBoard7);
         moveGenerator = new MoveGenerator(board);
         engine = new Engine(playerWhite, this);
         boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
