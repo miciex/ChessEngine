@@ -107,14 +107,13 @@ public class Engine {
                 addMovedPiece(move);
 
                 int eval = setEval(depth, alpha, beta, move, false, originalDepth);
-                setBestMove(eval, move, depth, originalDepth, true);
 
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
 
                 if (beta <= alpha) {
                     cutoffs += moves.size() - i - 1;
-                    break;
+                   break;
 
                 }
             }
@@ -135,7 +134,7 @@ public class Engine {
                 addMovedPiece(move);
 
                 int eval = setEval(depth, alpha, beta,move, true,originalDepth);
-                setBestMove(eval, move, depth, originalDepth, false);
+
 
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
@@ -227,29 +226,28 @@ public class Engine {
         } else {
 
             checkedMoves.add(move);
-
             eval = minimax( depth - 1, alpha, beta, maximizingPlayer,originalDepth);
 
             checkedMoves.remove(checkedMoves.size() - 1);
 
-
             piecesMovedDuringOpening = originalPiecesMovedDuringOpening;
 
         }
+        setBestMove(eval, alpha, beta, move, depth, originalDepth, false);
         board.unMakeMove(move);
         return eval;
     }
 
-    private void setBestMove(int eval, Move move, int depth, int originalDepth, boolean maximizingPlayer) {
+    private void setBestMove(int eval, int alpha, int beta, Move move, int depth, int originalDepth, boolean maximizingPlayer) {
         if(depth != originalDepth) return;
         if(bestMove == null){
-            bestMovesEval = eval;
+            //bestMovesEval = eval;
             bestMove = move;
-        }if(maximizingPlayer && eval > bestMovesEval){
-            bestMovesEval = eval;
+        }else if(maximizingPlayer && eval > alpha){
+            //bestMovesEval = eval;
             bestMove = move;
-        }else if(!maximizingPlayer && eval < bestMovesEval){
-            bestMovesEval = eval;
+        }else if(!maximizingPlayer && eval < beta){
+            //bestMovesEval = eval;
             bestMove = move;
         }
     }
@@ -320,7 +318,7 @@ public class Engine {
                     Move moveBuff = new Move(moves.get(j + 1));
                     moveOrder[j + 1] = moveOrder[j];
                     moveOrder[j] = buff;
-                    moves.set(j + 1, new Move(moves.get(i)));
+                    moves.set(j + 1, new Move(moves.get(j)));
                     moves.set(j, moveBuff);
                 }
             }

@@ -25,6 +25,7 @@ public class Board {
     public int[] visualBoard;
     public ArrayList<HashMap<Integer, Integer>> positions;
     public int movesTo50MoveRule;
+    public int[] movedPieces = new int[64];
 
     public Board(String fenString, boolean whiteToMove, int[] availableCastles, ArrayList<Move> moves){
         this.fen = fenString;
@@ -35,6 +36,7 @@ public class Board {
         this.moves = moves;
         this.positions = new ArrayList<>();
         this.movesTo50MoveRule = 0;
+        this.resetMovedPieces();
     }
 
     public Board(String fenString){
@@ -46,6 +48,7 @@ public class Board {
         this.moves = new ArrayList<>();
         this.positions = new ArrayList<>();
         this.movesTo50MoveRule = 0;
+        this.resetMovedPieces();
     }
 
     public Board(Board board){
@@ -57,6 +60,7 @@ public class Board {
         this.moves = board.moves;
         this.positions = board.positions;
         this.movesTo50MoveRule = 0;
+        this.resetMovedPieces();
     }
 
     public void resetBoard(){
@@ -67,16 +71,13 @@ public class Board {
         this.moves = new ArrayList<>();
         this.positions.clear();
         this.movesTo50MoveRule = 0;
+        this.resetMovedPieces();
     }
 
     public GameResults checkGameResult() {
         GameResults result = GameResults.NONE;
 
         //Do the same in engine
-        //if (move.takenPiece != 0 || (move.movedPiece % 8 == King && Math.abs(move.startField - move.endField) == 2))
-        //positions.clear();
-        //positions.add((HashMap<Integer, Integer>) Playing.ActivePieces.clone());
-
         //movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, movesTo50MoveRule);
 
         if (CheckGameResults.isThreefold(this))
@@ -451,8 +452,9 @@ public class Board {
         setCastles();
         moves.add(move);
         positions.add((HashMap<Integer, Integer>) position.clone());
-        //whiteToMove = !whiteToMove;
-        //draw50MoveRuleCheck(move, movesTo50MoveRule);
+        if(movedPieces[move.startField] == 0){
+            movedPieces[move.startField] = moves.size();
+        }
     }
 
     public void unMakeMove(Move move){
@@ -460,7 +462,9 @@ public class Board {
         unsetCastles();
         removeLastMove();
         positions.remove(positions.size()-1);
-        //whiteToMove = !whiteToMove;
+        if(movedPieces[move.startField] > 0 && movedPieces[move.startField] < moves.size()){
+            movedPieces[move.startField] = 0;
+        }
     }
 
     public  boolean isEndgame() {
@@ -501,6 +505,14 @@ public class Board {
         }
 
         return true;
+    }
+
+    private void resetMovedPieces(){
+        for(int i = 0; i < movedPieces.length; i++){
+            if(position.containsKey(i))
+                movedPieces[i] = 0;
+            else movedPieces[i] = -1;
+        }
     }
 
     public Move getLastMove(){

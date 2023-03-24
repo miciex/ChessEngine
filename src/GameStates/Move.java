@@ -33,8 +33,8 @@ public class Move {
         this.startField = startField;
         this.endField = endField;
         this.movedPiece = pieces.get(startField);
-        this.takenPiece = calcTakenPiece(this.movedPiece, pieces.containsKey(endField) ? pieces.get(endField) : 0, startField, endField);
-        this.takenPieceField = calcTakenPieceField(this.movedPiece, pieces.containsKey(endField) ? pieces.get(endField) : 0, startField, endField);
+        this.takenPiece = pieces.containsKey(endField) ? pieces.get(endField) : 0;
+        this.takenPieceField = takenPiece != 0 ? endField : -1;
         this.promotePiece = promotePiece;
     }
 
@@ -42,8 +42,8 @@ public class Move {
         this.startField = startField;
         this.endField = endField;
         this.movedPiece = pieces.get(startField);
-        this.takenPiece = calcTakenPiece(this.movedPiece, pieces.containsKey(endField) ? pieces.get(endField) : 0, startField, endField);
-        this.takenPieceField = calcTakenPieceField(this.movedPiece, pieces.containsKey(endField) ? pieces.get(endField) : 0, startField, endField);
+        this.takenPiece = pieces.containsKey(endField) ? pieces.get(endField) : 0;
+        this.takenPieceField = takenPiece != 0 ? endField : -1;
     }
 
     public Move(Move move){
@@ -53,22 +53,6 @@ public class Move {
         this.takenPiece = move.takenPiece;
         this.takenPieceField = move.takenPieceField;
         this.promotePiece = move.promotePiece;
-    }
-
-    private int calcTakenPiece(int piece, int pieceOnNewField,int startPos, int endPos){
-        if(piece%8 == Pawn && pieceOnNewField == None && startPos%8 != endPos%8)
-            return Pawn + (piece>16 ? 8: 16);
-        return pieceOnNewField;
-    }
-
-    private int calcTakenPieceField(int piece, int pieceOnNewField,int startPos, int endPos){
-        if(takenPiece == None) return -1;
-        if(piece%8 == Pawn && pieceOnNewField == None && startPos%8 != endPos%8) {
-            int a = (startPos / 8) * 8 ;
-            a+= endPos%8;
-            return a;
-        }
-        return endPos;
     }
 
 }

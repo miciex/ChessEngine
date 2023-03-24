@@ -30,7 +30,10 @@ public class Evaluate {
     private static int evaluateBonus(Board board, ArrayList<Move> moves) {
         int eval = 0;
 
+
         for (Move move : moves) {
+
+
 
             int multiplier = move.movedPiece < 16 ? 1 : -1;
             int moved = move.movedPiece % 8;
@@ -41,14 +44,13 @@ public class Evaluate {
                 eval += (100 * multiplier);
 
             if (board.moves.size() <= 10) {
-                if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook
-                        || moved == Queen)
-                    eval -= (100 * multiplier);
+                if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook||moved == Queen)
+                    eval -= (30 * multiplier);
 
-//                if (playing.getMovedPieces().contains(move.startField))
-//                    eval -= (20 * multiplier);
+                if (board.movedPieces[move.startField] == 0)
+                   eval -= (20 * multiplier);
 
-                if (board.moves.size() <= 1 && moved == Knight)
+                if (board.moves.size() - moves.size() <= 2 && moved == Knight)
                     eval -= (100 * multiplier);
             }
 

@@ -278,11 +278,8 @@ public class BoardOverlay extends UIElement {
         playing.board.makeMove(move);
         playing.updateWholeBoard(mapToBoard(playing.board.position));
         updateFieldsValue(playing.board.visualBoard);
-        playing.board.moves.add(move);
         playing.addMovedPiece(move);
-        playing.board.setCastles();
         playing.movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, playing.movesTo50MoveRule);
-        playing.board.positions.add((HashMap<Integer, Integer>) playing.board.position.clone());
         playing.board.whiteToMove = !playing.board.whiteToMove;
         playing.result = playing.board.checkGameResult();
         playing.engine.removeLastBestMove();
