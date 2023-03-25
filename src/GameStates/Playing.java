@@ -24,13 +24,13 @@ import static utils.Constants.BoardInfo.*;
 import static utils.Constants.Pieces.King;
 import static utils.HelpMethods.*;
 
-public class Playing extends State implements StateMethods{
+public class Playing extends State implements StateMethods {
 
     public Board board;
     public MoveGenerator moveGenerator;
     public String currentBoard = classicBoard;
-    public final int BOARD_X = (GAME_WIDTH-BOARD_WIDTH*FIELD_SIZE)/2;
-    public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
+    public final int BOARD_X = (GAME_WIDTH - BOARD_WIDTH * FIELD_SIZE) / 2;
+    public final int BOARD_Y = (GAME_HEIGHT - BOARD_HEIGHT * FIELD_SIZE) / 2;
 
     public GameResults result;
     public boolean playerWhite;
@@ -44,7 +44,7 @@ public class Playing extends State implements StateMethods{
     public ArrayList<Integer> gmGamesIndexes = new ArrayList<>();
     Random rnd = new Random();
 
-    public Playing(Game game){
+    public Playing(Game game) {
         super(game);
         playerWhite = rnd.nextFloat() > 0.5;
         initClasses();
@@ -53,7 +53,7 @@ public class Playing extends State implements StateMethods{
         setGmGamesIndexes();
     }
 
-    public void resetGame(){
+    public void resetGame() {
         playerWhite = rnd.nextFloat() > 0.5;
         engine.isWhite = !playerWhite;
         board.resetBoard();
@@ -63,22 +63,21 @@ public class Playing extends State implements StateMethods{
         setGmGamesIndexes();
     }
 
-    private void initClasses(){
+    private void initClasses() {
         board = new Board(classicBoard);
         moveGenerator = new MoveGenerator(board);
         engine = new Engine(playerWhite, this);
         boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
-        buttonOverlay = new ButtonOverlay((BOARD_X + BOARD_WIDTH * FIELD_SIZE), 0, 0,0, this);
+        buttonOverlay = new ButtonOverlay((BOARD_X + BOARD_WIDTH * FIELD_SIZE), 0, 0, 0, this);
 
     }
 
-    public void setGmGamesIndexes(){
+    public void setGmGamesIndexes() {
         gmGamesIndexes.clear();
-        for(int i = 0; i<gmGames.size(); i++){
+        for (int i = 0; i < gmGames.size(); i++) {
             gmGamesIndexes.add(i);
         }
     }
-
 
     @Override
     public void update() {
@@ -86,7 +85,7 @@ public class Playing extends State implements StateMethods{
     }
 
     @Override
-    public void draw(Graphics g){
+    public void draw(Graphics g) {
         boardOverlay.draw(g);
         buttonOverlay.draw(g);
     }
@@ -115,7 +114,7 @@ public class Playing extends State implements StateMethods{
         buttonOverlay.mouseMoved(e);
     }
 
-    public void mouseDragged(MouseEvent e){
+    public void mouseDragged(MouseEvent e) {
         boardOverlay.mouseDragged(e);
     }
 
@@ -123,26 +122,23 @@ public class Playing extends State implements StateMethods{
         this.board.moves = moves;
     }
 
-    public void updateWholeBoard(int[] board){this.board.visualBoard = board;}
+    public void updateWholeBoard(int[] board) {
+        this.board.visualBoard = board;
+    }
 
-    public ArrayList<Integer> getMovedPieces()
-    {
+    public ArrayList<Integer> getMovedPieces() {
         return piecesMovedDuringOpening;
     }
 
-    public void addMovedPiece(Move move)
-    {
-        if(piecesMovedDuringOpening.size() <= 10)
-            if(piecesMovedDuringOpening.contains(move.endField))
-            {
-                //piecesMovedDuringOpening.remove(move.startField);
-                //piecesMovedDuringOpening.add(0);
-            }
-        else
-            {
+    public void addMovedPiece(Move move) {
+        if (piecesMovedDuringOpening.size() <= 10)
+            if (piecesMovedDuringOpening.contains(move.endField)) {
+                // piecesMovedDuringOpening.remove(move.startField);
+                // piecesMovedDuringOpening.add(0);
+            } else {
                 piecesMovedDuringOpening.add(move.endField);
-                //piecesMovedDuringOpening.remove(move.startField);
-                //piecesMovedDuringOpening.add(0);
+                // piecesMovedDuringOpening.remove(move.startField);
+                // piecesMovedDuringOpening.add(0);
             }
     }
 }
