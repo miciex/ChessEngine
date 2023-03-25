@@ -62,6 +62,11 @@ public class Constants {
                 }
         };
 
+    public static final class Engine
+    {
+        public static final int[] pawnStructureGeneralDirections = {7, 9, -7, -9};
+    }
+
         public static class Boards {
                 public final static String classicBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
