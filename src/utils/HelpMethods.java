@@ -275,19 +275,12 @@ public class HelpMethods {
         return (isUpperCase(p)?Pieces.White:Pieces.Black);
     }
 
-    public static boolean isWhite(int p) {
-        if(p != 0)
-            return p<16 ? true : false;
-        else
-            return false;
-    }
-
     public static int findKing(Board board) {
         int position = -1;
 
         for(int i : board.position.keySet())
         {
-            if (board.position.containsKey(i) && board.position.get(i) % 8 == Pieces.King && HelpMethods.isWhite(board.position.get(i)) == board.whiteToMove)
+            if (board.position.containsKey(i) && board.position.get(i) % 8 == Pieces.King && board.isWhite(i) == board.whiteToMove)
                 return i;
         }
 
@@ -299,7 +292,7 @@ public class HelpMethods {
 
         for(int i : position.keySet())
         {
-            if (position.containsKey(i) && position.get(i) % 8 == Pieces.King && HelpMethods.isWhite(position.get(i)) == white)
+            if (position.containsKey(i) && position.get(i) % 8 == Pieces.King && position.get(i) < 16 == white)
                 return i;
         }
 

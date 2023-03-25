@@ -74,6 +74,10 @@ public class Board {
         this.resetMovedPieces();
     }
 
+    public boolean isWhite(int piecePosition){
+        return position.get(piecePosition) < 16 ? true : false;
+    }
+
     public GameResults checkGameResult() {
         GameResults result = GameResults.NONE;
 
@@ -155,7 +159,7 @@ public class Board {
         while (checkingRow == row) {
             if ((checkingColumn == 0 || checkingColumn == 7) && this.position.containsKey(checkingPosition)) {
                 if (this.position.get(checkingPosition) % 8 != Constants.Pieces.Rook
-                        || HelpMethods.isWhite(this.position.get(checkingPosition)) != whiteToMove)
+                        || isWhite(checkingPosition) != whiteToMove)
                     return false;
                 else
                     return true;
@@ -185,7 +189,7 @@ public class Board {
             if (isChecked() == -1) {
                 if (copy.get(activeField) % 8 == King && Math.abs(i - activeField) == 2) {
                     if (isChecked(activeField) == -1 && isChecked(activeField + (i - activeField) / 2) == -1 && isChecked(i) == -1)
-                        if (!(position.containsKey(activeField + (8 * multiplier)) && HelpMethods.isWhite(position.get(activeField + (8 * multiplier))) != whiteToMove && position.get(activeField + (8 * multiplier)) % 8 == Pawn))
+                        if (!(position.containsKey(activeField + (8 * multiplier)) && isWhite(activeField + (8 * multiplier)) != whiteToMove && position.get(activeField + (8 * multiplier)) % 8 == Pawn))
                             possibleMoves.add(i);
                 } else
                     possibleMoves.add(i);
@@ -285,7 +289,7 @@ public class Board {
     private  ArrayList<Integer> PossiblePawnMoves(int position) {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        boolean isWhite = HelpMethods.isWhite(this.position.get(position));
+        boolean isWhite = isWhite(position);
         int mulptiplier = isWhite ? -1 : 1;
         ArrayList<Integer> directions = Constants.Directions.get(Constants.Pieces.Pawn);
         for (int i = 0; i < directions.size(); i++) {
@@ -310,7 +314,7 @@ public class Board {
     private  ArrayList<Integer> specialPossibleMoves(int position, int piece) {
         ArrayList<Integer> moves = new ArrayList<>();
 
-        boolean isWhite = HelpMethods.isWhite(this.position.get(position));
+        boolean isWhite = isWhite(position);
 
         int checkingPosition;
 
@@ -318,7 +322,7 @@ public class Board {
             checkingPosition = position + i;
 
             if (IsCorrect(position, i)) {
-                if (this.position.containsKey(checkingPosition) && HelpMethods.isWhite(this.position.get(checkingPosition)) == isWhite)
+                if (this.position.containsKey(checkingPosition) && isWhite(checkingPosition) == isWhite)
                     continue;
 
                 moves.add(checkingPosition);

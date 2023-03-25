@@ -13,8 +13,7 @@ import java.sql.Array;
 import java.util.*;
 
 import static utils.Constants.Pieces.*;
-import static utils.HelpMethods.getPieceValue;
-import static utils.HelpMethods.getRandom;
+import static utils.HelpMethods.*;
 
 public class Engine {
 
@@ -50,22 +49,29 @@ public class Engine {
     }
 
     public void setBestMoves( int depth, int alpha, int beta, ArrayList<Integer> piecesMovedDuringOpening) {
-        this.originalPiecesMovedDuringOpening = (ArrayList<Integer>) piecesMovedDuringOpening.clone();
-        this.piecesMovedDuringOpening = this.originalPiecesMovedDuringOpening;
-        board = new Board(playing.board);
-        moveGenerator.setBoard(board);
-        checkedMoves.clear();
-        resetTranspositions(depth);
-        int eval;
-        transpositions = 0;
-        bestMove = null;
-        bestMovesEval = board.whiteToMove ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        eval = minimax(depth, alpha, beta, board.whiteToMove, depth);
-        System.out.println("Transpositions: " + transpositions);
-        System.out.println("Cut offs: " + cutoffs);
-        System.out.println("Moves searched: " + movesSearched);
-        System.out.println("Evaluation: " + eval);
-        positionsTable.clear();
+        if(playing.gmGamesIndexes.size() > 0){
+            int gmGame = getRandom(playing.gmGamesIndexes);
+            String move = playing.gmGames.get(gmGame).get(playing.board.moves.size());
+            bestMove = chessNotationToMove(playing.board, move);
+        }
+        else {
+            this.originalPiecesMovedDuringOpening = (ArrayList<Integer>) piecesMovedDuringOpening.clone();
+            this.piecesMovedDuringOpening = this.originalPiecesMovedDuringOpening;
+            board = new Board(playing.board);
+            moveGenerator.setBoard(board);
+            checkedMoves.clear();
+            resetTranspositions(depth);
+            int eval;
+            transpositions = 0;
+            bestMove = null;
+            bestMovesEval = board.whiteToMove ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+            eval = minimax(depth, alpha, beta, board.whiteToMove, depth);
+            System.out.println("Transpositions: " + transpositions);
+            System.out.println("Cut offs: " + cutoffs);
+            System.out.println("Moves searched" + movesSearched);
+            System.out.println("Evaluation: " + eval);
+            positionsTable.clear();
+        }
     }
 
     public int minimax(int depth, int alpha, int beta, boolean maximizingPlayer ,int originalDepth) {
@@ -80,7 +86,7 @@ public class Engine {
         }
 
         if (depth == 0) {
-            return  !Playing.isEndgame  ? Evaluate.evaluate(board, checkedMoves) : searchAllCaptures(alpha, beta, maximizingPlayer);
+            return  Evaluate.evaluate(board, checkedMoves);
         }
 
 
@@ -106,7 +112,7 @@ public class Engine {
 
                 addMovedPiece(move);
 
-                int eval = setEval(depth, alpha, beta, move, false, originalDepth);
+                int eval = setEval(depth, alpha, beta, move, true, originalDepth);
 
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
@@ -133,7 +139,7 @@ public class Engine {
 
                 addMovedPiece(move);
 
-                int eval = setEval(depth, alpha, beta,move, true,originalDepth);
+                int eval = setEval(depth, alpha, beta,move, false,originalDepth);
 
 
                 minEval = Math.min(minEval, eval);
@@ -244,14 +250,14 @@ public class Engine {
         } else {
 
             checkedMoves.add(move);
-            eval = minimax( depth - 1, alpha, beta, maximizingPlayer,originalDepth);
+            eval = minimax( depth - 1, alpha, beta, !maximizingPlayer,originalDepth);
 
             checkedMoves.remove(checkedMoves.size() - 1);
 
             piecesMovedDuringOpening = originalPiecesMovedDuringOpening;
 
         }
-        setBestMove(eval, alpha, beta, move, depth, originalDepth, false);
+        setBestMove(eval, alpha, beta, move, depth, originalDepth, maximizingPlayer);
         board.unMakeMove(move);
         return eval;
     }
