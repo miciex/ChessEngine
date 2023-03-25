@@ -8,11 +8,13 @@ import ui.BoardOverlay;
 import ui.ButtonMethods;
 import ui.ButtonOverlay;
 import utils.CheckGameResults;
+import utils.LoadSave;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import static utils.Constants.Boards.*;
 import static utils.Constants.Boards.TestBoards.*;
@@ -31,29 +33,38 @@ public class Playing extends State implements StateMethods{
     public final int BOARD_Y = (GAME_HEIGHT-BOARD_HEIGHT*FIELD_SIZE)/2;
 
     public GameResults result;
-    public boolean playerWhite = true;
+    public boolean playerWhite;
     public int movesTo50MoveRule = 0;
     public static boolean isEndgame = false;
     BoardOverlay boardOverlay;
     ButtonOverlay buttonOverlay;
     public Engine engine;
     private ArrayList<Integer> piecesMovedDuringOpening = new ArrayList<>();
+    public ArrayList<ArrayList<String>> gmGames;
+    public ArrayList<Integer> gmGamesIndexes = new ArrayList<>();
+    Random rnd = new Random();
 
     public Playing(Game game){
         super(game);
+        playerWhite = rnd.nextFloat() > 0.5;
         initClasses();
         result = GameResults.NONE;
+        gmGames = LoadSave.getGrandmasterGames(LoadSave.GM_GAMES);
+        setGmGamesIndexes();
     }
 
     public void resetGame(){
+        playerWhite = rnd.nextFloat() > 0.5;
+        engine.isWhite = !playerWhite;
         board.resetBoard();
         boardOverlay.createFields();
         piecesMovedDuringOpening = new ArrayList<>();
         result = GameResults.NONE;
+        setGmGamesIndexes();
     }
 
     private void initClasses(){
-        board = new Board(testBoard7);
+        board = new Board(classicBoard);
         moveGenerator = new MoveGenerator(board);
         engine = new Engine(playerWhite, this);
         boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
@@ -61,6 +72,12 @@ public class Playing extends State implements StateMethods{
 
     }
 
+    public void setGmGamesIndexes(){
+        gmGamesIndexes.clear();
+        for(int i = 0; i<gmGames.size(); i++){
+            gmGamesIndexes.add(i);
+        }
+    }
 
 
     @Override

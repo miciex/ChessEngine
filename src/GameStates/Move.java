@@ -33,8 +33,8 @@ public class Move {
         this.startField = startField;
         this.endField = endField;
         this.movedPiece = pieces.get(startField);
-        this.takenPiece = pieces.containsKey(endField) ? pieces.get(endField) : 0;
-        this.takenPieceField = takenPiece != 0 ? endField : -1;
+        this.takenPiece = calcTakenPiece(pieces);
+        this.takenPieceField = calcTakenPieceField(pieces);
         this.promotePiece = promotePiece;
     }
 
@@ -42,8 +42,8 @@ public class Move {
         this.startField = startField;
         this.endField = endField;
         this.movedPiece = pieces.get(startField);
-        this.takenPiece = pieces.containsKey(endField) ? pieces.get(endField) : 0;
-        this.takenPieceField = takenPiece != 0 ? endField : -1;
+        this.takenPiece = calcTakenPiece(pieces);
+        this.takenPieceField = calcTakenPieceField(pieces);
     }
 
     public Move(Move move){
@@ -53,6 +53,20 @@ public class Move {
         this.takenPiece = move.takenPiece;
         this.takenPieceField = move.takenPieceField;
         this.promotePiece = move.promotePiece;
+    }
+
+    private int calcTakenPiece(HashMap<Integer, Integer> pieces){
+        if(pieces.containsKey(this.endField)) return pieces.get(this.endField);
+        if((movedPiece%8) == Pawn && (startField - endField) % 8 != 0)
+            return Pawn + (movedPiece > 16 ? White : Black);
+        return 0;
+    }
+
+    private int calcTakenPieceField(HashMap<Integer, Integer> pieces){
+        if(this.takenPiece == 0)  return -1;
+        if(movedPiece%8 == Pawn && !pieces.containsKey(endField))
+                return startField + endField % 8 - startField % 8;
+        return endField;
     }
 
 }

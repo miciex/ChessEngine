@@ -43,6 +43,8 @@ public class BoardOverlay extends UIElement {
     private int testingStartField = -1;
     ArrayList<Move> lastMoves;
 
+    private boolean moveFinished = true;
+
     public BoardOverlay(int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
         this.playing = playing;
@@ -74,8 +76,8 @@ public class BoardOverlay extends UIElement {
     }
 
     public void update(){
-        if(playing.board.whiteToMove == playing.engine.isWhite && playing.result == GameResults.NONE){
-           //playComputerMove();
+        if(playing.board.whiteToMove == playing.engine.isWhite && playing.result == GameResults.NONE && moveFinished){
+           playComputerMove();
         }
     }
 
@@ -140,7 +142,7 @@ public class BoardOverlay extends UIElement {
 
         if (activeField < 0 ) {
             activeField = col + row * BOARD_WIDTH;
-            if(HelpMethods.isWhite(playing.board.position.get(activeField)) == playing.board.whiteToMove == playing.playerWhite) {
+            if(playing.board.isWhite(activeField) == playing.board.whiteToMove && playing.playerWhite == playing.board.whiteToMove) {
                 fields[activeField].setMousePressed(true);
                 moves = playing.board.PossibleMoves(activeField);
                 showPossibleMoves();
@@ -163,7 +165,7 @@ public class BoardOverlay extends UIElement {
             if (playing.board.visualBoard[newField] != 0 && activeField != newField) {
                 activeField = newField;
                 fields[activeField].setMousePressed(true);
-                if (HelpMethods.isWhite(playing.board.position.get(activeField)) == playing.board.whiteToMove == playing.playerWhite) {
+                if (playing.board.isWhite(activeField) == playing.board.whiteToMove && playing.playerWhite == playing.board.whiteToMove) {
                     moves = playing.board.PossibleMoves(activeField);
                     showPossibleMoves();
                 }
@@ -176,7 +178,7 @@ public class BoardOverlay extends UIElement {
         }
 
         if (newField < 0 && activeField >= 0) {
-            if (HelpMethods.isWhite(playing.board.position.get(activeField)) == playing.board.whiteToMove == playing.playerWhite) {
+            if (playing.board.isWhite(activeField) == playing.board.whiteToMove == playing.playerWhite) {
                 moves = playing.board.PossibleMoves(activeField);
                 showPossibleMoves();
             }
@@ -203,7 +205,7 @@ public class BoardOverlay extends UIElement {
         }
 
         if (newField >= 0 && playing.result == GameResults.NONE) {
-            if (HelpMethods.isWhite(playing.board.position.get(activeField)) == playing.board.whiteToMove) {
+            if (playing.board.isWhite(activeField) == playing.board.whiteToMove) {
                 moves = playing.board.PossibleMoves(activeField);
                 showPossibleMoves();
             }
@@ -247,6 +249,7 @@ public class BoardOverlay extends UIElement {
     }
 
     private void playMove(int endField, int promotingPiece){
+        moveFinished = false;
         if(!promoting && promotingPiece == -1)
         {
             currMove = new Move(playing.board.position, (activeField == -1) ? testingStartField : activeField, endField);
@@ -259,19 +262,20 @@ public class BoardOverlay extends UIElement {
         if(promotingPiece != -1)
             currMove.promotePiece = promotingPiece;
         playMoveOnBoard(currMove);
-        if(playing.result == GameResults.NONE)
-            playComputerMove();
+        moveFinished = true;
     }
 
     private void playComputerMove(){
+        moveFinished = false;
         if(playing.result != GameResults.NONE) return;
         long milis = -currentTimeMillis();
-        playing.engine.setBestMoves( 5, Integer.MIN_VALUE, Integer.MAX_VALUE,playing.getMovedPieces());
+        playing.engine.setBestMoves( 4, Integer.MIN_VALUE, Integer.MAX_VALUE,playing.getMovedPieces());
         milis += currentTimeMillis();
         System.out.println("miliseconds" + milis);
         Move move = playing.engine.getBestMove();
 
         playMoveOnBoard(move);
+        moveFinished = true;
     }
 
     private void playMoveOnBoard(Move move){
@@ -281,6 +285,8 @@ public class BoardOverlay extends UIElement {
         playing.addMovedPiece(move);
         playing.movesTo50MoveRule = CheckGameResults.draw50MoveRuleCheck(move, playing.movesTo50MoveRule);
         playing.board.whiteToMove = !playing.board.whiteToMove;
+        playing.board.moves.get(playing.board.moves.size()-1).gaveCheck = playing.board.isChecked() != -1;
+        removeIndexes(moveToChessNotation(playing.board,playing.board.moves.get(playing.board.moves.size()-1)));
         playing.result = playing.board.checkGameResult();
         playing.engine.removeLastBestMove();
         Playing.isEndgame = playing.board.isEndgame();
@@ -345,6 +351,18 @@ public class BoardOverlay extends UIElement {
         }
 
         return promotedPiece[0];
+    }
+
+    private void removeIndexes(String move){
+        ArrayList<Integer> indexes = new ArrayList<>();
+        for (int i = 0; i<playing.gmGamesIndexes.size(); i++){
+            int index = playing.gmGamesIndexes.get(i);
+            String gmMove = playing.gmGames.get(index).get(playing.board.moves.size() - 1);
+            if(gmMove.equals(move) && playing.gmGames.get(index).size() > playing.board.moves.size()){
+                indexes.add(index);
+            }
+        }
+        playing.gmGamesIndexes = indexes;
     }
 
     public void mouseMoved(MouseEvent e) {
