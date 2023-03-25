@@ -37,7 +37,6 @@ public class Evaluate {
     private static int evaluateBonus(Board board, ArrayList<Move> moves) {
         int eval = 0;
 
-
         for (Move move : moves) {
             int multiplier = move.movedPiece < 16 ? 1 : -1;
             int moved = move.movedPiece % 8;
@@ -48,7 +47,7 @@ public class Evaluate {
                 eval += (50 * multiplier);
 
             if (board.moves.size() <= 10) {
-                if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook||moved == Queen)
+                if ((moved == King && Math.abs(move.endField - move.startField) != 2) || moved == Rook || moved == Queen)
                     eval -= (50 * multiplier);
 
                 if (board.movedPieces[move.startField] != 0)
@@ -60,10 +59,10 @@ public class Evaluate {
 
             if (Playing.isEndgame) {
                 if (moved == King) {
-                    // if(multiplier == 1)
-                    // eval += Constants.Heatmaps.kingEndgame[0][move.endField];
-                    // else if(multiplier == -1)
-                    // eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
+                    if(multiplier == 1)
+                        eval += Constants.Heatmaps.kingEndgame[0][move.endField];
+                    else if(multiplier == -1)
+                        eval -= Constants.Heatmaps.kingEndgame[1][move.endField];
                 } else {
                     if (multiplier == 1)
                         eval += Constants.Heatmaps.Whites[moved - 1][move.endField];
@@ -110,5 +109,4 @@ public class Evaluate {
 
         return eval;
     }
-
 }
