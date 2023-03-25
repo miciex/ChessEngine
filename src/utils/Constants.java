@@ -58,6 +58,11 @@ public class Constants {
         put(2137, new ArrayList<Integer>(Arrays.asList(1,-1,8,-8,7,-7,9,-9,15,-15,17,-17,6,-6,10,-10)));
     }};
 
+    public static final class Engine
+    {
+        public static final int[] pawnStructureGeneralDirections = {7, 9, -7, -9};
+    }
+
     public static class Boards{
         public final static String classicBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
         public final static class TestBoards{

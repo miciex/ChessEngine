@@ -78,6 +78,25 @@ public class Evaluate {
                     eval -= Constants.Heatmaps.Blacks[moved - 1][move.endField];
             }
 
+            eval += evaluatePawnStructure(board, move, multiplier);
+        }
+
+        return eval;
+    }
+
+    private static int evaluatePawnStructure(Board board, Move move, int multiplier)
+    {
+        int eval = 0, color = multiplier == 1 ? 8 : 16;
+
+        for(int i : Constants.Engine.pawnStructureGeneralDirections)
+        {
+            if(board.position.containsKey(move.endField + i) && board.position.get(move.endField + i) == Pawn + color) {
+                eval += 10 * multiplier;
+                continue;
+            }
+
+            if(move.movedPiece % 8 == Pawn && (i / Math.abs(i) == -multiplier) && board.position.containsKey(move.endField + i) && ((board.position.get(move.endField + i) < 16) == (multiplier == 1)))
+                eval += 10 * multiplier;
         }
 
         return eval;

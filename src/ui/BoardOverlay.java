@@ -266,9 +266,9 @@ public class BoardOverlay extends UIElement {
     private void playComputerMove(){
         if(playing.result != GameResults.NONE) return;
         long milis = -currentTimeMillis();
-        playing.engine.setBestMoves( 5, Integer.MIN_VALUE, Integer.MAX_VALUE,playing.getMovedPieces());
+        playing.engine.setBestMoves( 4, Integer.MIN_VALUE, Integer.MAX_VALUE,playing.getMovedPieces());
         milis += currentTimeMillis();
-        System.out.println("miliseconds" + milis);
+        System.out.println("Miliseconds: " + milis);
         Move move = playing.engine.getBestMove();
 
         playMoveOnBoard(move);

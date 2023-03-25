@@ -63,7 +63,7 @@ public class Engine {
         eval = minimax(depth, alpha, beta, board.whiteToMove, depth);
         System.out.println("Transpositions: " + transpositions);
         System.out.println("Cut offs: " + cutoffs);
-        System.out.println("Moves searched" + movesSearched);
+        System.out.println("Moves searched: " + movesSearched);
         System.out.println("Evaluation: " + eval);
         positionsTable.clear();
     }
