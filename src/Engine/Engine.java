@@ -74,13 +74,13 @@ public class Engine {
 
         if (gameResult != GameResults.NONE) {
             if(gameResult==GameResults.MATE){
-                return maximizingPlayer ? Integer.MIN_VALUE + 100 - originalDepth + depth : Integer.MAX_VALUE - 100 + originalDepth - depth;
+                return maximizingPlayer ? Integer.MIN_VALUE + 100 + originalDepth - depth : Integer.MAX_VALUE - 100 - originalDepth + depth;
             }
             return 0;
         }
 
         if (depth == 0) {
-            return Evaluate.evaluate(board, checkedMoves);//searchAllCaptures(alpha, beta, maximizingPlayer);
+            return  !Playing.isEndgame  ? Evaluate.evaluate(board, checkedMoves) : searchAllCaptures(alpha, beta, maximizingPlayer);
         }
 
 
@@ -154,63 +154,81 @@ public class Engine {
         }
     }
 
-//    private int searchAllCaptures(int alpha, int beta, boolean maximizingPlayer) {
-//        board.whiteToMove = maximizingPlayer;
-//        int evaluation = Evaluate.evaluate(board, checkedMoves);
-//
-//        if(maximizingPlayer)
-//
-//        ArrayList<Move> moves = moveGenerator.generateMoves(true);
-//        if(moves.size() == 0){
-//            return evaluation;
-//        }
-//
-//        if (maximizingPlayer) {
-//
-//            for (int i = 0; i < moves.size(); i++) {
-//
-//                movesSearched++;
-//
-//                Move move = moves.get(i);
-//                checkedMoves.add(move);
-//                board.makeMove(move);
-//
-//                int eval = searchAllCaptures(alpha, beta, false);
-//                checkedMoves.remove(checkedMoves.size()-1);
-//                board.unMakeMove(move);
-//
-//                alpha = Math.max(alpha, eval);
-//
-//                if (beta <= alpha) {
-//                    return beta;
-//                }
-//
-//
-//            }
-//
-//            return alpha;
-//        } else {
-//            for (int i = 0; i < moves.size(); i++) {
-//
-//                movesSearched++;
-//
-//                Move move = moves.get(i);
-//
-//                board.makeMove(move);
-//                checkedMoves.add(move);
-//                int eval = searchAllCaptures(alpha, beta, true);
-//                checkedMoves.remove(checkedMoves.size()-1);
-//                board.unMakeMove(move);
-//
-//                beta = Math.min(beta, eval);
-//
-//                if (beta <= alpha) {
-//                    return alpha;
-//                }
-//            }
-//            return beta;
-//        }
-//    }
+    private int searchAllCaptures(int alpha, int beta, boolean maximizingPlayer) {
+        board.whiteToMove = maximizingPlayer;
+
+        GameResults gameResult = board.checkGameResult();
+
+        if (gameResult != GameResults.NONE) {
+            if(gameResult==GameResults.MATE){
+                return maximizingPlayer ? Integer.MIN_VALUE + 100 - playing.board.moves.size() + board.moves.size() : Integer.MAX_VALUE - 100 - playing.board.moves.size() + board.moves.size();
+            }
+            return 0;
+        }
+
+        int evaluation = Evaluate.evaluate(board, checkedMoves);
+
+        ArrayList<Move> moves = moveGenerator.generateMoves(true);
+
+        if(moves.size() == 0){
+            return evaluation;
+        }
+
+        if (maximizingPlayer) {
+
+            int maxEval = Integer.MIN_VALUE;
+
+            for (int i = 0; i < moves.size(); i++) {
+
+                movesSearched++;
+
+                Move move = moves.get(i);
+                checkedMoves.add(move);
+                board.makeMove(move);
+
+                int eval = searchAllCaptures(alpha, beta, false);
+                checkedMoves.remove(checkedMoves.size()-1);
+                board.unMakeMove(move);
+
+                maxEval = Math.max(eval, maxEval);
+                alpha = Math.max(alpha, eval);
+
+                if (beta <= alpha) {
+                    return beta;
+                }
+
+
+            }
+
+            return maxEval;
+        } else {
+
+            int minEval = Integer.MAX_VALUE;
+
+            for (int i = 0; i < moves.size(); i++) {
+
+                movesSearched++;
+
+                Move move = moves.get(i);
+
+                board.makeMove(move);
+                checkedMoves.add(move);
+
+                int eval = searchAllCaptures(alpha, beta, true);
+                
+                checkedMoves.remove(checkedMoves.size()-1);
+                board.unMakeMove(move);
+
+                minEval = Math.min(minEval, eval);
+                beta = Math.min(beta, eval);
+
+                if (beta <= alpha) {
+                    return alpha;
+                }
+            }
+            return minEval;
+        }
+    }
 
 
     private int setEval(int depth, int alpha, int beta, Move move, boolean maximizingPlayer,int originalDepth) {
