@@ -8,6 +8,7 @@ import ui.BoardOverlay;
 import ui.ButtonMethods;
 import ui.ButtonOverlay;
 import utils.CheckGameResults;
+import utils.Constants;
 import utils.LoadSave;
 
 import java.awt.*;
@@ -32,7 +33,7 @@ public class Playing extends State implements StateMethods {
     public final int BOARD_X = (GAME_WIDTH - BOARD_WIDTH * FIELD_SIZE) / 2;
     public final int BOARD_Y = (GAME_HEIGHT - BOARD_HEIGHT * FIELD_SIZE) / 2;
 
-    public GameResults result;
+    public GameResults result = GameResults.STALEMATE;
     public boolean playerWhite;
     public int movesTo50MoveRule = 0;
     public static boolean isEndgame = false;
@@ -47,14 +48,14 @@ public class Playing extends State implements StateMethods {
     public Playing(Game game) {
         super(game);
         playerWhite = rnd.nextFloat() > 0.5;
-        result = GameResults.NONE;
+        //result = GameResults.NONE;
         gmGames = LoadSave.getGrandmasterGames(LoadSave.GM_GAMES);
         setGmGamesIndexes();
         initClasses();
     }
 
-    public void resetGame() {
-        playerWhite = rnd.nextFloat() > 0.5;
+    public void resetGame(String color) {
+        playerWhite = (color == Constants.Colors.Random_Color) ? (rnd.nextFloat() > 0.5) : (color == Constants.Colors.WHITE);
         engine.isWhite = !playerWhite;
         board.resetBoard();
         boardOverlay.createFields();
@@ -67,7 +68,7 @@ public class Playing extends State implements StateMethods {
         board = new Board(classicBoard);
         moveGenerator = new MoveGenerator(board);
         engine = new Engine(playerWhite, this);
-        boardOverlay = new BoardOverlay(BOARD_X, BOARD_Y, this);
+        boardOverlay = new BoardOverlay(game, BOARD_X, BOARD_Y, this);
         buttonOverlay = new ButtonOverlay((BOARD_X + BOARD_WIDTH * FIELD_SIZE), 0, 0, 0, this);
 
     }

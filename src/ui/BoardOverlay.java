@@ -3,6 +3,7 @@ package ui;
 import GameStates.GameResults;
 import GameStates.Move;
 import GameStates.Playing;
+import main.Game;
 import utils.*;
 
 import javax.swing.*;
@@ -23,6 +24,7 @@ import static utils.HelpMethods.*;
 
 public class BoardOverlay extends UIElement {
 
+    private Game game;
     private BoardField[] fields;
     public Playing playing;
     int activeField = -1;
@@ -39,11 +41,13 @@ public class BoardOverlay extends UIElement {
     private Move currMove;
     private int testingStartField = -1;
     ArrayList<Move> lastMoves;
+    GameFinishedOverlay gameFinishedOverlay;
 
     private boolean moveFinished = true;
 
-    public BoardOverlay(int xPos, int yPos, Playing playing) {
+    public BoardOverlay(Game game, int xPos, int yPos, Playing playing) {
         super(xPos, yPos, FIELD_SIZE * 8, FIELD_SIZE * 8);
+        this.game = game;
         this.playing = playing;
         loadPiecesImgs();
         initClasses();
@@ -52,6 +56,7 @@ public class BoardOverlay extends UIElement {
 
     private void initClasses(){
         createFields();
+        gameFinishedOverlay = new GameFinishedOverlay(game, playing,xPos, yPos, bounds.width, bounds.height, "White won");
     }
 
     public void createFields() {
@@ -73,6 +78,9 @@ public class BoardOverlay extends UIElement {
     public void update(){
         if(playing.board.whiteToMove == playing.engine.isWhite && playing.result == GameResults.NONE && moveFinished){
            playComputerMove();
+        }
+        if(playing.result != GameResults.NONE){
+            gameFinishedOverlay.addComponentsToWindow();
         }
     }
 
@@ -124,6 +132,14 @@ public class BoardOverlay extends UIElement {
     }
 
     public void mousePressed(MouseEvent e) {
+        pieceMovementOnMousePressed(e);
+    }
+
+    public void mouseReleased(MouseEvent e) {
+        pieceMovementOnMouseReleased(e);
+    }
+
+    public void pieceMovementOnMousePressed(MouseEvent e){
         int col = (e.getX() - xPos) / FIELD_SIZE;
         int row = (e.getY() - yPos) / FIELD_SIZE;
 
@@ -180,7 +196,7 @@ public class BoardOverlay extends UIElement {
         }
     }
 
-    public void mouseReleased(MouseEvent e) {
+    private void pieceMovementOnMouseReleased(MouseEvent e){
         if(promoting) return;
         int col = (e.getX() - xPos) / FIELD_SIZE;
         int row = (e.getY() - yPos) / FIELD_SIZE;
@@ -206,7 +222,15 @@ public class BoardOverlay extends UIElement {
             }
         }
         fields[activeField].setMousePressed(false);
+    }
 
+    public void mouseClicked(MouseEvent e) {
+        if(promoting) return;
+    }
+
+    public void mouseMoved(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
     }
 
     private void resetActivePieces() {
@@ -216,9 +240,7 @@ public class BoardOverlay extends UIElement {
         resetColors();
     }
 
-    public void mouseClicked(MouseEvent e) {
-        if(promoting) return;
-    }
+
 
     private void showPossibleMoves() {
         if (!HelpMethods.isPromotionNeeded(playing.board)) {
@@ -377,12 +399,16 @@ public class BoardOverlay extends UIElement {
 
     }
 
-    public void mouseMoved(MouseEvent e) {
-        mouseX = e.getX();
-        mouseY = e.getY();
-    }
+
 
     public void draw(Graphics g) {
+        drawBoard(g);
+        if(playing.result != GameResults.NONE){
+            gameFinishedOverlay.draw(g);
+        }
+    }
+
+    private void drawBoard(Graphics g){
         for (BoardField f : fields) {
             f.drawSquare(g);
         }

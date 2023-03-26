@@ -11,7 +11,7 @@ public class Game implements Runnable{
     private final int UPS_SET = 200;
 
     GamePanel gamePanel;
-    GameWindow gameWindow;
+    public GameWindow gameWindow;
     Playing playing;
 
     public Game(){

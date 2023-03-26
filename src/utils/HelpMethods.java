@@ -6,6 +6,8 @@ import GameStates.Move;
 import GameStates.Playing;
 import utils.Constants.Pieces;
 
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +19,9 @@ import static utils.Constants.Pieces.*;
 
 public class HelpMethods {
 
+    public static Rectangle setRectanglePos(int parentX, int parentY, int height, int width,int marginX, int marginY){
+        return new Rectangle(parentX + marginX, parentY + marginY, width, height);
+    }
 
     public static int getPieceValue(int piece){
         switch (piece % 8){

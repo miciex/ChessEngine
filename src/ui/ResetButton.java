@@ -1,19 +1,25 @@
 package ui;
 
+import GameStates.Playing;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.Random;
 
 public class ResetButton extends UIElement implements ButtonMethods{
 
     private Color textColor;
-    private ButtonOverlay buttonOverlay;
+    private Playing playing;
     private String text = "";
+    private Random rnd = new Random();
+    private String color;
 
-    public ResetButton(int xPos, int yPos, int width, int height, ButtonOverlay buttonOverlay, Color textColor, String text) {
+    public ResetButton(int xPos, int yPos, int width, int height, Playing playing, Color textColor, String text, String color) {
         super(xPos, yPos, width, height);
         this.textColor = textColor;
-        this.buttonOverlay = buttonOverlay;
+        this.playing = playing;
         this.text = text;
+        this.color = color;
     }
 
     @Override
@@ -32,7 +38,7 @@ public class ResetButton extends UIElement implements ButtonMethods{
     @Override
     public void mouseClicked(MouseEvent e) {
         if(isIn(e)){
-            buttonOverlay.playing.resetGame();
+            playing.resetGame(color);
         }
     }
 
@@ -49,6 +55,10 @@ public class ResetButton extends UIElement implements ButtonMethods{
     @Override
     public void mouseMoved(MouseEvent e) {
 
+    }
+
+    public void setText(String text){
+        this.text = text;
     }
 
 
