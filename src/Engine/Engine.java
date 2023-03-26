@@ -50,7 +50,9 @@ public class Engine {
 
     public void setBestMoves( int depth, int alpha, int beta, ArrayList<Integer> piecesMovedDuringOpening) {
         if(playing.gmGamesIndexes.size() > 0){
+            //Handles castles in chessNotationToMove and in moveToSquare
             int gmGame = getRandom(playing.gmGamesIndexes);
+            ArrayList<String>  str = playing.gmGames.get(gmGame);
             String move = playing.gmGames.get(gmGame).get(playing.board.moves.size());
             bestMove = chessNotationToMove(playing.board, move);
         }
