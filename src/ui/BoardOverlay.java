@@ -36,14 +36,9 @@ public class BoardOverlay extends UIElement {
 
     private JButton[] piecePromotionButtons = new JButton[4];
 
-    private HashMap<Integer, Integer> boardMap;
-    private boolean whitesMove = true;
-
     private Move currMove;
     private int testingStartField = -1;
     ArrayList<Move> lastMoves;
-
-    String[] movesToDelete = new String[]{"e4", "c5", "Nf3", "e6", "d4", "cxd4", "Nxd4", "a6", "Bd3", "Nf6"};
 
     private boolean moveFinished = true;
 
@@ -52,13 +47,11 @@ public class BoardOverlay extends UIElement {
         this.playing = playing;
         loadPiecesImgs();
         initClasses();
-        boardMap = boardToMap(FenToIntArray(playing.currentBoard, 64));
         lastMoves = new ArrayList<>();
     }
 
     private void initClasses(){
         createFields();
-
     }
 
     public void createFields() {
@@ -264,7 +257,7 @@ public class BoardOverlay extends UIElement {
         if(promotingPiece != -1)
             currMove.promotePiece = promotingPiece;
         playMoveOnBoard(currMove);
-        moveFinished = true;
+
     }
 
     private void playComputerMove(){
@@ -296,12 +289,13 @@ public class BoardOverlay extends UIElement {
 
     private void movePiece(int col, int row) {
         if(promoting) return;
-        if(playing.board.whiteToMove == playing.playerWhite  && playing.board.position.containsKey(activeField)){
-            playMove(col + row * 8,-1);
-            promoting = false;
+        if(playing.board.whiteToMove == playing.playerWhite  && playing.board.position.containsKey(activeField) ){
+            if(playing.board.position.get(activeField) < 16 == playing.playerWhite) {
+                playMove(col + row * 8, -1);
+                promoting = false;
+            }
         }
     }
-
 
 
     private int GetPromotionPiece(int moveField) {
@@ -397,6 +391,7 @@ public class BoardOverlay extends UIElement {
         }
         if (activeField >= 0)
             fields[activeField].drawPiece(g);
+        moveFinished = true;
     }
 
     private void loadPiecesImgs() {

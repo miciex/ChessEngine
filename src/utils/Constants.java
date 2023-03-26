@@ -93,12 +93,17 @@ public class Constants {
                 public final static String BLACK = "Black";
                 public final static String WHITE = "White";
                 public final static String ACTIVE = "Active";
+                public final static String MOVE_FIELD = "moveField";
+                public final static String ATTACK_MOVE = "attackMove";
                 public static final HashMap<String, Color> basic = new HashMap<>() {
                         {
-                                put("White", Color.white);
-                                put("Black", new Color(133, 80, 27));
-                                put("WhiteActive", new Color(155, 155, 155, 100));
-                                put("BlackActive", new Color(155, 155, 155, 155));
+                                put(WHITE, Color.white);
+                                put(BLACK, new Color(133, 80, 27));
+                                put(WHITE + ACTIVE, new Color(155, 155, 155, 100));
+                                put(BLACK + ACTIVE, new Color(155, 155, 155, 155));
+                                put(MOVE_FIELD, new Color(255, 255, 0, 155));
+                                put(ATTACK_MOVE, new Color(255, 0,0, 125));
+
                         }
                 };
         }
