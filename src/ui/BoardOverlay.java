@@ -43,6 +43,8 @@ public class BoardOverlay extends UIElement {
     private int testingStartField = -1;
     ArrayList<Move> lastMoves;
 
+    String[] movesToDelete = new String[]{"e4", "c5", "Nf3", "e6", "d4", "cxd4", "Nxd4", "a6", "Bd3", "Nf6"};
+
     private boolean moveFinished = true;
 
     public BoardOverlay(int xPos, int yPos, Playing playing) {
@@ -363,6 +365,22 @@ public class BoardOverlay extends UIElement {
             }
         }
         playing.gmGamesIndexes = indexes;
+    }
+
+    private void removeIndexes(String[] moves) {
+        ArrayList<Integer> indexes = new ArrayList<>();
+        for (int i = 0; i < moves.length; i++) {
+            indexes.clear();
+            for (int j = 0; j < playing.gmGamesIndexes.size(); j++) {
+                int index = playing.gmGamesIndexes.get(j);
+                String gmMove = playing.gmGames.get(index).get(i);
+                if(gmMove.equals(moves[i])){
+                    indexes.add(index);
+                }
+            }
+            playing.gmGamesIndexes = (ArrayList<Integer>) indexes.clone();
+        }
+
     }
 
     public void mouseMoved(MouseEvent e) {

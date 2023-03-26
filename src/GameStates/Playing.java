@@ -47,10 +47,10 @@ public class Playing extends State implements StateMethods {
     public Playing(Game game) {
         super(game);
         playerWhite = rnd.nextFloat() > 0.5;
-        initClasses();
         result = GameResults.NONE;
         gmGames = LoadSave.getGrandmasterGames(LoadSave.GM_GAMES);
         setGmGamesIndexes();
+        initClasses();
     }
 
     public void resetGame() {

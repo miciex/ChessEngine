@@ -93,7 +93,13 @@ public class HelpMethods {
     public static Move chessNotationToMove(Board board, String notation){
         char[] notationArr = notation.toCharArray();
         Move move = new Move();
-        if(!notation.contains("=") && containsUpperCaseLetter(notation)){
+        if(notation.equals("O-O")){
+            return new Move(board.position, findKing(board), findKing(board) + 2);
+        }
+        else if(notation.equals("O-O-O")){
+            return new Move(board.position, findKing(board), findKing(board) - 2);
+        }
+        else if(!notation.contains("=") && containsUpperCaseLetter(notation)){
             move.movedPiece = CharPieceToInt2(notationArr[0]) + (board.whiteToMove ? White : Black);
 
             if(notation.contains("x")){
