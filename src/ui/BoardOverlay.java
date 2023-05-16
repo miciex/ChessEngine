@@ -403,9 +403,9 @@ public class BoardOverlay extends UIElement {
 
     public void draw(Graphics g) {
         drawBoard(g);
-        if(playing.result != GameResults.NONE){
-            gameFinishedOverlay.draw(g);
-        }
+//        if(playing.result != GameResults.NONE){
+//            gameFinishedOverlay.draw(g);
+//        }
     }
 
     private void drawBoard(Graphics g){
